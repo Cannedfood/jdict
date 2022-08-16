@@ -18,12 +18,12 @@ nlohmann::json to_json(jmdict::entry const&);
 
 template<class T>
 nlohmann::json to_json(std::vector<T> const& j) {
-    auto result = nlohmann::json::value_type::array();
-    if constexpr(std::is_pointer_v<T>)
-        for(auto& e : j) result.push_back(to_json(*e));
-    if constexpr(!std::is_pointer_v<T>)
-        for(auto& e : j) result.push_back(to_json(e));
-    return result;
+	auto result = nlohmann::json::value_type::array();
+	if constexpr(std::is_pointer_v<T>)
+		for(auto& e : j) result.push_back(to_json(*e));
+	if constexpr(!std::is_pointer_v<T>)
+		for(auto& e : j) result.push_back(to_json(e));
+	return result;
 }
 
 } // namespace jdict

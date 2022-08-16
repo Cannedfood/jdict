@@ -7,6 +7,7 @@
 //! \file rapidxml_iterators.hpp This file contains rapidxml iterators
 
 #include "rapidxml.hpp"
+#include <iterator>
 
 namespace rapidxml
 {
@@ -15,14 +16,12 @@ namespace rapidxml
     template<class Ch>
     class node_iterator
     {
-    
     public:
-
-        typedef typename xml_node<Ch> value_type;
-        typedef typename xml_node<Ch> &reference;
-        typedef typename xml_node<Ch> *pointer;
-        typedef std::ptrdiff_t difference_type;
-        typedef std::bidirectional_iterator_tag iterator_category;
+        using value_type        = xml_node<Ch>;
+        using reference         = xml_node<Ch>&;
+        using pointer           = xml_node<Ch>*;
+        using difference_type   = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
         
         node_iterator()
             : m_node(0)
@@ -94,15 +93,13 @@ namespace rapidxml
     template<class Ch>
     class attribute_iterator
     {
-    
     public:
+        using value_type        = xml_attribute<Ch>;
+        using reference         = xml_attribute<Ch>&;
+        using pointer           = xml_attribute<Ch>*;
+        using difference_type   = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
 
-        typedef typename xml_attribute<Ch> value_type;
-        typedef typename xml_attribute<Ch> &reference;
-        typedef typename xml_attribute<Ch> *pointer;
-        typedef std::ptrdiff_t difference_type;
-        typedef std::bidirectional_iterator_tag iterator_category;
-        
         attribute_iterator()
             : m_attribute(0)
         {

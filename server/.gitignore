@@ -1,6 +1,12 @@
-.vs
+# General files
+JMdict.xml
+# Build results
 bin
 obj
+# Visual Studio
+.vs
 *.sln
 *.vcxproj*
-JMdict.xml
+# GNU Make
+Makefile
+*.make
