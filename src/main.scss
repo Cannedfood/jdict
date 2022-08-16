@@ -1,0 +1,39 @@
+:root {
+	font-family: 'Courier New', Courier, monospace;
+
+	color-scheme: dark light;
+
+	// color: rgba(255, 255, 255, 0.87);
+	// background-color: #242424;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
+}
+
+// Dark Theme
+:root {
+	color: rgba(255, 255, 255, 0.87);
+	background-color: #242424;
+}
+
+// Light Theme
+@media(prefers-colors-scheme: light) {
+	:root {
+		color: rgba(0, 0, 0, .87);
+		background-color: rgba(102, 0, 255, 1);
+	}
+}
+* {
+	background: none;
+	outline: none;
+	border: none;
+	color: inherit;
+}
+
+.container {
+	max-width: 20cm;
+	margin-inline: auto;
+}

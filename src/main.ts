@@ -1,8 +1,22 @@
-import './app.scss'
-import App from './App.svelte'
+import { createApp } from 'vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
-const app = new App({
-  target: document.getElementById('app')
-});
+import './main.scss'
 
-export default app;
+import App from './App.vue'
+import Home from './routes/Home.vue'
+import Search from './routes/Search.vue'
+
+import { SearchService } from './backend/search'
+
+createApp(App)
+.provide('search-service', new SearchService('/api'))
+.use(createRouter({
+	history: createWebHashHistory(),
+	routes: [
+		{ path: '/', component: Home, name: 'home' },
+		{ path: '/search', redirect: '/' },
+		{ path: '/search/:query', component: Search, name: 'search' }
+	]
+}))
+.mount('#app')
