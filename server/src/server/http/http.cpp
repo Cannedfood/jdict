@@ -150,7 +150,7 @@ static void replace(std::string& s, std::string_view pattern, std::string_view w
 		auto pos = s.find(pattern);
 		if(pos == std::string_view::npos)
 			break;
-		s.replace(pos, pattern.size(), "/");
+		s.replace(pos, pattern.size(), with);
 	}
 }
 
@@ -165,11 +165,11 @@ struct scoped {
 
 namespace http {
 
-location::location(std::string_view s) {
-	this->path = urlDecode(snipUntil(s, [](char c) { return c == '#' || c == '?'; }, 0));
-	replace(this->path, "\\", "/");
-	replace(this->path, "./", "/");
-	replace(this->path, "//", "/");
+static void parse_location(std::string_view s, std::string* out_path, value_map* out_query) {
+	*out_path = urlDecode(snipUntil(s, [](char c) { return c == '#' || c == '?'; }, 0));
+	replace(*out_path, "\\", "/");
+	replace(*out_path, "./", "/");
+	replace(*out_path, "//", "/");
 
 	if(s.starts_with('?')) {
 		do {
@@ -178,7 +178,7 @@ location::location(std::string_view s) {
 
 			auto name  = urlDecode(trim(snipUntil(query, '=')));
 			auto value = urlDecode(trim(query));
-			this->query.entries.emplace(std::move(name), std::move(value));
+			out_query->entries.emplace(std::move(name), std::move(value));
 		} while(s.starts_with('&'));
 	}
 }
@@ -312,10 +312,7 @@ static http::method snipHttpMethod(std::string_view& s) {
 static void parseFirstLine(std::string_view line, request* req_out) {
 	req_out->method = snipHttpMethod(line);
 	req_out->url = snipToken(line);
-
-	auto loc = location(req_out->url);
-	req_out->path = std::move(loc.path);
-	req_out->query = std::move(loc.query);
+	parse_location(req_out->url, &req_out->path, &req_out->query);
 
 	if(trim(line) != "HTTP/1.1")
 		throw std::runtime_error("Only HTTP/1.1 is supported");
@@ -350,6 +347,8 @@ static void parseRequestHeaders(SOCKET client, request* req_out) {
 	readUntilDoubleNewline(client, &req_out->requestText);
 	assert(req_out->requestText.size() > 0);
 
+	// printf("%s\n", req_out->requestText.c_str());
+
 	std::string_view lines = req_out->requestText;
 	parseFirstLine(snipLine(lines), req_out);
 
@@ -376,6 +375,13 @@ int listen(int port, request_handler const& handler, listen_flags flags) {
 		throw std::runtime_error("Failed creating the socket: " + e);
 	}
 	scoped _b([&] { sockClose(serverSocket); });
+
+	#if !defined(_WIN32)
+	{ // "Hack" to prevent "Address already in use" errors
+		int option = 1;
+		setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+	}
+	#endif
 
 	sockaddr_in addr = {};
 	addr.sin_family = AF_INET;
@@ -463,10 +469,10 @@ std::string_view mimetype_from_filending(std::string_view filename) noexcept {
 	if(filename.ends_with(".ics")) return "text/calendar";
 	if(filename.ends_with(".jar")) return "application/java-archive";
 	if(filename.ends_with(".jpeg") || filename.ends_with(".jpg")) return "image/jpeg";
-	if(filename.ends_with(".js")) return "text/javascript (Specifications: HTML and RFC 9239)";
+	if(filename.ends_with(".js")) return "text/javascript"; // (Specifications: HTML and RFC 9239)
 	if(filename.ends_with(".json")) return "application/json";
 	if(filename.ends_with(".jsonld")) return "application/ld+json";
-	if(filename.ends_with(".mid") || filename.ends_with(".midi")) return "audio/midi audio/x-midi";
+	if(filename.ends_with(".mid") || filename.ends_with(".midi")) return "audio/midi"; // or audio/x-midi
 	if(filename.ends_with(".mjs")) return "text/javascript";
 	if(filename.ends_with(".mp3")) return "audio/mpeg";
 	if(filename.ends_with(".mp4")) return "video/mp4";
@@ -508,8 +514,8 @@ std::string_view mimetype_from_filending(std::string_view filename) noexcept {
 	if(filename.ends_with(".xml")) return "application/xml";
 	if(filename.ends_with(".xul")) return "application/vnd.mozilla.xul+xml";
 	if(filename.ends_with(".zip")) return "application/zip";
-	if(filename.ends_with(".3gp")) return "video/3gpp; audio/3gpp if it doesn't contain video";
-	if(filename.ends_with(".3g2")) return "video/3gpp2; audio/3gpp2 if it doesn't contain video";
+	if(filename.ends_with(".3gp")) return "video/3gpp"; // audio/3gpp if it doesn't contain video
+	if(filename.ends_with(".3g2")) return "video/3gpp2"; // audio/3gpp2 if it doesn't contain video
 	if(filename.ends_with(".7z")) return "application/x-7z-compressed";
 	return "application/octet-stream";
 }

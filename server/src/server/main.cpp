@@ -62,6 +62,7 @@ int main(int argc, char** argv) {
 
 		if(dictionary_loaded.wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
 			res.status(http::ServiceUnavailable, "Service Unavailable - dictionary not loaded yet");
+			return;
 		}
 
 		auto timeStart = std::chrono::high_resolution_clock::now();

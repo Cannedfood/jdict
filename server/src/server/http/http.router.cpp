@@ -32,7 +32,15 @@ router& router::options(std::string path, http::request_handler&& handler) noexc
 router& router::trace  (std::string path, http::request_handler&& handler) noexcept { return handle(http::Trace,   std::move(path), std::move(handler)); }
 router& router::patch  (std::string path, http::request_handler&& handler) noexcept { return handle(http::Patch,   std::move(path), std::move(handler)); }
 
-router& router::files(std::string path, std::string directory) noexcept { return get(path, static_files(path, directory)); }
+router& router::files(std::string path, std::string directory) noexcept {
+	assert(path.ends_with("**"));
+
+	auto static_files_path = std::string_view(path);
+	static_files_path.remove_suffix(2);
+	assert(static_files_path.find_first_of("*:") == std::string_view::npos);
+
+	return get(path, static_files(static_files_path, directory));
+}
 
 bool router::operator()(http::request& req, http::response& res) noexcept {
 	// printf("Matching: %s %.*s\n", to_string(req.method), (int) req.path.size(), req.path.data());
@@ -100,11 +108,16 @@ bool router::match_route(std::string_view route, std::string_view request_path, 
 }
 
 bool static_files::operator()(request& req, response& res) {
+	// printf(
+	// 	"'%.*s' '%.*s'\n",
+	// 	(int) req.path.size(), req.path.data(),
+	// 	(int) path_prefix.size(), path_prefix.data()
+	// );
 	if(!req.path.starts_with(path_prefix))
 		return false;
 
 	std::string_view newPath = std::string_view(req.path).substr(path_prefix.size());
-	if(newPath == "/")
+	if(newPath == "/" || newPath.empty())
 		newPath = "/index.html";
 	res.send_file(std::string(directory) + std::string(newPath));
 	return true;

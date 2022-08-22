@@ -84,25 +84,17 @@ struct value_map {
 	std::string_view operator[](std::string_view key) const { return entries.find(key)->second; }
 };
 
-struct location {
-	std::string path;
-	value_map   query;
-
-	location() = default;
-	location(std::string_view sv);
-};
-
 struct request {
 	const unsigned handle;
 
 	std::string requestText;
 
-	method           method;
-	std::string      url;
-	std::string_view path;
-	value_map        query;
-	value_map        route;
-	value_map        headers;
+	method      method;
+	std::string url;
+	std::string path;
+	value_map   query;
+	value_map   route;
+	value_map   headers;
 
 	unsigned content_length() const;
 	std::string read_content(unsigned length = 0);

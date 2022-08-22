@@ -20,6 +20,8 @@ project 'server'
 	}
 	filter 'system:windows'
 		links 'Ws2_32.lib' -- required for winsock
+	filter 'files:src/server/jmdict*.cpp'
+		optimize 'Speed'
 	filter '*'
 
 project 'server-test'
