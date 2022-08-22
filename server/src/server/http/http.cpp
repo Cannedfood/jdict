@@ -166,9 +166,10 @@ struct scoped {
 namespace http {
 
 location::location(std::string_view s) {
-	this->url = urlDecode(snipUntil(s, [](char c) { return c == '#' || c == '?'; }, 0));
-	replace(this->url, "./", "/");
-	replace(this->url, ".\\", "\\");
+	this->path = urlDecode(snipUntil(s, [](char c) { return c == '#' || c == '?'; }, 0));
+	replace(this->path, "\\", "/");
+	replace(this->path, "./", "/");
+	replace(this->path, "//", "/");
 
 	if(s.starts_with('?')) {
 		do {
@@ -296,10 +297,10 @@ void response::write_raw(std::span<char const> data) {
 }
 
 static http::method snipHttpMethod(std::string_view& s) {
-	if(snipPrefix(s, "GET "))	 return method::Get;
-	if(snipPrefix(s, "HEAD "))	return method::Head;
-	if(snipPrefix(s, "POST "))	return method::Post;
-	if(snipPrefix(s, "PUT "))	 return method::Put;
+	if(snipPrefix(s, "GET "))     return method::Get;
+	if(snipPrefix(s, "HEAD "))    return method::Head;
+	if(snipPrefix(s, "POST "))    return method::Post;
+	if(snipPrefix(s, "PUT "))     return method::Put;
 	if(snipPrefix(s, "DELETE "))  return method::Delete;
 	if(snipPrefix(s, "CONNECT ")) return method::Connect;
 	if(snipPrefix(s, "OPTIONS ")) return method::Options;
@@ -310,10 +311,12 @@ static http::method snipHttpMethod(std::string_view& s) {
 
 static void parseFirstLine(std::string_view line, request* req_out) {
 	req_out->method = snipHttpMethod(line);
-	auto loc = location(snipToken(line));
-	req_out->url = std::move(loc.url);
+	req_out->url = snipToken(line);
+
+	auto loc = location(req_out->url);
 	req_out->path = std::move(loc.path);
 	req_out->query = std::move(loc.query);
+
 	if(trim(line) != "HTTP/1.1")
 		throw std::runtime_error("Only HTTP/1.1 is supported");
 }
@@ -361,7 +364,7 @@ static void parseRequestHeaders(SOCKET client, request* req_out) {
 	}
 }
 
-int listen(int port, request_handler const& handler) {
+int listen(int port, request_handler const& handler, listen_flags flags) {
 	assert(handler);
 
 	sockInit();
@@ -390,17 +393,18 @@ int listen(int port, request_handler const& handler) {
 	while(true) {
 		sockaddr  addr = {};
 		socklen_t addr_len = sizeof(addr);
-		SOCKET	clientSocket = ::accept(serverSocket, (sockaddr*) &addr, &addr_len);
-		if(!sockValid(clientSocket)) {
+		SOCKET    client_socket = ::accept(serverSocket, (sockaddr*) &addr, &addr_len);
+		if(!sockValid(client_socket)) {
 			auto e = std::string(strerror(errno));
 			throw std::runtime_error("Failed accepting connection: " + e);
 		}
-		scoped _d([=]() { sockClose(clientSocket); });
+		scoped _d([=]() { sockClose(client_socket); });
 
-		http::request  req { (unsigned) clientSocket };
-		http::response res { (unsigned) clientSocket };
+		http::request  req { (unsigned) client_socket };
+		http::response res { (unsigned) client_socket };
 		try {
-			parseRequestHeaders(clientSocket, &req);
+			parseRequestHeaders(client_socket, &req);
+			// printf("%s %.*s\n", to_string(req.method), (int) req.path.size(), req.path.data());
 			handler(req, res);
 			switch (res.stage) {
 			case response::Stage::Status: res.status(NotFound, "Not Found"); [[fallthrough]];
@@ -415,7 +419,7 @@ int listen(int port, request_handler const& handler) {
 		}
 	}
 
-	return EXIT_SUCCESS;
+	// return EXIT_SUCCESS;
 }
 
 const char* to_string(method m) {

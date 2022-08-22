@@ -65,9 +65,8 @@ struct value_map {
 };
 
 struct location {
-	std::string      url;
-	std::string_view path;
-	value_map              query;
+	std::string path;
+	value_map   query;
 
 	location() = default;
 	location(std::string_view sv);
@@ -135,9 +134,9 @@ inline static listen_flags operator^(listen_flags a, listen_flags b) noexcept { 
 [[noreturn]]
 int listen(int port, request_handler const& handler, listen_flags flags = Default);
 
-template<class T, class = std::enable_if_t<!std::is_trivially_copyable_v<T>>> [[noreturn]]
-int listen(int port, T const& handler, listen_flags flags = Default) {
-	listen(port, request_handler([&](request& req, response& res) { handler(req, res); }), flags);
-}
+// template<class T, class = std::enable_if_t<!std::is_trivially_copyable_v<T>>> [[noreturn]]
+// int listen(int port, T&& handler, listen_flags flags = Default) {
+// 	listen(port, request_handler([&](request& req, response& res) { handler(req, res); }), flags);
+// }
 
 } // namespace http

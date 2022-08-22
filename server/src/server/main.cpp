@@ -2,11 +2,11 @@
 #include "./jmdict_index.hpp"
 #include "./jmdict_json.hpp"
 
-#include "./http/http.hpp"
-#include "./http/http.staticfiles.hpp"
+#include "./http/http.router.hpp"
 
 #include "./timer.hpp"
 #include "cache.hpp"
+#include "http/http.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -40,43 +40,36 @@ int main(int argc, char** argv) {
 
 	printf("Loaded %zu dictionary entries.\n", dict.entries.size());
 	printf("\nStart listening at http://localhost:8080\n");
-	http::listen(8080, [&](http::request& req, http::response& res) {
-		debug::timer _("handling request");
-		if(req.method != http::Get) {
-			res.status(http::MethodNotAllowed, "Only GET requests are accepted").send();
+
+	auto router = http::router();
+	router.get("/api/search", [&](http::request& req, http::response& res) {
+		auto searchTerm = req.query.get("searchTerm");
+		auto start      = req.query.get("skip", 0);
+		auto limit      = req.query.get("take", 50);
+
+		if(searchTerm.empty()) {
+			res.status(http::BadRequest, "The query must include a non-empty searchTerm parameter").send();
 			return;
 		}
 
-		printf("%s %s\n", to_string(req.method), req.location.path.c_str());
+		auto timeStart = std::chrono::high_resolution_clock::now();
 
-		if(req.location.path.starts_with("/api/search")) {
-			auto& searchTerm = req.location.query["searchTerm"];
-			auto  start = req.location.try_get_param("skip", 0);
-			auto  limit = req.location.try_get_param("take", 50);
+		auto allResults = cache.get_or_create(std::string(searchTerm), [&]() {
+			return index.search(searchTerm);
+		});
+		auto pagedEntries = applyPaging(start, limit, allResults);
 
-			if(searchTerm.empty()) {
-				res.status(http::BadRequest, "The query must include a non-empty searchTerm parameter").send();
-				return;
-			}
+		nlohmann::json responseBody;
+		responseBody["resultsTotal"] = allResults.size();
+		responseBody["results"] = to_json(pagedEntries);
 
-			auto timeStart = std::chrono::high_resolution_clock::now();
+		auto timeEnd = std::chrono::high_resolution_clock::now();
+		responseBody["time"] = std::to_string(duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()) + "ms";
 
-			auto allResults = cache.get_or_create(searchTerm, [&]() {
-				return index.search(searchTerm);
-			});
-			auto pagedEntries = applyPaging(start, limit, allResults);
-
-			nlohmann::json responseBody;
-			responseBody["resultsTotal"] = allResults.size();
-			responseBody["results"] = to_json(pagedEntries);
-
-			auto timeEnd = std::chrono::high_resolution_clock::now();
-			responseBody["time"] = std::to_string(duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()) + "ms";
-
-			res.send(http::mimetype_from_path(".json"), to_string(responseBody));
-		}
-		else if(http::serve_static_files("", "../dist/", req, res))
-			return;
+		res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
 	});
+	router.files("/**", "../dist/");
+
+	http::listen(8080, router);
 	return EXIT_SUCCESS;
 }

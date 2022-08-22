@@ -1,0 +1,24 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug Server",
+			"program": "${workspaceFolder}/server/bin/debug/server",
+			"args": [],
+			"cwd": "${workspaceFolder}/server"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug Tests",
+			"program": "${workspaceFolder}/server/bin/debug/server-test",
+			"args": [],
+			"cwd": "${workspaceFolder}/server"
+		}
+	]
+}
