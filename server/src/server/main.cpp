@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
 
 	auto dictionary_loaded = std::async(std::launch::async, [&] {
 		dict = jmdict::parse_file("JMdict.xml");
+		dict.generate_romaji();
 		index = jmdict_index(dict);
 		printf("Loaded %zu dictionary entries.\n", dict.entries.size());
 	});

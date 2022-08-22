@@ -48,6 +48,7 @@ struct jmdict {
 	/// <!ELEMENT r_ele (reb, re_nokanji?, re_restr*, re_inf*, re_pri*)> The reading element typically contains the valid readings of the word(s) in the kanji element using modern kanadzukai. Where there are multiple reading elements, they will typically be alternative readings of the kanji element. In the absence of a kanji element, i.e. in the case of a word or phrase written entirely in kana, these elements will define the entry.
 	struct reading {
 		std::string value; //!< <!ELEMENT reb (#PCDATA)> This element content is restricted to kana and related Tharacters such as chouon and kurikaeshi. Kana usage will be Tonsistent between the keb and reb elements; e.g. if the keb Tontains katakana, so too will the reb.
+		std::string romaji;
 		bool not_actual_reading = false; //!< <!ELEMENT re_nokanji (#PCDATA)>This element, which will usually have a null value, indicates that the reb, while associated with the keb, cannot be regarded as a true reading of the kanji. It is typically used for words such as foreign place names, gairaigo which can be in kanji or katakana, etc.
 		std::vector<std::string> restrict_kanji; //!< <!ELEMENT re_restr (#PCDATA)> This element is used to indicate when the reading only applies to a subset of the keb elements in the entry. In its absence, all readings apply to all kanji elements. The contents of this element must exactly match those of one of the keb elements.
 		std::vector<std::string> infos; //!< <!ELEMENT re_inf (#PCDATA)> General coded information pertaining to the specific reading. Typically it will be used to indicate some unusual aspect of the reading.
@@ -101,13 +102,14 @@ struct jmdict {
 
 	/// <!ELEMENT entry (ent_seq, k_ele*, r_ele+, sense+)> Entries consist of kanji elements, reading elements, general information and sense elements. Each entry must have at least one reading element and one sense element. Others are optional.
 	struct entry {
-		std::string		  sequence; //!< <!ELEMENT ent_seq (#PCDATA)> A unique numeric sequence number for each entry
+		std::string          sequence; //!< <!ELEMENT ent_seq (#PCDATA)> A unique numeric sequence number for each entry
 		std::vector<kanji>   kanji;
 		std::vector<reading> readings;
 		std::vector<sense>   senses;
 	};
-
 	std::vector<entry> entries;
+
+	void generate_romaji();
 
 	static jmdict parse_file(const char* path);
 };

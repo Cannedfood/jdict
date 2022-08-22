@@ -1,13 +1,15 @@
 #include "./jmdict.hpp"
 
+#include "./kana_util.hpp"
 #include "./timer.hpp"
 
 #include <rapidxml.hpp>
 #include <rapidxml_iterators.hpp>
 
+#include <cstdlib>
 #include <ratio>
 #include <stdexcept>
-#include <stdio.h>
+#include <cstdio>
 #include <string_view>
 
 
@@ -151,10 +153,10 @@ static jmdict::entry parseEntry(xml_node<char>& node) {
 	auto result = jmdict::entry();
 
 	for(auto& n : children(node)) {
-		if	 (n.name() == "ent_seq"sv) result.sequence = n.value();
-		else if(n.name() == "k_ele"sv)   result.kanji.push_back(parseKanjiElement(n));
-		else if(n.name() == "r_ele"sv)   result.readings.push_back(parseReadingElement(n));
-		else if(n.name() == "sense"sv)   result.senses.push_back(parseSenseElement(n));
+		if	 (n.name() == "ent_seq"sv) result.sequence = value(n);
+		else if(n.name() == "k_ele"sv) result.kanji.push_back(parseKanjiElement(n));
+		else if(n.name() == "r_ele"sv) result.readings.push_back(parseReadingElement(n));
+		else if(n.name() == "sense"sv) result.senses.push_back(parseSenseElement(n));
 		else UNHANDLED_NODE("entry", n);
 	}
 
@@ -195,6 +197,15 @@ jmdict jmdict::parse_file(const char* path) {
 	}
 
 	return result;
+}
+
+void jmdict::generate_romaji() {
+	timer _("generating romaji");
+	for(auto& e : entries) {
+		for(auto& r : e.readings) {
+			r.romaji = to_romaji(r.value);
+		}
+	}
 }
 
 } // namespace jdict
