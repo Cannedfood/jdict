@@ -9,6 +9,9 @@ export default defineConfig({
 		VitePWA({
 			registerType: 'autoUpdate',
 			injectRegister: 'inline',
+			workbox: {
+				globPatterns: []
+			},
 			devOptions: {
 				enabled: true
 			},
@@ -19,6 +22,7 @@ export default defineConfig({
 				description: "A Japanese Dictionary",
 
 				scope: '/',
+				orientation: 'natural',
 
 				display: "standalone",
 				background_color: "#242424",
