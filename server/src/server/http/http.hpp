@@ -1,12 +1,16 @@
 #pragma once
 
 #include <functional>
+#include <initializer_list>
 #include <string>
 #include <string_view>
 #include <span>
 #include <map>
+#include <type_traits>
 
-namespace jdict::http {
+#define HTTP_HANDLER [&](http::request& req, http::response& res) -> void
+
+namespace http {
 
 enum method {
 	Get, Head, Post, Put, Delete, Connect, Options, Trace, Patch
@@ -49,16 +53,24 @@ enum response_code {
 	InternalServerError = 500,
 };
 
+
+struct value_map {
+	std::map<std::string, std::string, std::less<>> entries;
+
+	std::string_view get(std::string_view name, std::string_view fallback = {}) const;
+	int			     get(std::string_view name, int			     fallback) const;
+	double		     get(std::string_view name, double		     fallback) const;
+
+	std::string_view operator[](std::string_view key) const { return entries.find(key)->second; }
+};
+
 struct location {
-	std::string path;
-	std::map<std::string, std::string, std::less<>> query;
+	std::string      url;
+	std::string_view path;
+	value_map              query;
 
 	location() = default;
 	location(std::string_view sv);
-
-	std::string_view try_get_param(std::string_view name, std::string_view fallback = {}) const;
-	int			  try_get_param(std::string_view name, int			  fallback) const;
-	double		   try_get_param(std::string_view name, double		   fallback) const;
 };
 
 struct request {
@@ -66,9 +78,12 @@ struct request {
 
 	std::string requestText;
 
-	method method;
-	location location;
-	std::multimap<std::string_view, std::string_view, std::less<>> headers;
+	method           method;
+	std::string      url;
+	std::string_view path;
+	value_map        query;
+	value_map        route;
+	value_map        headers;
 
 	unsigned content_length() const;
 	std::string read_content(unsigned length = 0);
@@ -88,8 +103,8 @@ struct response {
 
 	void send();
 	void send(std::string_view mimeType, std::span<char const> data);
-	void send(std::string_view mimeType, std::string_view	  data) { send(mimeType, std::span<char const>(data.data(), data.size())); }
-	void send(std::string_view mimeType, std::string const&	data) { send(mimeType, std::string_view(data)); }
+	void send(std::string_view mimeType, std::string_view	   data) { send(mimeType, std::span<char const>(data.data(), data.size())); }
+	void send(std::string_view mimeType, std::string const&	   data) { send(mimeType, std::string_view(data)); }
 	void send(std::string_view mimeType, const char*		   data) { send(mimeType, std::string_view(data)); }
 	void send_file(std::string const& path, std::string_view mimeType = {});
 
@@ -105,11 +120,24 @@ private:
 	void write_raw(const char*		   data) { write_raw(std::string_view(data)); }
 };
 
-using request_handler = std::function<void(request&, response&)>;
+using request_handler      = std::function<void(request&, response&)>; //!< Handles incoming http requests
+using cond_request_handler = std::function<void(request&, response&)>; //!< Handles an incoming http request and returns true or returns false otherwise
 
-std::string_view mimetype_from_path(std::string_view filename) noexcept;
+std::string_view mimetype_from_filending(std::string_view filename) noexcept;
+
+enum listen_flags {
+	Default,
+};
+inline static listen_flags operator|(listen_flags a, listen_flags b) noexcept { return (listen_flags) ((int) a | (int) b); }
+inline static listen_flags operator&(listen_flags a, listen_flags b) noexcept { return (listen_flags) ((int) a & (int) b); }
+inline static listen_flags operator^(listen_flags a, listen_flags b) noexcept { return (listen_flags) ((int) a ^ (int) b); }
 
 [[noreturn]]
-void listen(int port, request_handler const& handler);
+int listen(int port, request_handler const& handler, listen_flags flags = Default);
 
-} // namespace jdict::http
+template<class T, class = std::enable_if_t<!std::is_trivially_copyable_v<T>>> [[noreturn]]
+int listen(int port, T const& handler, listen_flags flags = Default) {
+	listen(port, request_handler([&](request& req, response& res) { handler(req, res); }), flags);
+}
+
+} // namespace http

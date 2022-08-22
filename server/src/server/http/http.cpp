@@ -2,13 +2,14 @@
 
 #include <stdexcept>
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <cstring>
 #include <cassert>
 #include <fstream>
 #include <array>
 
-// Many thanks for https://stackoverflow.com/a/28031039/3841944
+// Many thanks for https://stackoverflow.com/a/28031039/3841944 from which I basically stole all of the socket code
 
 #ifdef _WIN32
 	/* See http://stackoverflow.com/questions/12765743/getaddrinfo-on-win32 */
@@ -162,12 +163,12 @@ struct scoped {
 
 } // namespace
 
-namespace jdict::http {
+namespace http {
 
 location::location(std::string_view s) {
-	this->path = urlDecode(snipUntil(s, [](char c) { return c == '#' || c == '?'; }, 0));
-	replace(this->path, "./", "/");
-	replace(this->path, ".\\", "\\");
+	this->url = urlDecode(snipUntil(s, [](char c) { return c == '#' || c == '?'; }, 0));
+	replace(this->url, "./", "/");
+	replace(this->url, ".\\", "\\");
 
 	if(s.starts_with('?')) {
 		do {
@@ -176,35 +177,32 @@ location::location(std::string_view s) {
 
 			auto name  = urlDecode(trim(snipUntil(query, '=')));
 			auto value = urlDecode(trim(query));
-			this->query.emplace(std::move(name), std::move(value));
+			this->query.entries.emplace(std::move(name), std::move(value));
 		} while(s.starts_with('&'));
 	}
 }
 
-std::string_view location::try_get_param(std::string_view name, std::string_view fallback) const {
-	auto iter = this->query.find(name);
-	if(iter != this->query.end())
+std::string_view value_map::get(std::string_view name, std::string_view fallback) const {
+	auto iter = this->entries.find(name);
+	if(iter != this->entries.end())
 		return iter->second;
 	return fallback;
 }
-int location::try_get_param(std::string_view name, int			  fallback) const {
-	auto iter = this->query.find(name);
-	if(iter != this->query.end())
+int value_map::get(std::string_view name, int			  fallback) const {
+	auto iter = this->entries.find(name);
+	if(iter != this->entries.end())
 		return std::stoi(iter->second);
 	return fallback;
 }
-double location::try_get_param(std::string_view name, double		   fallback) const {
-	auto iter = this->query.find(name);
-	if(iter != this->query.end())
+double value_map::get(std::string_view name, double		   fallback) const {
+	auto iter = this->entries.find(name);
+	if(iter != this->entries.end())
 		return std::stod(iter->second);
 	return fallback;
 }
 
 unsigned request::content_length() const {
-	auto [first, end] = headers.equal_range("Content-Length");
-	if(first == end)
-		return {};
-	return std::stoul(std::string(first->second));
+	return headers.get("Content-Length", 0);
 }
 
 std::string request::read_content(unsigned length) {
@@ -256,7 +254,7 @@ void response::send(std::string_view mimeType, std::span<char const> data) {
 }
 void response::send_file(std::string const& path, std::string_view mimeType) {
 	if(mimeType.empty())
-		mimeType = mimetype_from_path(path);
+		mimeType = mimetype_from_filending(path);
 
 	auto file = std::ifstream(path, std::ios::binary | std::ios::ate);
 	if(!file) {
@@ -312,7 +310,10 @@ static http::method snipHttpMethod(std::string_view& s) {
 
 static void parseFirstLine(std::string_view line, request* req_out) {
 	req_out->method = snipHttpMethod(line);
-	req_out->location = snipToken(line);
+	auto loc = location(snipToken(line));
+	req_out->url = std::move(loc.url);
+	req_out->path = std::move(loc.path);
+	req_out->query = std::move(loc.query);
 	if(trim(line) != "HTTP/1.1")
 		throw std::runtime_error("Only HTTP/1.1 is supported");
 }
@@ -349,18 +350,18 @@ static void parseRequestHeaders(SOCKET client, request* req_out) {
 	std::string_view lines = req_out->requestText;
 	parseFirstLine(snipLine(lines), req_out);
 
-	req_out->headers.clear();
+	req_out->headers.entries.clear();
 	while(true) {
 		auto line = trim(snipLine(lines));
 		if(line.empty()) break;
 
 		auto name = snipUntil(line, ':');
 		auto value = trim(line);
-		req_out->headers.emplace(name, value);
+		req_out->headers.entries.emplace(name, value);
 	}
 }
 
-void listen(int port, request_handler const& handler) {
+int listen(int port, request_handler const& handler) {
 	assert(handler);
 
 	sockInit();
@@ -413,6 +414,8 @@ void listen(int port, request_handler const& handler) {
 			throw;
 		}
 	}
+
+	return EXIT_SUCCESS;
 }
 
 const char* to_string(method m) {
@@ -430,7 +433,7 @@ const char* to_string(method m) {
 	}
 }
 
-std::string_view mimetype_from_path(std::string_view filename) noexcept {
+std::string_view mimetype_from_filending(std::string_view filename) noexcept {
 	if(filename.ends_with(".aac")) return"audio/aac";
 	if(filename.ends_with(".abw")) return"application/x-abiword";
 	if(filename.ends_with(".arc")) return "application/x-freearc";
@@ -507,4 +510,4 @@ std::string_view mimetype_from_path(std::string_view filename) noexcept {
 	return "application/octet-stream";
 }
 
-} // namespace jdict::http
+} // namespace http
