@@ -166,12 +166,13 @@ static std::string_view snip_romaji(std::string_view& s) {
 	if(try_snip(s, u8"ヂャ")) return "ja";
 	if(try_snip(s, u8"ヂュ")) return "ju";
 	if(try_snip(s, u8"ヂョ")) return "jo";
-	if(try_snip(s, u8"ビゃ")) return "bya";
-	if(try_snip(s, u8"ビュ")) return "byu";
+	if(try_snip(s, u8"ビャ")) return "byo";
+	if(try_snip(s, u8"ブュ") || try_snip(s, u8"ビュ")) return "byu";
 	if(try_snip(s, u8"ビョ")) return "byo";
-	if(try_snip(s, u8"ピゃ")) return "pya";
+	if(try_snip(s, u8"ピャ")) return "pya";
 	if(try_snip(s, u8"ピュ")) return "pyu";
 	if(try_snip(s, u8"ピョ")) return "pyo";
+	if(try_snip(s, u8"ピォ")) return "pyo";
 
 	// Extended katakana
 	if(try_snip(s, u8"イィ")) return "yi";
@@ -215,6 +216,7 @@ static std::string_view snip_romaji(std::string_view& s) {
 	if(try_snip(s, u8"ツュ")) return "tsyu";
 	if(try_snip(s, u8"ティ")) return "ti";
 	if(try_snip(s, u8"トゥ")) return "tu";
+	if(try_snip(s, u8"トュ")) return "tu";
 	if(try_snip(s, u8"テュ")) return "tyu";
 	if(try_snip(s, u8"ディ")) return "di";
 	if(try_snip(s, u8"ドゥ")) return "du";
@@ -325,9 +327,14 @@ static std::string_view snip_romaji(std::string_view& s) {
 	if(try_snip(s, u8"ン")) return "n";
 
 	// if(try_snip(s, u8"ぁ")) return "a";
-	// if(try_snip(s, u8"ィ")) return "i";
+	// if(try_snip(s, u8"ぇ")) return "e";
 	// if(try_snip(s, u8"ぃ")) return "i";
+	// if(try_snip(s, u8"ォ")) return "o";
 
+	// if(try_snip(s, u8"ァ")) return "a";
+	// if(try_snip(s, u8"ィ")) return "i";
+	// if(try_snip(s, u8"ェ")) return "e";
+	// if(try_snip(s, u8"ゥ")) return "u";
 
 	return snip(s, 1);
 }
@@ -361,13 +368,13 @@ std::string to_romaji(std::string_view s) {
 			result.push_back(romaji.front());
 		result.append(romaji);
 
-		if(try_snip(s, u8"ー"))
+		while(try_snip(s, u8"ー") || try_snip(s, u8"～"))
 			result.push_back(result.back());
 	}
 
-	if(contains_non_ascii(result)) {
-		printf("Still some kanji left? '%.*s' -> '%s'\n", (int) original.size(), original.data(), result.c_str());
-	}
+	// if(contains_non_ascii(result)) {
+	// 	printf("Still some kanji left? '%.*s' -> '%s'\n", (int) original.size(), original.data(), result.c_str());
+	// }
 
 	return result;
 }

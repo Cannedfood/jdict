@@ -49,8 +49,28 @@ enum response_code {
 	Forbidden = 403,
 	NotFound = 404,
 	MethodNotAllowed = 405,
+	NotAcceptable = 406,
+	ProxyAuthenticationRequired = 407,
+	RequestTimeout = 408,
+	Conflict = 409,
+	Gone = 410,
+	LengthRequired = 411,
+	PreconditionFailed = 412,
+	PayloadTooLarge = 413,
+	URITooLong = 414,
+	UnsupportedMediaType = 415,
+	RangeNotSatisfiable = 416,
+	ExpectationFailed = 417,
+	ImATeapot = 418,
 
 	InternalServerError = 500,
+	NotImplemented = 501,
+	BadGateway = 502,
+	ServiceUnavailable = 503,
+	GatewayTimeout = 504,
+	HttpVersionNotSupported = 505,
+	NotExtended = 510,
+	NetworkAuthenticationRequired = 511
 };
 
 
@@ -133,10 +153,5 @@ inline static listen_flags operator^(listen_flags a, listen_flags b) noexcept { 
 
 [[noreturn]]
 int listen(int port, request_handler const& handler, listen_flags flags = Default);
-
-// template<class T, class = std::enable_if_t<!std::is_trivially_copyable_v<T>>> [[noreturn]]
-// int listen(int port, T&& handler, listen_flags flags = Default) {
-// 	listen(port, request_handler([&](request& req, response& res) { handler(req, res); }), flags);
-// }
 
 } // namespace http

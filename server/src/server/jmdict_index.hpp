@@ -10,6 +10,7 @@ namespace jdict {
 
 class jmdict_index {
 public:
+	jmdict_index() = default;
 	jmdict_index(jmdict const& dict);
 	std::vector<jmdict::entry const*> search(std::string_view query) const;
 private:
@@ -17,7 +18,7 @@ private:
 	using TextViewIndex = std::map<std::string_view, jmdict::entry const*, std::less<>>;
 	using ResultWeights = std::map<jmdict::entry const*, unsigned>;
 
-	jmdict const* const dict;
+	jmdict const* dict = nullptr;
 	TextViewIndex bySequenceNumber;
 	TextIndex     byReading;
 	TextViewIndex byTranslation;

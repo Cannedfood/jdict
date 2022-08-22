@@ -9,12 +9,14 @@
 #include "http/http.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cstdlib>
 #include <exception>
 #include <span>
 #include <stdio.h>
 #include <set>
 #include <vector>
+#include <future>
 
 using namespace jdict;
 
@@ -34,11 +36,16 @@ std::vector<T> applyPaging(int skip, int take, std::vector<T> const& v) {
 }
 
 int main(int argc, char** argv) {
-	auto const dict  = jmdict::parse_file("JMdict.xml");
-	auto const index = jmdict_index(dict);
-	auto       cache = jdict::cache<std::string, std::vector<jmdict::entry const*>>(1024);
+	auto dict  = jmdict();
+	auto index = jmdict_index();
+	auto cache = jdict::cache<std::string, std::vector<jmdict::entry const*>>(1024);
 
-	printf("Loaded %zu dictionary entries.\n", dict.entries.size());
+	auto dictionary_loaded = std::async(std::launch::async, [&] {
+		dict = jmdict::parse_file("JMdict.xml");
+		index = jmdict_index(dict);
+		printf("Loaded %zu dictionary entries.\n", dict.entries.size());
+	});
+
 	printf("\nStart listening at http://localhost:8080\n");
 
 	auto router = http::router();
@@ -52,9 +59,13 @@ int main(int argc, char** argv) {
 			return;
 		}
 
+		if(dictionary_loaded.wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
+			res.status(http::ServiceUnavailable, "Service Unavailable - dictionary not loaded yet");
+		}
+
 		auto timeStart = std::chrono::high_resolution_clock::now();
 
-		auto allResults = cache.get_or_create(std::string(searchTerm), [&]() {
+		auto allResults = cache.get_or_create(std::string(searchTerm), [&] {
 			return index.search(searchTerm);
 		});
 		auto pagedEntries = applyPaging(start, limit, allResults);
@@ -64,7 +75,7 @@ int main(int argc, char** argv) {
 		responseBody["results"] = to_json(pagedEntries);
 
 		auto timeEnd = std::chrono::high_resolution_clock::now();
-		responseBody["time"] = std::to_string(duration_cast<std::chrono::milliseconds>(timeEnd - timeStart).count()) + "ms";
+		responseBody["time"] = debug::to_string(timeEnd - timeStart);
 
 		res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
 	});
