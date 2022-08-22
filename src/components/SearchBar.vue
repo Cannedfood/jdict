@@ -22,6 +22,11 @@ function acceptSuggestion() {
 
 const searchInput = ref<HTMLInputElement | null>(null);
 onMounted(() => nextTick(() => searchInput.value?.focus()))
+
+function send() {
+	searchInput.value?.blur();
+	emit('send', props.modelValue);
+}
 </script>
 
 <template lang="pug">
@@ -32,19 +37,14 @@ onMounted(() => nextTick(() => searchInput.value?.focus()))
 		placeholder="Search..."
 		:value="modelValue"
 		autocomplete="off"
-		@input="emit('update:modelValue', targetValue($event))"
-		@keydown.enter="emit('send', modelValue)"
+		@input="emit('update:modelValue', targetValue($event).toLowerCase())"
+		@keydown.enter="send"
 		@keydown.up="suggestionUp"
 		@keydown.down="suggestionDown"
 		@keydown.tab.prevent="acceptSuggestion"
 		onfocus="this.select();"
 	)
-	button W
-	a 漢
-	select
-		option EN
-		option DE
-		option RU
+	slot
 	.suggestions(v-if="suggestions")
 		.suggestion(v-for="suggestion, i of suggestions" :class="{ active: i + 1 == selectedSuggestion }")
 			span.tab-hint [tab]

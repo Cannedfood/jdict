@@ -6,6 +6,7 @@ export interface Kanji {
 
 export interface Reading {
 	value: string;
+	romaji?: string;
 	not_actual_reading?: boolean;
 	restrict_kanji?: string[];
 	infos?: string[];

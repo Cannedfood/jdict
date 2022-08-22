@@ -1,3 +1,5 @@
+import { uniq } from 'lodash';
+import { inject } from 'vue';
 import type { Entry } from "./jmdict";
 
 interface BasicSearchResult {
@@ -17,7 +19,7 @@ export class SearchService {
 
 	async search(searchTerm: string, params = {} as { skip?: number, take?: number }) {
 		return {
-			searchTerm,
+			searchTerm: searchTerm.toLowerCase(),
 			lastPageSize: params.take,
 			...await this.get<BasicSearchResult>('/search', { searchTerm, ...params })
 		} as SearchResult;
@@ -33,6 +35,19 @@ export class SearchService {
 		moreResults.results.unshift(...searchResult.results);
 		return moreResults;
 	}
+	async searchKanji(searchTerm: string) {
+		const results = await this.search(searchTerm, {  });
+		const kanji = uniq(
+			results.results
+			.flatMap(r => r.kanji)
+			.filter(k => k)
+			.map(k => k.value)
+			.flatMap(text => text.split(''))
+			// .map(k => k + " " + k.charCodeAt(0).toString(16))
+			.filter(k => k.charCodeAt(0) >= 0x4e00 && k.charCodeAt(0) < 0x9FBF)
+		);
+		return kanji;
+	}
 
 	private get<T>(url: string, params: { [key: string]: string|number }) {
 		let completeURL = `${this.baseUrl}${url}`;
@@ -44,4 +59,8 @@ export class SearchService {
 		}
 		return fetch(completeURL).then(r => r.json() as Promise<T>);
 	}
+}
+
+export function useSearch() {
+	return inject('search-service') as SearchService;
 }

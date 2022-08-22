@@ -14,14 +14,11 @@
 namespace jdict {
 
 std::vector<jmdict::entry const*> jmdict_index::search(std::string_view query) const {
-	debug::timer _("search");
-
 	// Find and rate results
 	std::map<jmdict::entry const*, unsigned> weights;
 
-	find_by_translation(weights, 1, query);
 	find_by_sequence_number(weights, 1, query);
-	// findByReading(weights, 1, query);
+	find_by_translation(weights, 1, query);
 	find_by_reading(weights, 1, query);
 
 	return sortResults(std::move(weights));

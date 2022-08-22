@@ -6,6 +6,7 @@ import './main.scss'
 import App from './App.vue'
 import Home from './routes/Home.vue'
 import Search from './routes/Search.vue'
+import KanjiSearch from './routes/KanjiSearch.vue'
 
 import { SearchService } from './backend/search'
 
@@ -16,7 +17,8 @@ createApp(App)
 	routes: [
 		{ path: '/', component: Home, name: 'home' },
 		{ path: '/search', redirect: '/' },
-		{ path: '/search/:query', component: Search, name: 'search' }
+		{ path: '/search/:query', component: Search, name: 'search' },
+		{ path: '/kanji-grid/:query?', component: KanjiSearch, name: 'kanji-grid' },
 	]
 }))
 .mount('#app')

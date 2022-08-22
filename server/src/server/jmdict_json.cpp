@@ -44,6 +44,7 @@ nlohmann::json to_json(jmdict::kanji   const& k) {
 nlohmann::json to_json(jmdict::reading const& r) {
 	nlohmann::json result;
 	result["value"] = r.value;
+	if(!r.romaji.empty())         result["romaji"]             = r.romaji;
 	if(r.not_actual_reading)      result["not_actual_reading"] = r.not_actual_reading;
 	if(!r.restrict_kanji.empty()) result["restrict_kanji"]     = r.restrict_kanji;
 	if(!r.infos.empty())          result["infos"]              = r.infos;

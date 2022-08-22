@@ -2,7 +2,7 @@
 import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { SearchService, SearchResult } from '../backend/search'
-import Result from '../components/Result.vue';
+import Entry from '../components/Entry.vue';
 import Spinner from '../components/Spinner.vue';
 import { throttle } from 'lodash'
 
@@ -56,7 +56,7 @@ onUnmounted(() => window.removeEventListener('scroll', scrollHandler));
 .stats(v-if="search") {{search.resultsTotal}} Results ({{search.time}})
 .container
 	.results(v-if="search")
-		Result(v-for="entry of search.results" :entry="entry")
+		Entry(v-for="entry of search.results" :entry="entry")
 	Spinner(v-if="searchInProgress")
 	hr
 </template>

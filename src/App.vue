@@ -41,6 +41,7 @@ nav
 			@send="router.push(`/search/${searchQuery}`)"
 			:suggestions="suggestions"
 		)
+			a(@click="router.replace(`/kanji-grid/${searchQuery}`)") 漢
 RouterView
 </template>
 
