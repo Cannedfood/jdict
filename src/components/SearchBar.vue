@@ -24,7 +24,8 @@ const searchInput = ref<HTMLInputElement | null>(null);
 onMounted(() => nextTick(() => searchInput.value?.focus()))
 
 function send() {
-	searchInput.value?.blur();
+	if(searchInput.value?.value !== '')
+		searchInput.value?.blur();
 	emit('send', props.modelValue);
 }
 </script>
