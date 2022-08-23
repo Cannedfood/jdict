@@ -25,7 +25,7 @@ public:
 	};
 	using StringViewMap = std::map<std::string_view, entry_ptr, std::less<>>;
 	using ResultWeights = std::map<entry_ptr, unsigned>;
-	using ngram_index  = text_index<std::pair<std::string_view, entry_ptr>, ngram_indexing_strategy>;
+	using ngram_index  = text_index<std::tuple<std::string_view, entry_ptr>, ngram_indexing_strategy>;
 	using word_index   = text_index<entry_ptr, word_indexing_strategy>;
 private:
 	jmdict const* dict = nullptr;
@@ -36,7 +36,6 @@ private:
 	void find_general           (ResultWeights& results_out, int baseWeight, std::string_view query) const;
 
 	static unsigned rate_match(std::string_view query, std::string_view match);
-	static unsigned rate_entry(entry_ptr e);
 	static std::vector<entry_ptr> sort_results(ResultWeights&& weights);
 };
 

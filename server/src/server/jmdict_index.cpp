@@ -27,7 +27,7 @@ std::vector<jmdict::entry const*> jmdict_index::search(std::string_view query) c
 
 void jmdict_index::find_general(ResultWeights& weights, int baseWeight, std::string_view query) const {
 	auto readingQuery = to_romaji(query);
-	idx_general.find(query, [&](std::pair<std::string_view, jmdict::entry const*> const& e) {
+	idx_general.find(query, [&](std::tuple<std::string_view, jmdict::entry const*> const& e) {
 		auto& [text, entry] = e;
 		if(text.find(readingQuery) != std::string::npos) {
 			auto& hitRating = weights[entry];
@@ -46,7 +46,7 @@ unsigned jmdict_index::rate_match(std::string_view query, std::string_view match
 	if(match == query) rating += 1000; // Exact match
 	else if(match.starts_with(query)) rating += 10; // Starts with search
 	// TODO: occurence rating
-	rating += 10 * std::max(0.f, 1 - match.size() / 50.f); // Smaller is better
+	rating += 10 * std::max(0.f, 1 - ((int) match.size() - (int) query.size()) / 50.f); // Smaller is better
 	return rating;
 }
 
@@ -77,12 +77,12 @@ jmdict_index::jmdict_index(jmdict const& dict) :
 		idx_sequence_number.emplace(entry.sequence, &entry);
 		for(auto& r : entry.readings) {
 			if(!r.romaji.empty()) {
-				idx_general.insert(r.romaji, std::make_pair(std::string_view(r.romaji), &entry));
+				idx_general.insert(r.romaji, std::make_tuple(std::string_view(r.romaji), &entry));
 			}
 		}
 		for(auto& s : entry.senses) {
 			for(auto& g : s.glosses) {
-				idx_general.insert(g.content, std::make_pair(std::string_view(g.content), &entry));
+				idx_general.insert(g.content, std::make_tuple(std::string_view(g.content), &entry));
 			}
 		}
 	}
