@@ -36,18 +36,23 @@ std::vector<T> applyPaging(int skip, int take, std::vector<T> const& v) {
 }
 
 int main(int argc, char** argv) {
+	std::string distDir = "../dist";
+	std::string jdictXML = "JMdict.xml";
+	int port = 8080;
+	if(auto* c = std::getenv("JDICT_DIST_DIR")) distDir = c;
+	if(auto* c = std::getenv("JDICT_XML")) jdictXML = c;
+	if(auto* c = std::getenv("JDICT_PORT")) port = atoi(c);
+
 	auto dict  = jmdict();
 	auto index = jmdict_index();
 	auto cache = jdict::cache<std::string, std::vector<jmdict::entry const*>>(1024);
 
 	auto dictionary_loaded = std::async(std::launch::async, [&] {
-		dict = jmdict::parse_file("JMdict.xml");
+		dict = jmdict::parse_file(jdictXML.c_str());
 		dict.generate_romaji();
 		index = jmdict_index(dict);
 		printf("Loaded %zu dictionary entries.\n", dict.entries.size());
 	});
-
-	printf("\nStart listening at http://localhost:8080\n");
 
 	auto router = http::router();
 	router.get("/api/search", [&](http::request& req, http::response& res) {
@@ -81,8 +86,23 @@ int main(int argc, char** argv) {
 
 		res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
 	});
+	// router.get("/api/stats", [&](http::request& req, http::response& res) {
+	// 	if(dictionary_loaded.wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
+	// 		res.status(http::ServiceUnavailable, "Service Unavailable - dictionary not loaded yet");
+	// 		return;
+	// 	}
+	// 	nlohmann::json responseBody;
+	// 	{
+	// 		nlohmann::json indices;
+	// 		for(auto const* idx : index.)
+
+	// 		responseBody["indices"] = indices;
+	// 	}
+	// 	res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
+	// });
 	router.files("/**", "../dist/");
 
-	http::listen(8080, router);
+	printf("\nStart listening at http://localhost:%i\n", port);
+	http::listen(port, router);
 	return EXIT_SUCCESS;
 }
