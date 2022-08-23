@@ -2,7 +2,7 @@
 .spinner
 </template>
 
-<style>
+<style scoped>
 .spinner {
 	display: block;
 	width: 3em;

@@ -45,7 +45,7 @@ nav
 RouterView
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 nav {
 	.left { float: left; }
 	.right { float: right; }

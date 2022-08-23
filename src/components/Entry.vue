@@ -27,7 +27,7 @@ const senses = computed(
 				| {{sense.glosses.map(g => g.content).join('; ')}}
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .entry {
 	margin-bottom: 2em;
 }

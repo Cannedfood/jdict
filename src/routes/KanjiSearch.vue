@@ -43,7 +43,7 @@ const hovered = ref(undefined as string|undefined);
 		) {{r}}
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 input {
 	margin: .5em;
 	display: block;

@@ -61,7 +61,7 @@ onUnmounted(() => window.removeEventListener('scroll', scrollHandler));
 	hr
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .stats {
 	color: #FFF3;
 	// text-align: right;

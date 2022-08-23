@@ -52,7 +52,7 @@ function send() {
 			| {{suggestion}}
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .suggestions {
 	position: absolute;
 	top: 100%;
