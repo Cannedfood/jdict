@@ -1,4 +1,4 @@
-#include "./kana_util.hpp"
+#include "./kana.hpp"
 
 namespace jdict {
 

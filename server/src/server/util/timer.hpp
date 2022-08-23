@@ -20,7 +20,7 @@ std::string to_string(std::chrono::duration<Period, Rep> d) {
 }
 
 struct timer {
-	using clock		= std::chrono::high_resolution_clock;
+	using clock        = std::chrono::high_resolution_clock;
 	using time_point   = clock::time_point;
 	using microseconds = std::chrono::microseconds;
 

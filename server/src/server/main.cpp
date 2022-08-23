@@ -4,9 +4,8 @@
 
 #include "./http/http.router.hpp"
 
-#include "./timer.hpp"
-#include "cache.hpp"
-#include "http/http.hpp"
+#include "./util/timer.hpp"
+#include "./util/cache.hpp"
 
 #include <algorithm>
 #include <chrono>

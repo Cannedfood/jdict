@@ -1,9 +1,7 @@
 #include "./jmdict_index.hpp"
 
-#include "./timer.hpp"
-#include "./kana_util.hpp"
-#include "jmdict.hpp"
-#include "text_index.hpp"
+#include "./util/timer.hpp"
+#include "./util/kana.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -26,7 +24,7 @@ std::vector<jmdict::entry const*> jmdict_index::search(std::string_view query) c
 }
 
 void jmdict_index::find_general(ResultWeights& weights, int baseWeight, std::string_view query) const {
-	auto readingQuery = to_romaji(query);
+	auto readingQuery = query;
 	idx_general.find(query, [&](std::tuple<std::string_view, jmdict::entry const*> const& e) {
 		auto& [text, entry] = e;
 		if(text.find(readingQuery) != std::string::npos) {
@@ -75,7 +73,11 @@ jmdict_index::jmdict_index(jmdict const& dict) :
 
 	for(auto& entry : dict.entries) {
 		idx_sequence_number.emplace(entry.sequence, &entry);
+		for(auto& k : entry.kanji) {
+			idx_general.insert(k.value, std::make_tuple(std::string_view(k.value), &entry));
+		}
 		for(auto& r : entry.readings) {
+			idx_general.insert(r.value, std::make_tuple(std::string_view(r.value), &entry));
 			if(!r.romaji.empty()) {
 				idx_general.insert(r.romaji, std::make_tuple(std::string_view(r.romaji), &entry));
 			}
@@ -99,6 +101,7 @@ jmdict_index::jmdict_index(jmdict const& dict) :
 		"Got %u index entries in %u sets. Entries per set: min: %u, max: %u, avg: %u\n",
 		totalEntries, count, min, max, totalEntries / count
 	);
+	idx_general.writeStats("./tmp.txt");
 }
 
 } // namespace jdict

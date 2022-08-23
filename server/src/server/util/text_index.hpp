@@ -1,18 +1,12 @@
 #pragma once
 
+#include "./utf8.hpp"
+
 #include <algorithm>
-#include <functional>
-#include <initializer_list>
-#include <memory>
-#include <optional>
-#include <set>
-#include <type_traits>
-#include <utility>
-#include <vector>
-#include <tuple>
-#include <string_view>
-#include <string>
 #include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace jdict {
 
@@ -29,23 +23,6 @@ concept FragmentCallback = std::is_invocable_v<T, std::string_view>;
 template<class T, class Result>
 concept ResultCallback   = std::is_invocable_v<T, Result>;
 
-struct word_indexing_strategy {
-	std::set<std::string, std::less<>> stop_words;
-
-	void get_fragments(std::string_view s, FragmentCallback auto emitFragment) const {
-		while(!s.empty()) {
-			while(!s.empty() && s.front() <= ' ') s.remove_prefix(1);
-			size_t i = 0;
-			while(i < s.size() && s[i] >= ' ') i++;
-			auto word = s.substr(0, i);
-			if(!stop_words.contains(word))
-				emitFragment(word);
-			s.remove_prefix(i);
-		}
-	}
-};
-static_assert(IndexingStrategy<word_indexing_strategy>, "word_indexing_strategy isn't a IndexingStrategy");
-
 struct ngram_indexing_strategy {
 	int n = 2;
 
@@ -54,6 +31,10 @@ struct ngram_indexing_strategy {
 			emitFragment(s);
 		}
 		else {
+			std::string_view ngram;
+			for(size_t i = 0; i < n; i++)
+				utf8::snip_codepoint(s);
+
 			for(int i = 0; i < int(s.size()) - n; i++) {
 				emitFragment(s.substr(i, n));
 			}
@@ -61,6 +42,28 @@ struct ngram_indexing_strategy {
 	}
 };
 static_assert(IndexingStrategy<ngram_indexing_strategy>, "ngram_indexing_strategy isn't a IndexingStrategy");
+
+struct smart_ngram_indexing_strategy {
+	unsigned ascii_n   = 2;
+	unsigned unicode_n = 2;
+	unsigned kanji_n   = 1;
+
+	void get_fragments(std::string_view s, FragmentCallback auto emitFragment) const {
+		if(s.size() < ascii_n) {
+			emitFragment(s);
+		}
+		else {
+			std::string_view remaining = s;
+			while(!remaining.empty()) {
+				auto c = utf8::snip_codepoint(remaining);
+				if(c < 127) {
+
+				}
+			}
+		}
+	}
+};
+static_assert(IndexingStrategy<smart_ngram_indexing_strategy>, "ngram_indexing_strategy isn't a IndexingStrategy");
 
 
 template<class T, IndexingStrategy Strategy = ngram_indexing_strategy>
@@ -95,6 +98,19 @@ struct text_index {
 				results(r);
 			}
 		}
+	}
+
+	void writeStats(std::string const& path) {
+		std::vector<std::pair<unsigned, std::string_view>> ee;
+		for(auto& [key, set] : entries)
+			ee.emplace_back((unsigned) set.size(), key);
+		std::sort(ee.begin(), ee.end());
+
+		auto* file = fopen(path.c_str(), "w");
+		for(auto& e : ee) {
+			fprintf(file, "%.*s %u\n", (int) e.second.size(), e.second.data(), e.first);
+		}
+		fclose(file);
 	}
 };
 

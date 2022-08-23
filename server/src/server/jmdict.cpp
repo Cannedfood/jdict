@@ -1,7 +1,7 @@
 #include "./jmdict.hpp"
 
-#include "./kana_util.hpp"
-#include "./timer.hpp"
+#include "./util/kana.hpp"
+#include "./util/timer.hpp"
 
 #include <rapidxml.hpp>
 #include <rapidxml_iterators.hpp>
