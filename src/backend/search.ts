@@ -43,7 +43,6 @@ export class SearchService {
 			.filter(k => k)
 			.map(k => k.value)
 			.flatMap(text => text.split(''))
-			// .map(k => k + " " + k.charCodeAt(0).toString(16))
 			.filter(k => k.charCodeAt(0) >= 0x4e00 && k.charCodeAt(0) < 0x9FBF)
 		);
 		return kanji;
