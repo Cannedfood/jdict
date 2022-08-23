@@ -14,8 +14,8 @@ function targetValue(e: any) { return e.target.value; }
 const selectedSuggestion = ref(1);
 function suggestionUp() { selectedSuggestion.value = Math.max(selectedSuggestion.value - 1, 1); }
 function suggestionDown() { selectedSuggestion.value = Math.min(selectedSuggestion.value + 1, props.suggestions.length); }
-function acceptSuggestion() {
-	const query = props.suggestions[selectedSuggestion.value - 1];
+function acceptSuggestion(suggestion?: string) {
+	const query = suggestion ?? props.suggestions[selectedSuggestion.value - 1];
 	emit('update:modelValue', query);
 	// emit('send', query);
 }
@@ -39,21 +39,26 @@ function send() {
 		:value="modelValue"
 		autocomplete="off"
 		@input="emit('update:modelValue', targetValue($event).toLowerCase())"
-		@keydown.enter="send"
-		@keydown.up="suggestionUp"
-		@keydown.down="suggestionDown"
-		@keydown.tab.prevent="acceptSuggestion"
+		@keydown.enter="send()"
+		@keydown.up="suggestionUp()"
+		@keydown.down="suggestionDown()"
+		@keydown.tab.prevent="acceptSuggestion()"
 		onfocus="this.select();"
 	)
 	slot
 	.suggestions(v-if="suggestions")
-		.suggestion(v-for="suggestion, i of suggestions" :class="{ active: i + 1 == selectedSuggestion }")
+		.suggestion(
+			v-for="suggestion, i of suggestions"
+			:class="{ active: i + 1 == selectedSuggestion }"
+			@click="acceptSuggestion(suggestion)"
+		)
 			span.tab-hint [tab]
 			| {{suggestion}}
 </template>
 
-<style lang="scss" scoped>
-.suggestions {
+<style lang="scss">
+
+.search-bar .suggestions {
 	position: absolute;
 	top: 100%;
 
