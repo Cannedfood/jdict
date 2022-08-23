@@ -74,7 +74,7 @@ static inline auto value_or_empty(xml_attribute<char>* n) {
 static jmdict::kanji parseKanjiElement(xml_node<char>& node) {
 	auto result = jmdict::kanji();
 	for(auto& child : children(node)) {
-		if	 (child.name() == "keb"sv)	result.value = value(child);
+		if     (child.name() == "keb"sv)    result.value = value(child);
 		else if(child.name() == "ke_inf"sv) result.infos.push_back(value(child));
 		else if(child.name() == "ke_pri"sv) result.priorities.push_back(value(child));
 		else UNHANDLED_NODE("k_ele", child);
@@ -85,11 +85,11 @@ static jmdict::kanji parseKanjiElement(xml_node<char>& node) {
 static jmdict::reading parseReadingElement(xml_node<char>& node) {
 	auto result = jmdict::reading();
 	for(auto& child : children(node)) {
-		if	 (child.name() == "reb"sv)		result.value = value(child);
+		if     (child.name() == "reb"sv)        result.value = value(child);
 		else if(child.name() == "re_nokanji"sv) result.not_actual_reading = true;
 		else if(child.name() == "re_restr"sv)   result.restrict_kanji.push_back(value(child));
-		else if(child.name() == "re_inf"sv)	 result.infos.push_back(value(child));
-		else if(child.name() == "re_pri"sv)	 result.priorities.push_back(value(child));
+		else if(child.name() == "re_inf"sv)     result.infos.push_back(value(child));
+		else if(child.name() == "re_pri"sv)     result.priorities.push_back(value(child));
 		else UNHANDLED_NODE("r_ele", child);
 	}
 	return result;
@@ -99,7 +99,7 @@ static jmdict::sense::gloss parseGlossElement(xml_node<char>& node) {
 	return jmdict::sense::gloss {
 		.content   = value(node),
 		.language  = value_or_empty(node.first_attribute("xml:lang")),
-		.gender	= value_or_empty(node.first_attribute("g_type")),
+		.gender    = value_or_empty(node.first_attribute("g_type")),
 		.highlight = node.first_node("pri") != nullptr,
 	};
 }
@@ -132,18 +132,18 @@ static jmdict::sense::source_language parseSourceLanguageElement(xml_node<char>&
 static jmdict::sense parseSenseElement(xml_node<char>& node) {
 	auto result = jmdict::sense();
 	for(auto& child : children(node)) {
-		if	 (child.name() == "stagk"sv)   result.restrict_kanji  .push_back(value(child));
-		else if(child.name() == "stagr"sv)   result.restrict_reading.push_back(value(child));
-		else if(child.name() == "pos"sv)	 result.part_of_speech_tags  .push_back(value(child));
-		else if(child.name() == "xref"sv)	result.cross_references	 .push_back(value(child));
-		else if(child.name() == "ant"sv)	 result.antonyms			 .push_back(value(child));
-		else if(child.name() == "field"sv)   result.fields .push_back(value(child));
-		else if(child.name() == "misc"sv)	result.misc_info   .push_back(value(child));
-		else if(child.name() == "s_inf"sv)   result.sense_info	.push_back(value(child));
-		else if(child.name() == "lsource"sv) result.lang_origin	   .push_back(parseSourceLanguageElement(child));
-		else if(child.name() == "dial"sv)	result.dialects			 .push_back(value(child));
-		else if(child.name() == "gloss"sv)   result.glosses			  .push_back(parseGlossElement(child));
-		else if(child.name() == "example"sv) result.examples			 .push_back(parseExampleElement(child));
+		if     (child.name() == "stagk"sv)   result.restrict_kanji     .push_back(value(child));
+		else if(child.name() == "stagr"sv)   result.restrict_reading   .push_back(value(child));
+		else if(child.name() == "pos"sv)     result.part_of_speech_tags.push_back(value(child));
+		else if(child.name() == "xref"sv)    result.cross_references   .push_back(value(child));
+		else if(child.name() == "ant"sv)     result.antonyms           .push_back(value(child));
+		else if(child.name() == "field"sv)   result.fields             .push_back(value(child));
+		else if(child.name() == "misc"sv)    result.misc_info          .push_back(value(child));
+		else if(child.name() == "s_inf"sv)   result.sense_info         .push_back(value(child));
+		else if(child.name() == "lsource"sv) result.lang_origin        .push_back(parseSourceLanguageElement(child));
+		else if(child.name() == "dial"sv)    result.dialects           .push_back(value(child));
+		else if(child.name() == "gloss"sv)   result.glosses            .push_back(parseGlossElement(child));
+		else if(child.name() == "example"sv) result.examples           .push_back(parseExampleElement(child));
 		else UNHANDLED_NODE("r_ele", child);
 	}
 	return result;
