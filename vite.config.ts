@@ -13,7 +13,7 @@ export default defineConfig({
 				globPatterns: []
 			},
 			devOptions: {
-				enabled: true
+				enabled: false
 			},
 			manifest: {
 				id: "jdict",
