@@ -54,7 +54,6 @@ struct ngram_indexing_strategy {
 			emitFragment(s);
 		}
 		else {
-			int n = 1;
 			for(int i = 0; i < int(s.size()) - n; i++) {
 				emitFragment(s.substr(i, n));
 			}
@@ -67,6 +66,7 @@ static_assert(IndexingStrategy<ngram_indexing_strategy>, "ngram_indexing_strateg
 template<class T, IndexingStrategy Strategy = ngram_indexing_strategy>
 struct text_index {
 	Strategy strategy;
+	// TODO: optimize memory footprint
 	std::map<std::string_view, std::set<T>, std::less<>> entries;
 
 	text_index(Strategy s = {}) noexcept :
@@ -90,8 +90,10 @@ struct text_index {
 				bestSet = &iter->second;
 			}
 		});
-		for(auto& r : *bestSet) {
-			results(r);
+		if(bestSet) {
+			for(auto& r : *bestSet) {
+				results(r);
+			}
 		}
 	}
 };
