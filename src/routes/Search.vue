@@ -62,7 +62,7 @@ onScrolledToBottom(
 
 <style lang="scss" scoped>
 .stats {
-	color: #FFF3;
+	color: #888A;
 	// text-align: right;
 	margin-block: 1em;
 	font-size: .8em;

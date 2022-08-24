@@ -38,7 +38,7 @@ const showJson = window.location.search.includes("debug=json")
 			span(v-if="highlightReading" v-for="kanji, i in entry.readings")
 				span(:class="kanjiClasses(kanji)")
 					span {{kanji.value}}
-					span(v-if="i + 1 != entry.kanji.length") ,&nbsp;
+					span(v-if="i + 1 != entry.kanji.length || entry.kanji.length > 0") ,&nbsp;
 			span(v-for="kanji, i in entry.kanji")
 				KanjiText(:kanji="kanji" :class="kanjiClasses(kanji)")
 					h1 Kapow!
@@ -83,8 +83,8 @@ const showJson = window.location.search.includes("debug=json")
 
 	.reading {
 		width: fit-content;
-		color: #FFF9;
 		font-size: .7rem;
+		color: #888A;
 	}
 	.kanji {
 		font-size: 1.2rem;
