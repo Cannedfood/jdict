@@ -1,5 +1,6 @@
 # General files
 JMdict.xml
+tmp.txt
 # Build results
 bin
 obj

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./utf8.hpp"
+#include "./utf8_sliding_window.hpp"
 
 #include <algorithm>
 #include <map>
@@ -24,47 +25,24 @@ template<class T, class Result>
 concept ResultCallback   = std::is_invocable_v<T, Result>;
 
 struct ngram_indexing_strategy {
-	int n = 2;
+	int n_ascii   = 2;
+	int n_kanji   = 1;
+	int n_kana    = 2;
+	int n_unicode = 1;
 
-	void get_fragments(std::string_view s, FragmentCallback auto emitFragment) const {
-		if(s.size() < n) {
-			emitFragment(s);
-		}
-		else {
-			std::string_view ngram;
-			for(size_t i = 0; i < n; i++)
-				utf8::snip_codepoint(s);
-
-			for(int i = 0; i < int(s.size()) - n; i++) {
-				emitFragment(s.substr(i, n));
-			}
-		}
+	void get_fragments(std::string_view s, FragmentCallback auto emit_fragment) const {
+		auto window = utf8_sliding_window(s);
+		while(
+			window.slide(n_ascii,   emit_fragment, utf8::is_ascii) ||
+			window.slide(n_kanji,   emit_fragment, utf8::is_kanji) ||
+			window.slide(n_kana,    emit_fragment, utf8::is_kana) ||
+			window.slide(n_unicode, emit_fragment, [](char32_t c) {
+				return !(utf8::is_ascii(c) || utf8::is_kanji(c) || utf8::is_kana(c));
+			})
+		);
 	}
 };
 static_assert(IndexingStrategy<ngram_indexing_strategy>, "ngram_indexing_strategy isn't a IndexingStrategy");
-
-struct smart_ngram_indexing_strategy {
-	unsigned ascii_n   = 2;
-	unsigned unicode_n = 2;
-	unsigned kanji_n   = 1;
-
-	void get_fragments(std::string_view s, FragmentCallback auto emitFragment) const {
-		if(s.size() < ascii_n) {
-			emitFragment(s);
-		}
-		else {
-			std::string_view remaining = s;
-			while(!remaining.empty()) {
-				auto c = utf8::snip_codepoint(remaining);
-				if(c < 127) {
-
-				}
-			}
-		}
-	}
-};
-static_assert(IndexingStrategy<smart_ngram_indexing_strategy>, "ngram_indexing_strategy isn't a IndexingStrategy");
-
 
 template<class T, IndexingStrategy Strategy = ngram_indexing_strategy>
 struct text_index {

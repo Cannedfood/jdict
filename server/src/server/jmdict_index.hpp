@@ -29,7 +29,7 @@ public:
 private:
 	jmdict const* dict = nullptr;
 	StringViewMap idx_sequence_number;
-	ngram_index   idx_general = ngram_index(ngram_indexing_strategy { .n = 3 });
+	ngram_index   idx_general = ngram_index(ngram_indexing_strategy { .n_ascii = 3 });
 
 	void find_by_sequence_number(ResultWeights& results_out, int baseWeight, std::string_view query) const;
 	void find_general           (ResultWeights& results_out, int baseWeight, std::string_view query) const;
