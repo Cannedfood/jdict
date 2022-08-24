@@ -31,12 +31,11 @@ private:
 	strview_map_t idx_sequence_number;
 	ngram_index_t idx_general = ngram_index_t(ngram_indexing_strategy {});
 
-	void find_by_sequence_number(result_ratings_t& results_out, rating_t baseRating, std::string_view query) const;
-	void find_general           (result_ratings_t& results_out, rating_t baseRating, std::string_view query) const;
+	void find_by_sequence_number(result_ratings_t& results_out, std::string_view query) const;
+	void find_general           (result_ratings_t& results_out, std::string_view query) const;
 
 	void build_indices();
 
-	static rating_t rate_match(std::string_view query, std::string_view match);
 	static results_t sort_results(result_ratings_t&& ratings);
 };
 

@@ -104,6 +104,16 @@ char32_t decode_and_snip(std::string_view& s) noexcept {
 	return result;
 }
 
+constexpr inline
+size_t count_codepoints(std::string_view s) {
+	size_t n = 0;
+	while(!s.empty()) {
+		decode_and_snip(s);
+		n++;
+	}
+	return n;
+}
+
 constexpr inline static bool is_alpha(char32_t c) {
 	return
 		// ASCII

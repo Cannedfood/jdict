@@ -57,7 +57,7 @@ const showJson = window.location.search.includes("debug=json")
 		display: none;
 		opacity: 50%;
 	}
-	.entry:hover {
+	&:hover {
 		.debug-info {
 			display: block;
 		}

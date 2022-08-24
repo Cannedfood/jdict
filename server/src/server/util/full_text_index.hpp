@@ -108,9 +108,9 @@ struct full_text_index {
 		}
 	}
 
-	void find(std::string_view s, ResultCallback<std::string_view, Values...> auto emit_result) const noexcept {
+	void find(std::string_view query, ResultCallback<std::string_view, Values...> auto emit_result) const noexcept {
 		std::vector<unsigned> const* smallestSet = nullptr;
-		strategy.get_fragments(s, [&](std::string_view fragment) {
+		strategy.get_fragments(query, [&](std::string_view fragment) {
 			auto iter = entries.find(fragment);
 			if(iter == entries.end())
 				return;
@@ -120,7 +120,10 @@ struct full_text_index {
 		});
 		if(smallestSet) {
 			for(auto idx : *smallestSet) {
-				std::apply(emit_result, values[idx]);
+				auto& v = values[idx];
+				if(std::get<0>(v).find(query) != std::string::npos) {
+					std::apply(emit_result, values[idx]);
+				}
 			}
 		}
 	}
