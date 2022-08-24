@@ -4,6 +4,7 @@ import SearchBar from './components/SearchBar.vue';
 
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from '@vue/reactivity';
+import Octicon from './components/Octicon.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -27,15 +28,12 @@ const home = computed(() => !route.name || route.name == 'home');
 </script>
 
 <template lang="pug">
-//- .settings-bar
-//- 	button theme:dark
-//- 	select
-//- 		option [EN]
-//- 		option [DE]
-//- 		option [RU]
 nav
+	.left
+		a.btn(v-if="!home" href="/#/")
+			Octicon(type="home")
 	.right
-	.search-bar-container(:class="{ center: home }")
+	.center.search-bar-container(:class="{ home: home }")
 		SearchBar(
 			v-model="searchQuery"
 			@send="router.push(`/search/${searchQuery}`)"
@@ -47,17 +45,28 @@ RouterView
 
 <style lang="scss" scoped>
 nav {
-	.left { float: left; }
-	.right { float: right; }
-	.search-bar-container {
-		flex-grow: 1;
+	display: grid;
+	grid-template-columns: .5fr 2fr .5fr;
+	grid-template-areas: "left center right";
+	.left  {
+		grid-area: left;
+		text-align: left;
+	}
+	.right {
+		grid-area: right;
+		text-align: right;
+	}
+	.center {
+		grid-area: center;
+		text-align: center;
+		width: 100%;
 	}
 }
 .search-bar-container {
 	margin-left: auto;
 	margin-right: auto;
 	transition: margin-top 100ms;
-	&.center {
+	&.home {
 		margin-top: 40vh;
 	}
 }

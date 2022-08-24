@@ -46,9 +46,14 @@ hr {
 	text-align: center;
 }
 
+.float-left { float: left; }
+.float-right { float: right; }
+
 button, .btn, [role="button"] {
+	display: inline-block;
 	cursor: pointer;
 	padding: .5em;
 	border-radius: .5em;
 	background: #8883;
+	text-align: center;
 }
