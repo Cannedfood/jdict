@@ -20,7 +20,6 @@ void test_utf8() {
 void test_ngram() {
 	auto strat = jdict::ngram_indexing_strategy {
 		.n_alpha = 2,
-		.n_numeric = 100,
 		.n_kanji = 1,
 		.n_kana = 2,
 		.n_unicode = 1
@@ -39,7 +38,6 @@ void test_ngram() {
 	TEST(result.size() > i && result[i++] == (const char*) u8"ab");
 	TEST(result.size() > i && result[i++] == (const char*) u8"bc");
 	TEST(result.size() > i && result[i++] == (const char*) u8"cd");
-	TEST(result.size() > i && result[i++] == (const char*) u8"4242");
 	TEST(result.size() > i && result[i++] == (const char*) u8"ひら");
 	TEST(result.size() > i && result[i++] == (const char*) u8"らが");
 	TEST(result.size() > i && result[i++] == (const char*) u8"がな");

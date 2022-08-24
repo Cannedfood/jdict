@@ -66,29 +66,41 @@ std::vector<jmdict::entry const*> jmdict_index::sort_results(ResultWeights&& wei
 	return sorted_entries;
 }
 
-jmdict_index::jmdict_index(jmdict const& dict) :
-	dict(&dict)
-{
-	debug::timer _("building index");
+void jmdict_index::build_indices() {
+	{
+		debug::timer _("building index");
 
-	for(auto& entry : dict.entries) {
-		idx_sequence_number.emplace(entry.sequence, &entry);
-		for(auto& k : entry.kanji) {
-			idx_general.insert(k.value, std::make_tuple(std::string_view(k.value), &entry));
-		}
-		for(auto& r : entry.readings) {
-			idx_general.insert(r.value, std::make_tuple(std::string_view(r.value), &entry));
-			if(!r.romaji.empty()) {
-				idx_general.insert(r.romaji, std::make_tuple(std::string_view(r.romaji), &entry));
+		for(auto& entry : dict->entries) {
+			idx_sequence_number.emplace(entry.sequence, &entry);
+			for(auto& k : entry.kanji) {
+				idx_general.insert(k.value, std::make_tuple(std::string_view(k.value), &entry));
 			}
-		}
-		for(auto& s : entry.senses) {
-			for(auto& g : s.glosses) {
-				idx_general.insert(g.content, std::make_tuple(std::string_view(g.content), &entry));
+			for(auto& r : entry.readings) {
+				idx_general.insert(r.value, std::make_tuple(std::string_view(r.value), &entry));
+				if(!r.romaji.empty()) {
+					idx_general.insert(r.romaji, std::make_tuple(std::string_view(r.romaji), &entry));
+				}
+			}
+			for(auto& s : entry.senses) {
+				for(auto& g : s.glosses) {
+					idx_general.insert(g.content, std::make_tuple(std::string_view(g.content), &entry));
+				}
 			}
 		}
 	}
 
+	{
+		debug::timer _("removing duplicates");
+		printf("Removed %zu duplicates\n", idx_general.remove_duplicates());
+	}
+}
+
+jmdict_index::jmdict_index(jmdict const& dict) :
+	dict(&dict)
+{
+	build_indices();
+
+	debug::timer _("writing stats");
 	unsigned min = 40000000, totalEntries = 0, max = 0;
 	unsigned count = 0;
 	for(auto& e : idx_general.entries) {
@@ -101,7 +113,7 @@ jmdict_index::jmdict_index(jmdict const& dict) :
 		"Got %u index entries in %u sets. Entries per set: min: %u, max: %u, avg: %u\n",
 		totalEntries, count, min, max, totalEntries / count
 	);
-	idx_general.writeStats("./tmp.txt");
+	idx_general.write_stats("./tmp.txt");
 }
 
 } // namespace jdict

@@ -116,7 +116,21 @@ constexpr inline static bool is_alpha(char32_t c) {
 		// Latin Extended-B
 		(c >= 0x0180 && c <= 0x024F) ||
 		// Latin Extended Additional
-		(c >= 0x1E02 && c <= 0x1EF3);
+		(c >= 0x1E02 && c <= 0x1EF3) ||
+		// Cyrillic
+		(c >= 0x0400 && c <= 0x04FF) ||
+		// Cyrillic Supplement
+		(c >= 0x0500 && c <= 0x052F) ||
+		// Cyrillic Extended A
+		(c >= 0x2DE0 && c <= 0x2DFF) ||
+		// Cyrillic Extended B
+		(c >= 0xA640 && c <= 0xA69F) ||
+		// Cyrillic Extended C
+		(c >= 0x1C80 && c <= 0x1C8F) ||
+		// Cyrillic Phonetic Extensions
+		(c >= 0x1D2B && c <= 0x1D78) ||
+		// Cyrillic Combining Half Marks
+		(c >= 0xFE2E && c <= 0xFE2F);
 }
 constexpr inline static bool is_whitespace(char32_t c) { return c <= ' '; }
 constexpr inline static bool is_punct_ascii(char32_t c) { return (c >= '!' && c <= '/') || (c >= ':' && c <= '`') || (c >= '{' && c <= '~'); }

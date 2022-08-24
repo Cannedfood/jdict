@@ -34,6 +34,8 @@ private:
 	void find_by_sequence_number(ResultWeights& results_out, int baseWeight, std::string_view query) const;
 	void find_general           (ResultWeights& results_out, int baseWeight, std::string_view query) const;
 
+	void build_indices();
+
 	static unsigned rate_match(std::string_view query, std::string_view match);
 	static std::vector<entry_ptr> sort_results(ResultWeights&& weights);
 };
