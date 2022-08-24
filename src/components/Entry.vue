@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
-import type { Entry, Kanji } from '../backend/jmdict'
+import type { Entry, Gloss, Kanji } from '../backend/jmdict'
 import { replaceEntities } from '../backend/jmdict';
-import OnHover from './OnHover.vue';
-import KanjiInfo from './KanjiInfo.vue';
+import KanjiText from './entry/KanjiText.vue';
+import MeaningText from './entry/MeaningText.vue';
 
 const props = defineProps<{ entry: Entry }>();
 
 const senses = computed(() => props.entry.senses.filter(s => s.glosses.some(g => !g.lang)))
 
-const hasGoodKanji = computed(() => props.entry.kanji.some(k => !k.infos?.includes('&rK;')));
+const highlightReading = computed(() =>
+	props.entry.kanji.every(k => k.infos?.includes('&rK;')) ||
+	senses.value.every(s => s.misc_info?.includes('&uk;')) // "word usually written using kana alone"
+);
 
 function kanjiClasses(kanji: Kanji) {
 	return {
@@ -19,7 +22,8 @@ function kanjiClasses(kanji: Kanji) {
 	};
 }
 
-const showDebugInfo = window.location.hostname.startsWith("localhost");
+const showDebugInfo = window.location.search.includes("debug=");
+const showJson = window.location.search.includes("debug=json")
 
 </script>
 
@@ -31,75 +35,74 @@ const showDebugInfo = window.location.hostname.startsWith("localhost");
 				.romaji {{reading.romaji}}
 				.kana   {{reading.value + (i + 1 != entry.readings.length? ', ' : '')}}
 		.kanji
-			span(v-if="!hasGoodKanji" v-for="kanji, i in entry.readings")
+			span(v-if="highlightReading" v-for="kanji, i in entry.readings")
 				span(:class="kanjiClasses(kanji)")
 					span {{kanji.value}}
 					span(v-if="i + 1 != entry.kanji.length") ,&nbsp;
 			span(v-for="kanji, i in entry.kanji")
-				OnHover
-					span(:class="kanjiClasses(kanji)")
-						span {{kanji.value}}
-						span(v-if="i + 1 != entry.kanji.length") ,&nbsp;
-					template(v-slot:when-hovered)
-						.floating-container
-							p prio: {{kanji.priorities?.map(replaceEntities).join(', ')}}
-							p info: {{kanji.infos?.map(replaceEntities).join(', ')}}
-							KanjiInfo(:kanji="kanji.value")
-	.meaning
-		ol.senses
-			li.sense(v-for="sense of senses")
-				.content
-					| {{sense.glosses.map(g => g.content).join('; ')}}
-					| {{sense.dialects?.map(replaceEntities).map(k => '['+k+']')}}
-				.crossref(v-if="sense.cross_references")
-					| See also&nbsp;
-					a(v-for="xref in sense.cross_references" :href="`#/search/${xref.split('・')[0]}`") {{xref}}
-	.debug-info(v-if="showDebugInfo")
-		p {{entry.rating}}
+				KanjiText(:kanji="kanji" :class="kanjiClasses(kanji)")
+					h1 Kapow!
+				span(v-if="i + 1 != entry.kanji.length") ,&nbsp;
+	MeaningText(:senses="senses")
+	.debug-info.float-right(v-if="showDebugInfo")
+		p rating: {{entry.rating?.toString(10)}}
+		p(v-if="showJson") {{entry}}
 </template>
 
-<style lang="scss" scoped>
-.debug-info {
-	display: none;
-	opacity: 50%;
-}
-.entry:hover {
-	.debug-info {
-		display: block;
-	}
-}
-.floating-container {
-	position: absolute;
-	background: #242424;
-	width: 100%;
-	max-width: 20cm;
-	border: 2px solid white;
-}
-
+<style lang="scss">
 .entry {
 	margin-bottom: 2em;
-}
 
-.reading-entry {
-	display: inline-block;
-	.romaji {
-		opacity: 0;
-		transition: opacity 100ms;
+	.debug-info {
+		display: none;
+		opacity: 50%;
 	}
-	&:hover .romaji {
-		opacity: 100%;
+	.entry:hover {
+		.debug-info {
+			display: block;
+		}
 	}
-}
+	.floating-container {
+		position: absolute;
+		background: #242424;
+		width: 100%;
+		max-width: 20cm;
+		border: 2px solid white;
+		z-index: 1;
+	}
+	.reading-entry {
+		display: inline-block;
+		.romaji {
+			opacity: 0;
+			transition: opacity 100ms;
+		}
+		&:hover .romaji {
+			opacity: 100%;
+		}
+	}
 
-.reading {
-	width: fit-content;
-	color: #FFF9;
-	font-size: .7rem;
-}
-.kanji {
-	font-size: 1.2rem;
-	.phoneticReading { font-weight: bold; }
-	.irregularUsage { opacity: 60%; }
-	.rarelyUsed { opacity: 30%; }
+	.reading {
+		width: fit-content;
+		color: #FFF9;
+		font-size: .7rem;
+	}
+	.kanji {
+		font-size: 1.2rem;
+		.phoneticReading { font-weight: bold; }
+		.irregularUsage { opacity: 60%; }
+		.rarelyUsed { opacity: 30%; }
+	}
+	.extra-info {
+		display: inline;
+		opacity: 30%;
+		&> * {
+			display: inline-block;
+			margin-inline: .5em;
+		}
+		.fields, .crossref {
+			display: block;
+		}
+	}
+
 }
 </style>

@@ -65,10 +65,10 @@ export interface Entry {
 }
 
 export function replaceEntities(s: string) {
-	return s.replaceAll(/&.+;/g, (str) => {
+	return s.replaceAll(/&.+;/g, str => {
 		const v = str.substring(1, str.length - 1);
 		const e = EntityLookup[v];
-		return e? `${v}: ${e}` : str;
+		return e ?? str;
 	});
 }
 

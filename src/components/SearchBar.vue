@@ -58,30 +58,6 @@ function send() {
 
 <style lang="scss">
 
-.search-bar .suggestions {
-	position: absolute;
-	top: 100%;
-
-	.suggestion {
-		.tab-hint {
-			font-size: .5em;
-			opacity: 0;
-			transition: opacity 200ms;
-		}
-		&.active {
-			text-decoration: underline;
-			.tab-hint {
-				opacity: 100%;
-			}
-		}
-	}
-}
-.search-bar:not(:focus-within) {
-	.suggestions {
-		display: none;
-	}
-}
-
 .search-bar {
 	display: flex;
 	flex-flow: nowrap row;
@@ -106,6 +82,30 @@ function send() {
 	border: 1px solid transparent;
 	&:focus-within {
 		border-color: purple;
+	}
+
+	.suggestions {
+		position: absolute;
+		top: 100%;
+
+		.suggestion {
+			.tab-hint {
+				font-size: .5em;
+				opacity: 0;
+				transition: opacity 200ms;
+			}
+			&.active {
+				text-decoration: underline;
+				.tab-hint {
+					opacity: 100%;
+				}
+			}
+		}
+	}
+	&:not(:focus-within) {
+		.suggestions {
+			display: none;
+		}
 	}
 
 	* {
