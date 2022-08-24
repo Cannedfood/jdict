@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import type { IconName } from '@primer/octicons'
-import octicons from '@primer/octicons'
 import { computed } from '@vue/reactivity';
 
+import home from '@primer/octicons/build/svg/home-24.svg?raw'
+
+const icons = {
+	home
+};
+
 const props = defineProps<{
-	type: IconName
+	type: keyof(typeof icons)
 }>();
 
 const svgCode = computed(() => {
-	const code = octicons[props.type].toSVG();
-	return code.replaceAll('<path ', '<path fill="currentColor"');
+	return icons[props.type].replaceAll('<path ', '<path fill="currentColor"');
 });
 
 </script>
