@@ -56,7 +56,7 @@ function scrollToTop() {
 </script>
 
 <template lang="pug">
-.stats(v-if="search") {{search.resultsTotal}} Results ({{search.time}})
+.stats.float-left(v-if="search") {{search.resultsTotal}} Results ({{search.time}})
 .container
 	.results(v-if="search")
 		Entry(v-for="entry of search.results" :entry="entry")
