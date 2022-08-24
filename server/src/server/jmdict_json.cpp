@@ -85,5 +85,11 @@ nlohmann::json to_json(jmdict::entry const& entry) {
 	return result;
 }
 
+nlohmann::json to_json(std::pair<jmdict::entry const*, int> const& e) {
+	auto result = to_json(*e.first);
+	result["rating"] = e.second;
+	return result;
+}
+
 } // namespace jmdict
 

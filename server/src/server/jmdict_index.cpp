@@ -11,58 +11,57 @@
 
 namespace jdict {
 
-std::vector<jmdict::entry const*> jmdict_index::search(std::string_view query) const {
+using rating_t = jmdict_index::rating_t;
+using result_t = jmdict_index::result_t;
+using results_t = jmdict_index::results_t;
+using entry_ptr = jmdict_index::entry_ptr;
+
+results_t jmdict_index::search(std::string_view query) const {
 	// Find and rate results
-	std::map<jmdict::entry const*, unsigned> weights;
+	result_ratings_t ratings;
 
-	find_by_sequence_number(weights, 1, query);
-	find_general(weights, 1, query);
-	// find_by_translation(weights, 1, query);
-	// find_by_reading(weights, 1, query);
+	find_by_sequence_number(ratings, 1, query);
+	find_general(ratings, 1, query);
+	// find_by_translation(ratings, 1, query);
+	// find_by_reading(ratings, 1, query);
 
-	return sort_results(std::move(weights));
+	return sort_results(std::move(ratings));
 }
 
-void jmdict_index::find_general(ResultWeights& weights, int baseWeight, std::string_view query) const {
+void jmdict_index::find_general(result_ratings_t& ratings, rating_t baseRating, std::string_view query) const {
 	auto readingQuery = query;
-	idx_general.find(query, [&](std::string_view text, jmdict::entry const* entry, unsigned weight) {
+	idx_general.find(query, [&](std::string_view text, jmdict::entry const* entry, rating_t rating) {
 		if(text.find(readingQuery) != std::string::npos) {
-			auto& hitRating = weights[entry];
-			hitRating = std::max(hitRating, rate_match(readingQuery, text) * baseWeight + weight);
+			auto& hitRating = ratings[entry];
+			hitRating = std::max(hitRating, rate_match(readingQuery, text) * baseRating + rating);
 		}
 	});
 }
-void jmdict_index::find_by_sequence_number(ResultWeights& weights, int baseWeight, std::string_view query) const {
+void jmdict_index::find_by_sequence_number(result_ratings_t& ratings, rating_t baseRating, std::string_view query) const {
 	if(auto bySeq = idx_sequence_number.find(query); bySeq != idx_sequence_number.end()) {
-		weights[bySeq->second] = baseWeight * 1;
+		ratings[bySeq->second] = baseRating * 1;
 	}
 }
 
-unsigned jmdict_index::rate_match(std::string_view query, std::string_view match) {
+rating_t jmdict_index::rate_match(std::string_view query, std::string_view match) {
 	unsigned rating = 1;
 	if(match == query) rating += 1000; // Exact match
 	else if(match.starts_with(query)) rating += 10; // Starts with search
 	// TODO: occurence rating
-	rating += 10 * std::max(0.f, 1 - ((int) match.size() - (int) query.size()) / 50.f); // Smaller is better
+	rating += 10 * std::max(0.f, 1 - ((rating_t) match.size() - (rating_t) query.size()) / 50.f); // Smaller is better
 	return rating;
 }
 
-std::vector<jmdict::entry const*> jmdict_index::sort_results(ResultWeights&& weights) {
-	auto pairs = std::vector<std::pair<jmdict::entry const*, unsigned>>(weights.begin(), weights.end());
+results_t jmdict_index::sort_results(result_ratings_t&& ratings) {
+	auto pairs = results_t(ratings.begin(), ratings.end());
 
 	// Sort results by rating
-	weights.clear();
+	ratings.clear();
 	std::sort(pairs.begin(), pairs.end(), [](auto const& a, auto const& b) {
 		return a.second > b.second;
 	});
 
-	// Compact results
-	std::vector<jmdict::entry const*> sorted_entries;
-	sorted_entries.reserve(pairs.size());
-	for(auto [e, rating] : pairs) {
-		sorted_entries.push_back(e);
-	}
-	return sorted_entries;
+	return pairs;
 }
 
 void jmdict_index::build_indices() {
@@ -72,11 +71,11 @@ void jmdict_index::build_indices() {
 		for(auto& entry : dict->entries) {
 			idx_sequence_number.emplace(entry.sequence, &entry);
 			for(auto& k : entry.kanji) {
-				unsigned bonus = 10*k.priorities.size();
+				rating_t bonus = 10*k.priorities.size();
 				idx_general.insert(k.value, &entry, 100 + bonus);
 			}
 			for(auto& r : entry.readings) {
-				unsigned bonus = 10*r.priorities.size();
+				rating_t bonus = 10*r.priorities.size();
 				idx_general.insert(r.value, &entry, 90 + bonus);
 				if(!r.romaji.empty()) {
 					idx_general.insert(r.romaji, &entry, 90 + bonus);

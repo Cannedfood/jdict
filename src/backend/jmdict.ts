@@ -58,6 +58,7 @@ export interface Sense {
 
 export interface Entry {
 	id: string;
+	rating?: number, // Rating used by search algorithm
 	kanji: Kanji[];
 	readings: Reading[];
 	senses: Sense[];

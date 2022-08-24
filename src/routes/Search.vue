@@ -34,11 +34,10 @@ watch(
 
 async function searchMore() {
 	if(search.value && !allResultsLoaded.value && !searchInProgress.value) {
-		console.log("Load more");
 		try {
 			searchInProgress.value++;
 			search.value = await searchService.searchMore(search.value);
-			console.log(`-> Loaded ${search.value.results.length} of ${search.value.resultsTotal}`)
+			console.log(`...loaded ${search.value.results.length} of ${search.value.resultsTotal}`)
 		}
 		finally { searchInProgress.value--; }
 	}

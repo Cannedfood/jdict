@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 
 	auto dict  = jmdict();
 	auto index = jmdict_index();
-	auto cache = jdict::cache<std::string, std::vector<jmdict::entry const*>>(1024);
+	auto cache = jdict::cache<std::string, jmdict_index::results_t>(1024);
 
 	auto dictionary_loaded = std::async(std::launch::async, [&] {
 		dict = jmdict::parse_file(jdictXML.c_str());

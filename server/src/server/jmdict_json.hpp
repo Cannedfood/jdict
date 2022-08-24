@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 #include <type_traits>
+#include <utility>
 
 namespace jdict {
 
@@ -15,6 +16,8 @@ nlohmann::json to_json(jmdict::kanji const&);
 nlohmann::json to_json(jmdict::reading const&);
 nlohmann::json to_json(jmdict::sense const&);
 nlohmann::json to_json(jmdict::entry const&);
+
+nlohmann::json to_json(std::pair<jmdict::entry const*, int> const&);
 
 template<class T>
 nlohmann::json to_json(std::vector<T> const& j) {

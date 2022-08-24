@@ -13,31 +13,31 @@ namespace jdict {
 
 class jmdict_index {
 public:
+	using rating_t = int;
+	using entry_ptr = jmdict::entry const*;
+	using result_ratings_t = std::map<entry_ptr, rating_t>;
+	using strview_map_t = std::map<std::string_view, entry_ptr, std::less<>>;
+	using ngram_index_t = full_text_index<ngram_indexing_strategy, entry_ptr, rating_t>;
+	using result_t = std::pair<entry_ptr, rating_t>;
+	using results_t = std::vector<std::pair<entry_ptr, rating_t>>;
+
+public:
 	jmdict_index() = default;
 	jmdict_index(jmdict const& dict);
-	std::vector<jmdict::entry const*> search(std::string_view query) const;
-public:
-	using entry_ptr = jmdict::entry const*;
-	struct index_entry {
-		std::string_view value;
-		entry_ptr entry;
-		unsigned weight;
-	};
-	using StringViewMap = std::map<std::string_view, entry_ptr, std::less<>>;
-	using ResultWeights = std::map<entry_ptr, unsigned>;
-	using ngram_index   = full_text_index<ngram_indexing_strategy, entry_ptr, unsigned>;
+	results_t search(std::string_view query) const;
+
 private:
 	jmdict const* dict = nullptr;
-	StringViewMap idx_sequence_number;
-	ngram_index   idx_general = ngram_index(ngram_indexing_strategy {});
+	strview_map_t idx_sequence_number;
+	ngram_index_t idx_general = ngram_index_t(ngram_indexing_strategy {});
 
-	void find_by_sequence_number(ResultWeights& results_out, int baseWeight, std::string_view query) const;
-	void find_general           (ResultWeights& results_out, int baseWeight, std::string_view query) const;
+	void find_by_sequence_number(result_ratings_t& results_out, rating_t baseRating, std::string_view query) const;
+	void find_general           (result_ratings_t& results_out, rating_t baseRating, std::string_view query) const;
 
 	void build_indices();
 
-	static unsigned rate_match(std::string_view query, std::string_view match);
-	static std::vector<entry_ptr> sort_results(ResultWeights&& weights);
+	static rating_t rate_match(std::string_view query, std::string_view match);
+	static results_t sort_results(result_ratings_t&& ratings);
 };
 
 } // namespace jdict

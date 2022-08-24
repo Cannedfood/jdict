@@ -19,6 +19,8 @@ function kanjiClasses(kanji: Kanji) {
 	};
 }
 
+const showDebugInfo = window.location.hostname.startsWith("localhost");
+
 </script>
 
 <template lang="pug">
@@ -52,9 +54,20 @@ function kanjiClasses(kanji: Kanji) {
 				.crossref(v-if="sense.cross_references")
 					| See also&nbsp;
 					a(v-for="xref in sense.cross_references" :href="`#/search/${xref.split('・')[0]}`") {{xref}}
+	.debug-info(v-if="showDebugInfo")
+		p {{entry.rating}}
 </template>
 
 <style lang="scss" scoped>
+.debug-info {
+	display: none;
+	opacity: 50%;
+}
+.entry:hover {
+	.debug-info {
+		display: block;
+	}
+}
 .floating-container {
 	position: absolute;
 	background: #242424;
