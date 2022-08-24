@@ -421,7 +421,7 @@ int listen(int port, request_handler const& handler, listen_flags flags) {
 		catch(std::exception& e) {
 			res.status(500, "Internal server error: " + std::string(e.what())).send();
 			fprintf(stderr, "Exception: %s\n", e.what());
-			throw;
+			// throw;
 		}
 	}
 
