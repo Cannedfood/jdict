@@ -386,7 +386,7 @@ int listen(int port, request_handler const& handler, listen_flags flags) {
 	sockaddr_in addr = {};
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = { inet_addr("127.0.0.1") };
+	addr.sin_addr.s_addr = { inet_addr("0.0.0.0") };
 	if(::bind(serverSocket, (sockaddr const*) &addr, sizeof(addr)) == -1) {
 		auto e = std::string(strerror(errno));
 		throw std::runtime_error("Failed binding server socket to port: " + e);
