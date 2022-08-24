@@ -5,12 +5,16 @@ import type { SearchService, SearchResult } from '../backend/search'
 import Entry from '../components/Entry.vue';
 import Spinner from '../components/Spinner.vue';
 import { throttle } from 'lodash'
+import { onScrolledToBottom } from '../util/OnScrolledToBottom';
+import { computed } from '@vue/reactivity';
 
 const searchService = inject<SearchService>('search-service')!;
 const route = useRoute();
 
 const search = ref<SearchResult>();
 const searchInProgress = ref(0);
+
+const allResultsLoaded = computed(() => search.value && search.value.results.length == search.value.resultsTotal);
 
 watch(
 	() => route.params.query,
@@ -28,8 +32,8 @@ watch(
 	{ immediate: true }
 );
 
-const searchMore = throttle(async() => {
-	if(search.value && !searchInProgress.value) {
+async function searchMore() {
+	if(search.value && !allResultsLoaded.value && !searchInProgress.value) {
 		console.log("Load more");
 		try {
 			searchInProgress.value++;
@@ -38,17 +42,16 @@ const searchMore = throttle(async() => {
 		}
 		finally { searchInProgress.value--; }
 	}
-}, 500);
-
-async function scrollHandler() {
-	const notAllResultsLoaded = search.value && search.value.results.length < search.value.resultsTotal;
-	const atBottom = window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
-	if (notAllResultsLoaded && atBottom) {
-		searchMore();
-	}
 }
-onMounted(() => window.addEventListener('scroll', scrollHandler));
-onUnmounted(() => window.removeEventListener('scroll', scrollHandler));
+
+onScrolledToBottom(
+	throttle(searchMore, 500, { leading: true, trailing: false })
+)
+
+function scrollToTop() {
+	document.body.scrollTop = 0; // For Safari
+	document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+}
 
 </script>
 
@@ -58,7 +61,8 @@ onUnmounted(() => window.removeEventListener('scroll', scrollHandler));
 	.results(v-if="search")
 		Entry(v-for="entry of search.results" :entry="entry")
 	Spinner(v-if="searchInProgress")
-	hr
+	hr(v-if="allResultsLoaded")
+
 </template>
 
 <style lang="scss" scoped>

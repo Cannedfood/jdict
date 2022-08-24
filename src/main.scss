@@ -32,9 +32,23 @@
 	border: none;
 	color: inherit;
 }
+hr {
+	border: 1px solid #8886;
+}
 
 .container {
 	max-width: 20cm;
 	// max-width: 75em;
 	margin-inline: auto;
+}
+
+.center {
+	text-align: center;
+}
+
+button, .btn, [role="button"] {
+	cursor: pointer;
+	padding: .5em;
+	border-radius: .5em;
+	background: #8883;
 }
