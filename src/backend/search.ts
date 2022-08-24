@@ -12,16 +12,22 @@ export interface SearchResult extends BasicSearchResult {
 	// These properties are used by "searchMore"
 	searchTerm: string,
 	lastPageSize: number,
+	clientTime: string
 }
 
 export class SearchService {
 	constructor(public baseUrl = '/api') {}
 
 	async search(searchTerm: string, params = {} as { skip?: number, take?: number }) {
+		const start = performance.now();
+		const result = await this.get<BasicSearchResult>('/search', { searchTerm: searchTerm.trim(), ...params })
+		const end = performance.now();
+
 		return {
 			searchTerm: searchTerm.toLowerCase(),
 			lastPageSize: params.take,
-			...await this.get<BasicSearchResult>('/search', { searchTerm, ...params })
+			clientTime: `${end - start}ms`,
+			...result
 		} as SearchResult;
 	}
 	async searchMore(searchResult: SearchResult, take?: number) {

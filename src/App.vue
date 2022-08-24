@@ -33,7 +33,7 @@ nav
 		a.btn(v-if="!home" href="/#/")
 			Octicon(type="home")
 	.right
-	.center.search-bar-container(:class="{ home: home }")
+	.search-bar-container.center(:class="{ home: home }")
 		SearchBar(
 			v-model="searchQuery"
 			@send="router.push(`/search/${searchQuery}`)"

@@ -45,18 +45,14 @@ async function searchMore() {
 }
 
 onScrolledToBottom(
-	throttle(searchMore, 500, { leading: true, trailing: false })
+	throttle(searchMore, 500, { leading: true, trailing: false }),
+	{ padding: 1200 }
 )
-
-function scrollToTop() {
-	document.body.scrollTop = 0; // For Safari
-	document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-}
 
 </script>
 
 <template lang="pug">
-.stats.float-left(v-if="search") {{search.resultsTotal}} Results ({{search.time}})
+.stats.float-left(v-if="search") {{search.resultsTotal}} Results (server: {{search.time}}, client: {{search.clientTime}})
 .container
 	.results(v-if="search")
 		Entry(v-for="entry of search.results" :entry="entry")
