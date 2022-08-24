@@ -123,7 +123,7 @@ results_t jmdict_index::search(std::string_view query) const {
 }
 
 void jmdict_index::find_general(result_ratings_t& ratings, std::string_view query) const {
-	idx_general.find(query, [&](std::string_view match, jmdict::entry const* entry, rating_t matchBaseRating) {
+	idx_general.find(query, [&](std::string_view match, jmdict::entry_t const* entry, rating_t matchBaseRating) {
 		rating_t rating =
 			matchBaseRating +
 			ratings::rate_match(query, match) +

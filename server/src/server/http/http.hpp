@@ -89,7 +89,7 @@ struct request {
 
 	std::string requestText;
 
-	method      method;
+	http::method method;
 	std::string url;
 	std::string path;
 	value_map   query;

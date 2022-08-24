@@ -71,8 +71,8 @@ static inline auto value_or_empty(xml_attribute<char>* n) {
 
 #define UNHANDLED_NODE(PARENT, N) throw std::runtime_error("Unhandled element in <" PARENT ">: " + std::string((N).name()));
 
-static jmdict::kanji parseKanjiElement(xml_node<char>& node) {
-	auto result = jmdict::kanji();
+static jmdict::kanji_t parseKanjiElement(xml_node<char>& node) {
+	auto result = jmdict::kanji_t();
 	for(auto& child : children(node)) {
 		if     (child.name() == "keb"sv)    result.value = value(child);
 		else if(child.name() == "ke_inf"sv) result.infos.push_back(value(child));
@@ -82,8 +82,8 @@ static jmdict::kanji parseKanjiElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::reading parseReadingElement(xml_node<char>& node) {
-	auto result = jmdict::reading();
+static jmdict::reading_t parseReadingElement(xml_node<char>& node) {
+	auto result = jmdict::reading_t();
 	for(auto& child : children(node)) {
 		if     (child.name() == "reb"sv)        result.value = value(child);
 		else if(child.name() == "re_nokanji"sv) result.not_actual_reading = true;
@@ -95,8 +95,8 @@ static jmdict::reading parseReadingElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::sense::gloss parseGlossElement(xml_node<char>& node) {
-	return jmdict::sense::gloss {
+static jmdict::sense_t::gloss parseGlossElement(xml_node<char>& node) {
+	return jmdict::sense_t::gloss {
 		.content   = value(node),
 		.language  = value_or_empty(node.first_attribute("xml:lang")),
 		.gender    = value_or_empty(node.first_attribute("g_type")),
@@ -104,13 +104,13 @@ static jmdict::sense::gloss parseGlossElement(xml_node<char>& node) {
 	};
 }
 
-static jmdict::sense::example parseExampleElement(xml_node<char>& node) {
-	auto result = jmdict::sense::example();
+static jmdict::sense_t::example parseExampleElement(xml_node<char>& node) {
+	auto result = jmdict::sense_t::example();
 	for(auto& child : children(node)) {
 		if	 (child.name() == "ex_srce"sv) result.source = value(child);
 		else if(child.name() == "ex_text"sv) result.form_in_example = value(child);
 		else if(child.name() == "ex_sent"sv) {
-			result.sentences.push_back(jmdict::sense::example::sentence {
+			result.sentences.push_back(jmdict::sense_t::example::sentence {
 				.language = value_or_empty(child.first_attribute("xml:lang")),
 				.value = value(child),
 			});
@@ -120,8 +120,8 @@ static jmdict::sense::example parseExampleElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::sense::source_language parseSourceLanguageElement(xml_node<char>& node) {
-	return jmdict::sense::source_language {
+static jmdict::sense_t::source_language parseSourceLanguageElement(xml_node<char>& node) {
+	return jmdict::sense_t::source_language {
 		.word = value(node),
 		.language = value_or_empty(node.first_attribute("xml:lang")),
 		.partial = "part"sv == value_or_empty(node.first_attribute("ls_type")),
@@ -129,8 +129,8 @@ static jmdict::sense::source_language parseSourceLanguageElement(xml_node<char>&
 	};
 }
 
-static jmdict::sense parseSenseElement(xml_node<char>& node) {
-	auto result = jmdict::sense();
+static jmdict::sense_t parseSenseElement(xml_node<char>& node) {
+	auto result = jmdict::sense_t();
 	for(auto& child : children(node)) {
 		if     (child.name() == "stagk"sv)   result.restrict_kanji     .push_back(value(child));
 		else if(child.name() == "stagr"sv)   result.restrict_reading   .push_back(value(child));
@@ -149,8 +149,8 @@ static jmdict::sense parseSenseElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::entry parseEntry(xml_node<char>& node) {
-	auto result = jmdict::entry();
+static jmdict::entry_t parseEntry(xml_node<char>& node) {
+	auto result = jmdict::entry_t();
 
 	for(auto& n : children(node)) {
 		if	 (n.name() == "ent_seq"sv) result.sequence = value(n);

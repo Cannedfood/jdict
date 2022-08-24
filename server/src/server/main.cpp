@@ -35,7 +35,7 @@ std::vector<T> applyPaging(int skip, int take, std::vector<T> const& v) {
 }
 
 int main(int argc, char** argv) {
-	std::string distDir = "../dist";
+	std::string distDir = "../dist/";
 	std::string jdictXML = "JMdict.xml";
 	int port = 8080;
 	if(auto* c = std::getenv("JDICT_DIST_DIR")) distDir = c;
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 	// 	}
 	// 	res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
 	// });
-	router.files("/**", "../dist/");
+	router.files("/**", distDir);
 
 	printf("\nStart listening at http://localhost:%i\n", port);
 	http::listen(port, router);

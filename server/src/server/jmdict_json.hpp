@@ -6,18 +6,18 @@
 
 namespace jdict {
 
-nlohmann::json to_json(jmdict::sense::example::sentence const&);
+nlohmann::json to_json(jmdict::sense_t::example::sentence const&);
 
-nlohmann::json to_json(jmdict::sense::example const&);
-nlohmann::json to_json(jmdict::sense::gloss const&);
-nlohmann::json to_json(jmdict::sense::source_language const&);
+nlohmann::json to_json(jmdict::sense_t::example const&);
+nlohmann::json to_json(jmdict::sense_t::gloss const&);
+nlohmann::json to_json(jmdict::sense_t::source_language const&);
 
-nlohmann::json to_json(jmdict::kanji const&);
-nlohmann::json to_json(jmdict::reading const&);
-nlohmann::json to_json(jmdict::sense const&);
-nlohmann::json to_json(jmdict::entry const&);
+nlohmann::json to_json(jmdict::kanji_t const&);
+nlohmann::json to_json(jmdict::reading_t const&);
+nlohmann::json to_json(jmdict::sense_t const&);
+nlohmann::json to_json(jmdict::entry_t const&);
 
-nlohmann::json to_json(std::pair<jmdict::entry const*, int> const&);
+nlohmann::json to_json(std::pair<jmdict::entry_t const*, int> const&);
 
 template<class T>
 nlohmann::json to_json(std::vector<T> const& j) {

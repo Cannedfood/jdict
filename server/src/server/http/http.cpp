@@ -259,6 +259,7 @@ void response::send_file(std::string const& path, std::string_view mimeType) {
 
 	auto file = std::ifstream(path, std::ios::binary | std::ios::ate);
 	if(!file) {
+		fprintf(stderr, "Couldn't find file %s\n", path.c_str());
 		if(stage == Stage::Status) {
 			status(NotFound, "Not Found").send();
 			return;

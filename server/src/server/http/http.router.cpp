@@ -115,11 +115,10 @@ bool static_files::operator()(request& req, response& res) {
 	// );
 	if(!req.path.starts_with(path_prefix))
 		return false;
-
 	std::string_view newPath = std::string_view(req.path).substr(path_prefix.size());
 	if(newPath == "/" || newPath.empty())
 		newPath = "/index.html";
-	res.send_file(std::string(directory) + std::string(newPath));
+	res.send_file(directory + std::string(newPath));
 	return true;
 }
 

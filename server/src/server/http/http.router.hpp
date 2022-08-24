@@ -38,15 +38,15 @@ public:
 };
 
 struct static_files {
-	std::string_view path_prefix, directory;
+	std::string path_prefix, directory;
 	static_files(std::string_view path_prefix, std::string_view directory) : path_prefix(path_prefix), directory(directory) {}
 	static_files() = default;
 	bool operator()(request& req, response& res);
 };
 
 bool serve_static_files(
-	std::string_view path_prefix,
-	std::string_view directory,
+	std::string path_prefix,
+	std::string directory,
 	request& req, response& res);
 
 } // namespace http

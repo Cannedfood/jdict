@@ -2,21 +2,21 @@
 
 namespace jdict {
 
-nlohmann::json to_json(jmdict::sense::example::sentence const& s) {
+nlohmann::json to_json(jmdict::sense_t::example::sentence const& s) {
 	nlohmann::json result;
 	if(!s.language.empty()) result["lang"] = s.language;
 	result["value"] = s.value;
 	return result;
 }
 
-nlohmann::json to_json(jmdict::sense::example const& e) {
+nlohmann::json to_json(jmdict::sense_t::example const& e) {
 	nlohmann::json result;
 	result["source"]          = e.source;
 	result["form_in_example"] = e.form_in_example;
 	result["sentences"]       = to_json(e.sentences);
 	return result;
 }
-nlohmann::json to_json(jmdict::sense::gloss const& g) {
+nlohmann::json to_json(jmdict::sense_t::gloss const& g) {
 	nlohmann::json result;
 	result["content"] = g.content;
 	if(!g.language.empty()) result["lang"]      = g.language;
@@ -25,7 +25,7 @@ nlohmann::json to_json(jmdict::sense::gloss const& g) {
 	if(g.highlight)         result["highlight"] = g.highlight;
 	return result;
 }
-nlohmann::json to_json(jmdict::sense::source_language const& l) {
+nlohmann::json to_json(jmdict::sense_t::source_language const& l) {
 	nlohmann::json result;
 	result["word"] = l.word;
 	if(!l.language.empty()) result["lang"]      = l.language;
@@ -34,14 +34,14 @@ nlohmann::json to_json(jmdict::sense::source_language const& l) {
 	return result;
 }
 
-nlohmann::json to_json(jmdict::kanji   const& k) {
+nlohmann::json to_json(jmdict::kanji_t   const& k) {
 	nlohmann::json result;
 	result["value"] = k.value;
 	if(!k.infos.empty())      result["infos"]      = k.infos;
 	if(!k.priorities.empty()) result["priorities"] = k.priorities;
 	return result;
 }
-nlohmann::json to_json(jmdict::reading const& r) {
+nlohmann::json to_json(jmdict::reading_t const& r) {
 	nlohmann::json result;
 	result["value"] = r.value;
 	if(!r.romaji.empty())         result["romaji"]             = r.romaji;
@@ -51,7 +51,7 @@ nlohmann::json to_json(jmdict::reading const& r) {
 	if(!r.priorities.empty())     result["priorities"]         = r.priorities;
 	return result;
 }
-nlohmann::json to_json(jmdict::sense const& s) {
+nlohmann::json to_json(jmdict::sense_t const& s) {
 	nlohmann::json result;
 	if(!s.restrict_kanji.empty())      result["restrict_kanji"]      = s.restrict_kanji;
 	if(!s.restrict_reading.empty())    result["restrict_reading"]    = s.restrict_reading;
@@ -68,7 +68,7 @@ nlohmann::json to_json(jmdict::sense const& s) {
 	return result;
 }
 
-nlohmann::json to_json(jmdict::entry const& entry) {
+nlohmann::json to_json(jmdict::entry_t const& entry) {
 	nlohmann::json result;
 	result["id"] = entry.sequence;
 
@@ -85,7 +85,7 @@ nlohmann::json to_json(jmdict::entry const& entry) {
 	return result;
 }
 
-nlohmann::json to_json(std::pair<jmdict::entry const*, int> const& e) {
+nlohmann::json to_json(std::pair<jmdict::entry_t const*, int> const& e) {
 	auto result = to_json(*e.first);
 	result["rating"] = e.second;
 	return result;

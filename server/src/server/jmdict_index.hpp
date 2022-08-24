@@ -14,7 +14,7 @@ namespace jdict {
 class jmdict_index {
 public:
 	using rating_t = int;
-	using entry_ptr = jmdict::entry const*;
+	using entry_ptr = jmdict::entry_t const*;
 	using result_ratings_t = std::map<entry_ptr, rating_t>;
 	using strview_map_t = std::map<std::string_view, entry_ptr, std::less<>>;
 	using ngram_index_t = full_text_index<ngram_indexing_strategy, entry_ptr, rating_t>;
