@@ -6,7 +6,13 @@ workspace 'MyWorkspace'
 		symbols 'On'
 	filter 'configurations:debug'
 		optimize 'Debug'
-	filter ''
+	filter 'configurations:release'
+		flags {
+			'LinkTimeOptimization'
+		}
+		buildoptions '-static'
+		linkoptions '-static'
+	filter '*'
 
 project 'server'
 	kind 'ConsoleApp'
@@ -18,6 +24,7 @@ project 'server'
 		"thirdparty/rapidxml",
 		"thirdparty/nlohmann-json"
 	}
+
 	filter 'system:windows'
 		links 'Ws2_32.lib' -- required for winsock
 	filter 'files:src/server/jmdict*.cpp'
