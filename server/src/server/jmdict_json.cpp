@@ -71,6 +71,11 @@ nlohmann::json to_json(jmdict::sense const& s) {
 nlohmann::json to_json(jmdict::entry const& entry) {
 	nlohmann::json result;
 	result["id"] = entry.sequence;
+
+	result["kanji"]    = nlohmann::json::value_type::array();
+	result["readings"] = nlohmann::json::value_type::array();
+	result["senses"]   = nlohmann::json::value_type::array();
+
 	for(auto& k : entry.kanji)
 		result["kanji"].push_back(to_json(k));
 	for(auto& r : entry.readings)
