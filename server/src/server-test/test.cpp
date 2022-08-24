@@ -1,6 +1,6 @@
 #include "../server/http/http.tests.hpp"
 #include "../server/util/utf8_sliding_window.hpp"
-#include "../server/util/text_index.hpp"
+#include "../server/util/full_text_index.hpp"
 
 #include <cstdio>
 #include <cstring>

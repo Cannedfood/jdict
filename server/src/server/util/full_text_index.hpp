@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace jdict {
@@ -22,8 +23,8 @@ concept IndexingStrategy =
 	};
 template<class T>
 concept FragmentCallback = std::is_invocable_v<T, std::string_view>;
-template<class T, class Result>
-concept ResultCallback   = std::is_invocable_v<T, Result>;
+template<class T, class... Results>
+concept ResultCallback   = std::is_invocable_v<T, Results...>;
 
 struct ngram_indexing_strategy {
 	int n_alpha   = 3;
@@ -58,56 +59,70 @@ struct ngram_indexing_strategy {
 };
 static_assert(IndexingStrategy<ngram_indexing_strategy>, "ngram_indexing_strategy isn't a IndexingStrategy");
 
-template<class T, IndexingStrategy Strategy = ngram_indexing_strategy>
-struct text_index {
-	Strategy strategy;
-	// TODO: optimize memory footprint
-	std::unordered_map<std::string_view, std::vector<T>> entries;
+template<IndexingStrategy Strategy, class... Values>
+struct full_text_index {
+	using entry_t = std::tuple<std::string_view, Values...>;
+	using set_t   = std::vector<unsigned>;
 
-	text_index(Strategy s = {}) noexcept :
+	Strategy strategy;
+	std::vector<entry_t> values;
+	std::unordered_map<std::string_view, set_t> entries;
+
+	full_text_index(Strategy s = {}) noexcept :
 		strategy(std::move(s))
 	{}
 
-	void insert(std::string_view v, T value) noexcept {
-		strategy.get_fragments(v, [&](std::string_view s) {
-			entries[s].push_back(value);
-		});
+	void insert(entry_t value) noexcept {
+		unsigned value_index = values.size();
+		values.push_back(value);
 	}
-	void find(std::string_view s, ResultCallback<T> auto results) const noexcept {
-		std::vector<T> const* bestSet = nullptr;
-		std::vector<T> const* secondBestSet = nullptr;
+	void insert(std::string_view text, Values... value) noexcept {
+		insert(entry_t(text, std::move(value)...));
+	}
+
+	template<class Order = std::less<>, class Comp = std::equal_to<>>
+	size_t remove_duplicates(Order order = {}, Comp comp = {}) {
+		size_t before = values.size();
+		std::sort(values.begin(), values.end(), order);
+		values.erase(
+			std::unique(values.begin(), values.end(), comp),
+			values.end()
+		);
+		return before - values.size();
+	}
+
+	void build() {
+		// Sort by memory order
+		std::sort(values.begin(), values.end(), [](entry_t const& a, entry_t const& b) {
+			return std::get<0>(a).data() < std::get<0>(b).data();
+		});
+
+		// Build entries
+		for(unsigned i = 0; i < values.size(); i++) {
+			auto& text = std::get<0>(values[i]);
+			strategy.get_fragments(text, [&](std::string_view s) {
+				auto& set = entries[s];
+				if(set.empty() || set.back() != i)
+					entries[s].push_back(i);
+			});
+		}
+	}
+
+	void find(std::string_view s, ResultCallback<std::string_view, Values...> auto emit_result) const noexcept {
+		std::vector<unsigned> const* smallestSet = nullptr;
 		strategy.get_fragments(s, [&](std::string_view fragment) {
 			auto iter = entries.find(fragment);
 			if(iter == entries.end())
 				return;
-			if(!bestSet || iter->second.size() < bestSet->size()) {
-				secondBestSet = bestSet;
-				bestSet = &iter->second;
+			if(!smallestSet || iter->second.size() < smallestSet->size()) {
+				smallestSet = &iter->second;
 			}
 		});
-		if(bestSet) {
-			for(auto& r : *bestSet) {
-				results(r);
+		if(smallestSet) {
+			for(auto idx : *smallestSet) {
+				std::apply(emit_result, values[idx]);
 			}
 		}
-	}
-
-	size_t remove_duplicates() {
-		size_t n = 0;
-		for(auto& [key, set] : entries) {
-			size_t before = set.size();
-			std::sort(set.begin(), set.end());
-			set.erase(
-				std::unique(
-					set.begin(),
-					set.end()
-				),
-				set.end()
-			);
-			set.shrink_to_fit();
-			n += before - set.size();
-		}
-		return n;
 	}
 
 	void write_stats(std::string const& path) {

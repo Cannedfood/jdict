@@ -1,7 +1,7 @@
 #pragma once
 
 #include "./jmdict.hpp"
-#include "./util/text_index.hpp"
+#include "./util/full_text_index.hpp"
 
 #include <functional>
 #include <set>
@@ -25,7 +25,7 @@ public:
 	};
 	using StringViewMap = std::map<std::string_view, entry_ptr, std::less<>>;
 	using ResultWeights = std::map<entry_ptr, unsigned>;
-	using ngram_index  = text_index<std::tuple<std::string_view, entry_ptr>, ngram_indexing_strategy>;
+	using ngram_index   = full_text_index<ngram_indexing_strategy, entry_ptr, unsigned>;
 private:
 	jmdict const* dict = nullptr;
 	StringViewMap idx_sequence_number;

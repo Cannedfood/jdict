@@ -25,11 +25,10 @@ std::vector<jmdict::entry const*> jmdict_index::search(std::string_view query) c
 
 void jmdict_index::find_general(ResultWeights& weights, int baseWeight, std::string_view query) const {
 	auto readingQuery = query;
-	idx_general.find(query, [&](std::tuple<std::string_view, jmdict::entry const*> const& e) {
-		auto& [text, entry] = e;
+	idx_general.find(query, [&](std::string_view text, jmdict::entry const* entry, unsigned weight) {
 		if(text.find(readingQuery) != std::string::npos) {
 			auto& hitRating = weights[entry];
-			hitRating = std::max(hitRating, rate_match(readingQuery, text) * baseWeight);
+			hitRating = std::max(hitRating, rate_match(readingQuery, text) * baseWeight + weight);
 		}
 	});
 }
@@ -68,30 +67,32 @@ std::vector<jmdict::entry const*> jmdict_index::sort_results(ResultWeights&& wei
 
 void jmdict_index::build_indices() {
 	{
-		debug::timer _("building index");
+		debug::timer _("inserting into index");
 
 		for(auto& entry : dict->entries) {
 			idx_sequence_number.emplace(entry.sequence, &entry);
 			for(auto& k : entry.kanji) {
-				idx_general.insert(k.value, std::make_tuple(std::string_view(k.value), &entry));
+				unsigned bonus = 10*k.priorities.size();
+				idx_general.insert(k.value, &entry, 100 + bonus);
 			}
 			for(auto& r : entry.readings) {
-				idx_general.insert(r.value, std::make_tuple(std::string_view(r.value), &entry));
+				unsigned bonus = 10*r.priorities.size();
+				idx_general.insert(r.value, &entry, 90 + bonus);
 				if(!r.romaji.empty()) {
-					idx_general.insert(r.romaji, std::make_tuple(std::string_view(r.romaji), &entry));
+					idx_general.insert(r.romaji, &entry, 90 + bonus);
 				}
 			}
 			for(auto& s : entry.senses) {
 				for(auto& g : s.glosses) {
-					idx_general.insert(g.content, std::make_tuple(std::string_view(g.content), &entry));
+					idx_general.insert(g.content, &entry, 80 + g.highlight * 100);
 				}
 			}
 		}
 	}
-
 	{
-		debug::timer _("removing duplicates");
-		printf("Removed %zu duplicates\n", idx_general.remove_duplicates());
+		debug::timer _("building index");
+		printf("Removed %zu duplicate entries\n", idx_general.remove_duplicates());
+		idx_general.build();
 	}
 }
 
