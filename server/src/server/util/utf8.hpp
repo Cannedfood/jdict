@@ -104,6 +104,23 @@ char32_t decode_and_snip(std::string_view& s) noexcept {
 	return result;
 }
 
+constexpr inline static bool is_alpha(char32_t c) {
+	return
+		// ASCII
+		(c >= 'a' && c <= 'z') ||
+		(c >= 'A' && c <= 'Z') ||
+		// Latin-1 Supplement
+		(c >= 0x00C0 && c <= 0x00FF && c != 0x00F7 && c != 0x00D7) ||
+		// Latin Extended-A
+		(c >= 0x0100 && c <= 0x017F) ||
+		// Latin Extended-B
+		(c >= 0x0180 && c <= 0x024F) ||
+		// Latin Extended Additional
+		(c >= 0x1E02 && c <= 0x1EF3);
+}
+constexpr inline static bool is_whitespace(char32_t c) { return c <= ' '; }
+constexpr inline static bool is_punct_ascii(char32_t c) { return (c >= '!' && c <= '/') || (c >= ':' && c <= '`') || (c >= '{' && c <= '~'); }
+constexpr inline static bool is_numeric(char32_t c) { return (c >= '0' && c <= '9'); }
 constexpr inline static bool is_ascii(char32_t c) { return c < 127; }
 constexpr inline static bool is_cjk_base(char32_t c) { return c >= 0x4e00 && c <= 0x9FFF; }
 constexpr inline static bool is_cjk_extension_a(char32_t c) { return c >= 0x3400  && c <= 0x4DBF;  }

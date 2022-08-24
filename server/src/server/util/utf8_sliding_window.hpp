@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./utf8.hpp"
+#include <cassert>
 #include <utility>
 
 namespace jdict {
@@ -18,6 +19,12 @@ struct utf8_sliding_window {
 	inline char32_t peek() const noexcept { return next_char; }
 	inline unsigned size() const noexcept { return nchars; }
 	inline void     clear() noexcept { window_start = window_end; nchars = 0; }
+
+	template<class Pred>
+	void skip(Pred&& pred) {
+		while(pred(next_char) && grow_back());
+		clear();
+	}
 
 	template<class Callback>
 	bool slide(int windowSize, Callback&& emit_fragment) {
@@ -41,9 +48,6 @@ struct utf8_sliding_window {
 		return true;
 	}
 
-	void grow_back_until(int n) {
-		while(size() < n && grow_back());
-	}
 	bool shift() {
 		shrink_front();
 		return grow_back();

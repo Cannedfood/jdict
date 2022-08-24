@@ -4,6 +4,7 @@
 #include "./utf8_sliding_window.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -25,19 +26,32 @@ template<class T, class Result>
 concept ResultCallback   = std::is_invocable_v<T, Result>;
 
 struct ngram_indexing_strategy {
-	int n_ascii   = 2;
+	int n_alpha   = 3;
+	int n_numeric = 100;
 	int n_kanji   = 1;
 	int n_kana    = 2;
 	int n_unicode = 1;
 
 	void get_fragments(std::string_view s, FragmentCallback auto emit_fragment) const {
+		auto ignored_characters = [](char32_t c) {
+			return utf8::is_whitespace(c) || utf8::is_punct_ascii(c);
+		};
+
 		auto window = utf8_sliding_window(s);
+		do { window.skip(ignored_characters); }
 		while(
-			window.slide(n_ascii,   emit_fragment, utf8::is_ascii) ||
+			window.slide(n_alpha,   emit_fragment, utf8::is_alpha) ||
+			window.slide(n_numeric, emit_fragment, utf8::is_numeric) ||
 			window.slide(n_kanji,   emit_fragment, utf8::is_kanji) ||
 			window.slide(n_kana,    emit_fragment, utf8::is_kana) ||
-			window.slide(n_unicode, emit_fragment, [](char32_t c) {
-				return !(utf8::is_ascii(c) || utf8::is_kanji(c) || utf8::is_kana(c));
+			window.slide(n_unicode, emit_fragment, [ignored_characters](char32_t c) {
+				return !(
+					ignored_characters(c) ||
+					utf8::is_alpha(c) ||
+					utf8::is_numeric(c) ||
+					utf8::is_kanji(c) ||
+					utf8::is_kana(c)
+				);
 			})
 		);
 	}
@@ -82,7 +96,7 @@ struct text_index {
 		std::vector<std::pair<unsigned, std::string_view>> ee;
 		for(auto& [key, set] : entries)
 			ee.emplace_back((unsigned) set.size(), key);
-		std::sort(ee.begin(), ee.end());
+		std::sort(ee.begin(), ee.end(), std::greater<>());
 
 		auto* file = fopen(path.c_str(), "w");
 		for(auto& e : ee) {
