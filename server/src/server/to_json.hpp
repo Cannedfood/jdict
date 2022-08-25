@@ -31,14 +31,15 @@ nlohmann::json to_json(kanjidic::rm_group_t  const&);
 nlohmann::json to_json(kanjidic::reading_t  const&);
 nlohmann::json to_json(kanjidic::meaning_t  const&);
 
+template<class T>
+nlohmann::json to_json(T* t) {
+	return t != nullptr? to_json(*t) : nlohmann::json();
+}
 
 template<class T>
 nlohmann::json to_json(std::vector<T> const& j) {
 	auto result = nlohmann::json::value_type::array();
-	if constexpr(std::is_pointer_v<T>)
-		for(auto& e : j) result.push_back(to_json(*e));
-	if constexpr(!std::is_pointer_v<T>)
-		for(auto& e : j) result.push_back(to_json(e));
+	for(auto& e : j) result.push_back(to_json(e));
 	return result;
 }
 

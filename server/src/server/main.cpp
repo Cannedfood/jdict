@@ -89,18 +89,10 @@ int main(int argc, char** argv) {
 		});
 		auto pagedEntries = applyPaging(start, limit, allResults);
 
-
 		nlohmann::json responseBody;
 		responseBody["resultsTotal"] = allResults.size();
 		responseBody["results"] = to_json(pagedEntries);
-
-		unsigned firstCharLength = 0;
-		char32_t firstChar = utf8::decode(searchTerm, &firstCharLength);
-		if(utf8::is_cjk(firstChar) && firstCharLength == searchTerm.size()) {
-			if(auto* k = kanji_idx.find(firstChar)) {
-				responseBody["kanji"] = to_json(*k);
-			}
-		}
+		responseBody["kanji"] = to_json(kanji_idx.search(searchTerm));
 
 		auto timeEnd = std::chrono::high_resolution_clock::now();
 		responseBody["time"] = debug::to_string(timeEnd - timeStart);
