@@ -99,20 +99,6 @@ int main(int argc, char** argv) {
 
 		res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
 	});
-	// router.get("/api/stats", [&](http::request& req, http::response& res) {
-	// 	if(dictionary_loaded.wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
-	// 		res.status(http::ServiceUnavailable, "Service Unavailable - dictionary not loaded yet");
-	// 		return;
-	// 	}
-	// 	nlohmann::json responseBody;
-	// 	{
-	// 		nlohmann::json indices;
-	// 		for(auto const* idx : index.)
-
-	// 		responseBody["indices"] = indices;
-	// 	}
-	// 	res.send(http::mimetype_from_filending(".json"), to_string(responseBody));
-	// });
 	router.files("/**", distDir);
 
 	printf("\nStart listening at http://localhost:%i\n", port);
