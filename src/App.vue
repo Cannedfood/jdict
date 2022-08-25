@@ -5,6 +5,7 @@ import SearchBar from './components/SearchBar.vue';
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from '@vue/reactivity';
 import Octicon from './components/Octicon.vue';
+import { Entities } from './backend/jmdict';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,7 +20,12 @@ const suggestions = computed(() => {
 	const tokens = searchQuery.value.split(' ').filter(t => t);
 	if(!tokens.length) return [];
 	const last = tokens[tokens.length - 1];
-	const words = ['#kanji', '#name', '#fun'];
+	if(!last.startsWith('#')) return [];
+	const words = [
+		'kanji',
+		...[1, 2, 3, 4, 5].map(n => 'jlpt' + n),
+		...Object.keys(Entities),
+	].map(w => '#' + w);
 	return words.filter(w => w.startsWith(last) && !w.endsWith(last));
 });
 

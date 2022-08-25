@@ -1,8 +1,10 @@
-<script setup lang="ts">import { nextTick, onMounted, ref } from 'vue';
+<script setup lang="ts">
+import { nextTick, onMounted, ref } from 'vue';
+import SearchBarSuggestions from './SearchBarSuggestions.vue';
 
 const props = defineProps<{
 	modelValue: string,
-	suggestions: string[]
+	suggestions: string[],
 }>();
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void,
@@ -10,15 +12,6 @@ const emit = defineEmits<{
 }>()
 
 function targetValue(e: any) { return e.target.value; }
-
-const selectedSuggestion = ref(1);
-function suggestionUp() { selectedSuggestion.value = Math.max(selectedSuggestion.value - 1, 1); }
-function suggestionDown() { selectedSuggestion.value = Math.min(selectedSuggestion.value + 1, props.suggestions.length); }
-function acceptSuggestion(suggestion?: string) {
-	const query = suggestion ?? props.suggestions[selectedSuggestion.value - 1];
-	emit('update:modelValue', query);
-	// emit('send', query);
-}
 
 const searchInput = ref<HTMLInputElement | null>(null);
 onMounted(() => nextTick(() => searchInput.value?.focus()))
@@ -28,6 +21,9 @@ function send() {
 		searchInput.value?.blur();
 	emit('send', props.modelValue);
 }
+
+const suggestionBox = ref<typeof SearchBarSuggestions>(undefined!);
+
 </script>
 
 <template lang="pug">
@@ -39,21 +35,18 @@ function send() {
 		:value="modelValue"
 		autocomplete="off"
 		@input="emit('update:modelValue', targetValue($event).toLowerCase())"
-		@keydown.enter="send()"
-		@keydown.up="suggestionUp()"
-		@keydown.down="suggestionDown()"
-		@keydown.tab.prevent="acceptSuggestion()"
+		@keydown.enter.prevent="send()"
+		@keydown.up.prevent="suggestionBox.suggestionUp()"
+		@keydown.down.prevent="suggestionBox.suggestionDown()"
+		@keydown.tab.prevent="suggestionBox.acceptSuggestion()"
 		onfocus="this.select();"
 	)
 	slot
-	.suggestions(v-if="suggestions")
-		.suggestion(
-			v-for="suggestion, i of suggestions"
-			:class="{ active: i + 1 == selectedSuggestion }"
-			@click="acceptSuggestion(suggestion)"
-		)
-			span.tab-hint [tab]
-			| {{suggestion}}
+	SearchBarSuggestions(
+		ref="suggestionBox"
+		:suggestions="suggestions"
+		@accept="emit('update:modelValue', $event)"
+	)
 </template>
 
 <style lang="scss">
@@ -87,20 +80,15 @@ function send() {
 	.suggestions {
 		position: absolute;
 		top: 100%;
+		left: .5em;
+		right: .5em;
+		border-bottom-left-radius: .2em;
+		border-bottom-right-radius: .2em;
+		border: 1px solid purple;
+		border-top: none;
+		background: #242424;
 
-		.suggestion {
-			.tab-hint {
-				font-size: .5em;
-				opacity: 0;
-				transition: opacity 200ms;
-			}
-			&.active {
-				text-decoration: underline;
-				.tab-hint {
-					opacity: 100%;
-				}
-			}
-		}
+		text-align: left;
 	}
 	&:not(:focus-within) {
 		.suggestions {
