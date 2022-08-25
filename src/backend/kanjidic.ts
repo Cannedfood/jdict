@@ -13,7 +13,7 @@ export interface Radical {
 export interface Misc {
 	grade?: number;
 	stroke_count?: number[];
-	variant?: any;
+	variant?: Variant[];
 	freq?: number;
 	rad_name?: string[];
 	jlpt?: number;

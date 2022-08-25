@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from '@vue/reactivity';
-import type { Entry, Gloss, Kanji } from '../backend/jmdict'
-import { replaceEntities } from '../backend/jmdict';
+import type { Entry, Kanji } from '../backend/jmdict'
 import KanjiText from './entry/KanjiText.vue';
 import MeaningText from './entry/MeaningText.vue';
 

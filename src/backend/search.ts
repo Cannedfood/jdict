@@ -4,7 +4,7 @@ import type { Entry } from "./jmdict";
 import { Character } from './kanjidic';
 
 interface BasicSearchResult {
-	kanji: Character,
+	kanji: Character[],
 	results: Entry[],
 	resultsTotal: number,
 	time: string,

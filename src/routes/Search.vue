@@ -54,7 +54,11 @@ onScrolledToBottom(
 <template lang="pug">
 .stats.float-left(v-if="search") {{search.resultsTotal}} Results (server: {{search.time}}, client: {{search.clientTime}})
 .container
-	KanjiInfo(v-if="search && search.kanji" :kanji="search.kanji")
+	KanjiInfo(
+		v-if="search && search.kanji"
+		v-for="kanji of search.kanji"
+		:kanji="kanji"
+	)
 	.results(v-if="search")
 		Entry(v-for="entry of search.results" :entry="entry")
 	Spinner(v-if="searchInProgress")

@@ -1,9 +1,17 @@
 <script setup lang="ts">
-import type { Character } from '@/backend/kanjidic';
+import type { Character, VariantType } from '@/backend/kanjidic';
 
 const props = defineProps<{
 	kanji: Character
 }>();
+
+function variants(t: VariantType) {
+	const result = props.kanji.variant?.filter(v => v.type == t).map(v => v.value);
+	if(!result?.length)
+		return null;
+	else
+		return result;
+}
 
 </script>
 
@@ -14,13 +22,26 @@ const props = defineProps<{
 		span(v-if="kanji.jlpt") JLPT {{kanji.jlpt}}
 		span(v-if="kanji.grade") Grade {{kanji.grade}}
 		span(v-if="kanji.freq") Freq: {{kanji.freq}}
-		span(v-if="kanji.rad_name") {{kanji.rad_name.join(', ')}}
+		span(v-if="kanji.stroke_count && kanji.stroke_count.length > 0")
+			| Strokes: {{kanji.stroke_count[0]}}
+			//- span(v-if="kanji.stroke_count.length > 1")
+			//- 	| ({{kanji.stroke_count.slice(1).join(', ')}})
 	.info
 		.nanori(v-if="kanji.nanori") Nanori: {{kanji.nanori?.join(', ')}}
+		.radical(v-if="kanji.rad_name") Radical: {{kanji.rad_name.join(', ')}}
 		.mr_group(v-for="g of kanji.reading_meaning_groups")
 			.reading-kun On: {{g.readings?.filter(r => r.type == 'ja_kun').map(r => r.value).join(', ')}}
 			.reading-on Kun: {{g.readings?.filter(r => r.type == 'ja_on').map(r => r.value).join(', ')}}
 			.meaning {{g.meanings?.filter(m => !m.lang).map(m => m.value).join(', ')}}
+	.bonus-info
+		.codepoint(v-if="kanji.codepoint")
+			.c(v-for="v, k in kanji.codepoint")
+				| {{k}}: {{v}}
+				span(v-if="variants(k)") {{variants(k)?.join(', ')}}
+		.variants(v-if="kanji.variant" v-for="v of kanji.variant")
+			span alt {{v.type}}:
+				a(:href="`/#/search/${v.value}`") {{v.value}}
+
 </template>
 
 <style lang="scss" scoped>
@@ -31,7 +52,8 @@ const props = defineProps<{
 	grid-template-areas:
 		"kanji info"
 		"kanji info"
-		"tags  info";
+		"tags  info"
+		"bonus bonus";
 
 	border: 1px solid #888;
 	border-radius: .5em;
@@ -62,6 +84,9 @@ const props = defineProps<{
 	}
 	.info {
 		grid-area: info;
+	}
+	.bonus-info {
+		grid-area: bonus;
 	}
 }
 </style>
