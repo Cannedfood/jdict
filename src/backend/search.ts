@@ -1,8 +1,10 @@
 import { uniq } from 'lodash';
 import { inject } from 'vue';
 import type { Entry } from "./jmdict";
+import { Character } from './kanjidic';
 
 interface BasicSearchResult {
+	kanji: Character,
 	results: Entry[],
 	resultsTotal: number,
 	time: string,

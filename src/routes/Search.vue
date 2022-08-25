@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { SearchService, SearchResult } from '../backend/search'
 import Entry from '../components/Entry.vue';
@@ -7,6 +7,7 @@ import Spinner from '../components/Spinner.vue';
 import { throttle } from 'lodash'
 import { onScrolledToBottom } from '../util/OnScrolledToBottom';
 import { computed } from '@vue/reactivity';
+import KanjiInfo from '@/components/KanjiInfo.vue';
 
 const searchService = inject<SearchService>('search-service')!;
 const route = useRoute();
@@ -53,6 +54,7 @@ onScrolledToBottom(
 <template lang="pug">
 .stats.float-left(v-if="search") {{search.resultsTotal}} Results (server: {{search.time}}, client: {{search.clientTime}})
 .container
+	KanjiInfo(v-if="search && search.kanji" :kanji="search.kanji")
 	.results(v-if="search")
 		Entry(v-for="entry of search.results" :entry="entry")
 	Spinner(v-if="searchInProgress")

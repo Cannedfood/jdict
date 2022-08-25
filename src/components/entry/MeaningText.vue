@@ -48,6 +48,6 @@ function generateGlossText(g: Gloss) {
 						| See also&nbsp;
 						a(v-for="xref in sense.cross_references" :href="`#/search/${xref.split('・')[0]}`") {{xref}}
 					.antonyms(v-if="sense.antonyms")
-						| Anonyms:
+						| Antonyms:
 						a(v-for="ant in sense.antonyms" :href="`#/search/${ant.split('・')[0]}`") {{ant}}
 </template>
