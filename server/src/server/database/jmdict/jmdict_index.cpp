@@ -1,8 +1,8 @@
 #include "./jmdict_index.hpp"
 
-#include "./util/timer.hpp"
-#include "./util/kana.hpp"
-#include "./util/utf8.hpp"
+#include <server/util/timer.hpp>
+#include <server/util/kana.hpp>
+#include <server/util/utf8.hpp>
 
 #include <algorithm>
 #include <functional>

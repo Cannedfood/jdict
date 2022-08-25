@@ -1,11 +1,13 @@
-#include "./jmdict.hpp"
-#include "./jmdict_index.hpp"
-#include "./jmdict_json.hpp"
+#include "./database/jmdict/jmdict_index.hpp"
+#include "./database/kanjidic/kanjidic_index.hpp"
+
+#include "./to_json.hpp"
 
 #include "./http/http.router.hpp"
 
 #include "./util/timer.hpp"
 #include "./util/cache.hpp"
+#include "server/util/utf8.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -37,19 +39,30 @@ std::vector<T> applyPaging(int skip, int take, std::vector<T> const& v) {
 int main(int argc, char** argv) {
 	std::string distDir = "../dist/";
 	std::string jdictXML = "JMdict.xml";
+	std::string kanjidicXML = "kanjidic2.xml";
 	int port = 8080;
 	if(auto* c = std::getenv("JDICT_DIST_DIR")) distDir = c;
-	if(auto* c = std::getenv("JDICT_XML")) jdictXML = c;
+	if(auto* c = std::getenv("JDICT_JMDICT_XML")) jdictXML = c;
+	if(auto* c = std::getenv("JDICT_KANJIDIC_XML")) kanjidicXML = c;
 	if(auto* c = std::getenv("JDICT_PORT")) port = atoi(c);
 
 	auto dict  = jmdict();
-	auto index = jmdict_index();
+	auto dict_idx = jmdict_index();
+
+	auto kanji = kanjidic();
+	auto kanji_idx = kanjidic_index();
+
 	auto cache = jdict::cache<std::string, jmdict_index::results_t>(1024);
 
 	auto dictionary_loaded = std::async(std::launch::async, [&] {
 		dict = jmdict::parse_file(jdictXML.c_str());
 		dict.generate_romaji();
-		index = jmdict_index(dict);
+
+		kanji = kanjidic::parse_file(kanjidicXML.c_str());
+
+		dict_idx = jmdict_index(dict);
+		kanji_idx = kanjidic_index(kanji);
+
 		printf("Loaded %zu dictionary entries.\n", dict.entries.size());
 	});
 
@@ -72,13 +85,22 @@ int main(int argc, char** argv) {
 		auto timeStart = std::chrono::high_resolution_clock::now();
 
 		auto allResults = cache.get_or_create(std::string(searchTerm), [&] {
-			return index.search(searchTerm);
+			return dict_idx.search(searchTerm);
 		});
 		auto pagedEntries = applyPaging(start, limit, allResults);
+
 
 		nlohmann::json responseBody;
 		responseBody["resultsTotal"] = allResults.size();
 		responseBody["results"] = to_json(pagedEntries);
+
+		unsigned firstCharLength = 0;
+		char32_t firstChar = utf8::decode(searchTerm, &firstCharLength);
+		if(utf8::is_cjk(firstChar) && firstCharLength == searchTerm.size()) {
+			if(auto* k = kanji_idx.find(firstChar)) {
+				responseBody["kanji"] = to_json(*k);
+			}
+		}
 
 		auto timeEnd = std::chrono::high_resolution_clock::now();
 		responseBody["time"] = debug::to_string(timeEnd - timeStart);

@@ -91,9 +91,12 @@ int decode(char const* bytes, int nbytes, char32_t* out_codepoint) {
 }
 
 constexpr inline
-char32_t decode(std::string_view& s) noexcept {
+char32_t decode(std::string_view s, unsigned* count_out = nullptr) noexcept {
 	char32_t result = 0;
-	decode(s.data(), s.size(), &result);
+	if(count_out)
+		*count_out = decode(s.data(), s.size(), &result);
+	else
+		decode(s.data(), s.size(), &result);
 	return result;
 }
 

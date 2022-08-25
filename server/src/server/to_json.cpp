@@ -1,4 +1,6 @@
-#include "./jmdict_json.hpp"
+#include "./to_json.hpp"
+#include "server/database/kanjidic/kanjidic.hpp"
+#include <cstdio>
 
 namespace jdict {
 
@@ -88,6 +90,89 @@ nlohmann::json to_json(jmdict::entry_t const& entry) {
 nlohmann::json to_json(std::pair<jmdict::entry_t const*, int> const& e) {
 	auto result = to_json(*e.first);
 	result["rating"] = e.second;
+	return result;
+}
+
+
+
+nlohmann::json to_json(kanjidic::query_code_t const& q) {
+	nlohmann::json result;
+	result["type"] = to_string(q.type);
+	result["value"] = q.value;
+	if(q.skip_misclass != kanjidic::skip_misclass_t::none)
+		result["skip_misclassification"] = to_string(q.skip_misclass);
+	return result;
+}
+nlohmann::json to_json(kanjidic::radical_t const& m) {
+	nlohmann::json result;
+	if(m.classical != 0) result["classical"] = m.classical;
+	if(m.nelson_c != 0) result["nelson_c"] = m.nelson_c;
+	return result;
+}
+nlohmann::json to_json(kanjidic::misc_t const& m) {
+	nlohmann::json result;
+	if(m.grade != 0)
+		result["grade"] = m.grade;
+	if(!m.stroke_count.empty())
+		result["stroke_count"] = m.stroke_count;
+	if(!m.variant.empty())
+		result["variant"] = to_json(m.variant);
+	if(m.freq != 0)
+		result["freq"] = m.freq;
+	if(!m.rad_name.empty())
+		result["rad_name"] = m.rad_name;
+	if(m.jlpt != 0)
+		result["jlpt"] = m.jlpt;
+	return result;
+}
+nlohmann::json to_json(kanjidic::codepoint_t const& c) {
+	nlohmann::json result;
+	if(!c.jis208.empty()) result["jis208"] = c.jis208;
+	if(!c.jis212.empty()) result["jis212"] = c.jis212;
+	if(!c.jis213.empty()) result["jis213"] = c.jis213;
+	if(!c.ucs.empty())    result["ucs"] = c.ucs;
+	return result;
+}
+nlohmann::json to_json(kanjidic::variant_t const& v) {
+	nlohmann::json result;
+	result["type"] = to_string(v.type);
+	result["value"] = v.value;
+	return result;
+}
+nlohmann::json to_json(kanjidic::rm_group_t const& g) {
+	nlohmann::json result;
+	if(!g.readings.empty()) result["readings"] = to_json(g.readings);
+	if(!g.meanings.empty()) result["meanings"] = to_json(g.meanings);
+	return result;
+}
+nlohmann::json to_json(kanjidic::reading_t  const& r) {
+	nlohmann::json result;
+	result["value"] = r.value;
+	result["type"] = to_string(r.type);
+	if(r.approved_for_joyou_kanji) result["approved_for_joyou_kanji"] = true;
+	if(r.on_type != kanjidic::on_type_t::none) result["on_type"] = to_string(r.on_type);
+	return result;
+}
+nlohmann::json to_json(kanjidic::meaning_t  const& m) {
+	nlohmann::json result;
+	result["value"] = m.value;
+	if(!m.lang.empty()) result["lang"] = m.lang;
+	return result;
+}
+
+nlohmann::json to_json(kanjidic::character_t const& c) {
+	nlohmann::json result = to_json(c.misc);
+	result["literal"] = c.literal;
+	if(c.codepoint)
+		result["codepoint"] = to_json(c.codepoint);
+	if(c.radical)
+		result["radical"] = to_json(c.radical);
+	if(!c.query_code.empty())
+		result["query_code"] = to_json(c.query_code);
+	if(!c.reading_meaning_groups.empty())
+		result["reading_meaning_groups"] = to_json(c.reading_meaning_groups);
+	if(!c.nanori.empty())
+		result["nanori"] = c.nanori;
 	return result;
 }
 

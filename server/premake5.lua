@@ -22,7 +22,8 @@ project 'server'
 	files 'src/server/**'
 	includedirs {
 		"thirdparty/rapidxml",
-		"thirdparty/nlohmann-json"
+		"thirdparty/nlohmann-json",
+		"src"
 	}
 
 	filter 'system:windows'
@@ -38,13 +39,9 @@ project 'server-test'
 		language 'C++'
 		cppdialect 'C++20'
 
-	files { 'src/server/**', 'src/server-test/**' }
-	removefiles 'src/server/main.cpp'
-	includedirs {
-		"thirdparty/rapidxml",
-		"thirdparty/nlohmann-json"
+	files {
+		'src/server-test/**',
+		'src/server/http/http.router.cpp',
+		'src/server/http/http.cpp',
 	}
-	filter 'system:windows'
-		links 'Ws2_32.lib' -- required for winsock
-	filter '*'
 

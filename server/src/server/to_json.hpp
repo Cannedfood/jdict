@@ -1,4 +1,5 @@
-#include "./jmdict.hpp"
+#include "./database/jmdict/jmdict.hpp"
+#include "./database/kanjidic/kanjidic.hpp"
 
 #include <nlohmann/json.hpp>
 #include <type_traits>
@@ -18,6 +19,18 @@ nlohmann::json to_json(jmdict::sense_t const&);
 nlohmann::json to_json(jmdict::entry_t const&);
 
 nlohmann::json to_json(std::pair<jmdict::entry_t const*, int> const&);
+
+
+nlohmann::json to_json(kanjidic::query_code_t const&);
+nlohmann::json to_json(kanjidic::radical_t    const&);
+nlohmann::json to_json(kanjidic::misc_t       const&);
+nlohmann::json to_json(kanjidic::variant_t  const&);
+nlohmann::json to_json(kanjidic::codepoint_t  const&);
+nlohmann::json to_json(kanjidic::character_t  const&);
+nlohmann::json to_json(kanjidic::rm_group_t  const&);
+nlohmann::json to_json(kanjidic::reading_t  const&);
+nlohmann::json to_json(kanjidic::meaning_t  const&);
+
 
 template<class T>
 nlohmann::json to_json(std::vector<T> const& j) {

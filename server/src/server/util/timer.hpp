@@ -24,9 +24,9 @@ struct timer {
 	using time_point   = clock::time_point;
 	using microseconds = std::chrono::microseconds;
 
-	const char* msg;
+	std::string msg;
 	time_point start;
-	timer(const char* msg) :
+	timer(std::string msg) :
 		msg(msg),
 		start(clock::now())
 	{}
@@ -34,7 +34,7 @@ struct timer {
 		auto end = clock::now();
 		auto duration = end - start;
 
-		printf("%s took %s\n", msg, to_string(duration).c_str());
+		printf("%s took %s\n", msg.c_str(), to_string(duration).c_str());
 	}
 };
 

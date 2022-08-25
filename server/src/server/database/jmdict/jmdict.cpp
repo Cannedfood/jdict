@@ -1,10 +1,9 @@
 #include "./jmdict.hpp"
 
-#include "./util/kana.hpp"
-#include "./util/timer.hpp"
-
-#include <rapidxml.hpp>
-#include <rapidxml_iterators.hpp>
+#include <server/util/kana.hpp>
+#include <server/util/timer.hpp>
+#include <server/util/file2vector.hpp>
+#include <server/util/my_rapidxml_utils.hpp>
 
 #include <cstdlib>
 #include <ratio>
@@ -12,66 +11,13 @@
 #include <cstdio>
 #include <string_view>
 
-
-using namespace rapidxml;
 using namespace std::string_view_literals;
-
 using jdict::debug::timer;
 
 namespace jdict {
 namespace {
 
-static std::vector<char> readZip(const char* path) {
-	throw std::runtime_error("Loading zip files is not implemented");
-}
-
-static std::vector<char> readTextFile(const char* path) {
-	timer _("reading jmdict.xml");
-
-	auto* file = fopen(path, "rb");
-	if(!file)
-		throw std::runtime_error("Failed opening file '" + std::string(path) + "'");
-
-	fseek(file, 0, SEEK_END);
-	unsigned size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	auto data = std::vector<char>(size + 1);
-	data.back() = '\0';
-	fread(data.data(), size, 1, file);
-
-	fclose(file);
-
-	return data;
-}
-
-
-struct children {
-	xml_node<char>* node;
-	children(xml_node<char>* node) noexcept : node(node) {}
-	children(xml_node<char>& node) noexcept : node(&node) {}
-	using iterator = node_iterator<char>;
-	iterator begin() { return { node }; }
-	iterator end()   { return {}; }
-};
-static inline std::string value(xml_node<char>& n) {
-	return std::string(n.value(), n.value_size());
-}
-static inline std::string value(xml_attribute<char>& n) {
-	return std::string(n.value(), n.value_size());
-}
-static inline auto value(xml_attribute<char>* n) {
-	assert(n);
-	return value(*n);
-}
-static inline auto value_or_empty(xml_attribute<char>* n) {
-	if(!n) return std::string{};
-	return value(*n);
-}
-
-#define UNHANDLED_NODE(PARENT, N) throw std::runtime_error("Unhandled element in <" PARENT ">: " + std::string((N).name()));
-
-static jmdict::kanji_t parseKanjiElement(xml_node<char>& node) {
+static jmdict::kanji_t parseKanjiElement(xml_node& node) {
 	auto result = jmdict::kanji_t();
 	for(auto& child : children(node)) {
 		if     (child.name() == "keb"sv)    result.value = value(child);
@@ -82,7 +28,7 @@ static jmdict::kanji_t parseKanjiElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::reading_t parseReadingElement(xml_node<char>& node) {
+static jmdict::reading_t parseReadingElement(xml_node& node) {
 	auto result = jmdict::reading_t();
 	for(auto& child : children(node)) {
 		if     (child.name() == "reb"sv)        result.value = value(child);
@@ -95,7 +41,7 @@ static jmdict::reading_t parseReadingElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::sense_t::gloss parseGlossElement(xml_node<char>& node) {
+static jmdict::sense_t::gloss parseGlossElement(xml_node& node) {
 	return jmdict::sense_t::gloss {
 		.content   = value(node),
 		.language  = value_or_empty(node.first_attribute("xml:lang")),
@@ -104,7 +50,7 @@ static jmdict::sense_t::gloss parseGlossElement(xml_node<char>& node) {
 	};
 }
 
-static jmdict::sense_t::example parseExampleElement(xml_node<char>& node) {
+static jmdict::sense_t::example parseExampleElement(xml_node& node) {
 	auto result = jmdict::sense_t::example();
 	for(auto& child : children(node)) {
 		if	 (child.name() == "ex_srce"sv) result.source = value(child);
@@ -120,7 +66,7 @@ static jmdict::sense_t::example parseExampleElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::sense_t::source_language parseSourceLanguageElement(xml_node<char>& node) {
+static jmdict::sense_t::source_language parseSourceLanguageElement(xml_node& node) {
 	return jmdict::sense_t::source_language {
 		.word = value(node),
 		.language = value_or_empty(node.first_attribute("xml:lang")),
@@ -129,7 +75,7 @@ static jmdict::sense_t::source_language parseSourceLanguageElement(xml_node<char
 	};
 }
 
-static jmdict::sense_t parseSenseElement(xml_node<char>& node) {
+static jmdict::sense_t parseSenseElement(xml_node& node) {
 	auto result = jmdict::sense_t();
 	for(auto& child : children(node)) {
 		if     (child.name() == "stagk"sv)   result.restrict_kanji     .push_back(value(child));
@@ -149,7 +95,7 @@ static jmdict::sense_t parseSenseElement(xml_node<char>& node) {
 	return result;
 }
 
-static jmdict::entry_t parseEntry(xml_node<char>& node) {
+static jmdict::entry_t parseEntry(xml_node& node) {
 	auto result = jmdict::entry_t();
 
 	for(auto& n : children(node)) {
@@ -166,19 +112,18 @@ static jmdict::entry_t parseEntry(xml_node<char>& node) {
 } // namespace
 
 jmdict jmdict::parse_file(const char* path) {
-	std::vector<char> text;
-	if(std::string_view(path).ends_with(".zip"))
-		text = readZip(path);
-	else
-		text = readTextFile(path);
+	std::vector<char> text = read_file_to_vector(path);
 
-	constexpr auto PARSE_FLAGS = parse_trim_whitespace | parse_normalize_whitespace | parse_no_data_nodes;
+	constexpr auto PARSE_FLAGS =
+		rapidxml::parse_trim_whitespace |
+		rapidxml::parse_normalize_whitespace |
+		rapidxml::parse_no_data_nodes;;
 
 	auto result = jmdict();
 
 	{
 		timer _("parsing jmdict.xml");
-		xml_document<char> doc;
+		xml_document doc;
 		{
 			timer __("building DOM from jdmict xml");
 			doc.parse<PARSE_FLAGS>(text.data());

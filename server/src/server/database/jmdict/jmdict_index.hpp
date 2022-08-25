@@ -1,8 +1,8 @@
 #pragma once
 
 #include "./jmdict.hpp"
-#include "./util/full_text_index.hpp"
 
+#include <server/util/full_text_index.hpp>
 #include <functional>
 #include <set>
 #include <string_view>
