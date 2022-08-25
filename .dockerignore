@@ -1,4 +1,4 @@
 *
 !dist
+!res
 !server/bin/release/server
-!server/JMdict.xml

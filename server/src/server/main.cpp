@@ -38,13 +38,14 @@ std::vector<T> applyPaging(int skip, int take, std::vector<T> const& v) {
 
 int main(int argc, char** argv) {
 	std::string distDir = "../dist/";
-	std::string jdictXML = "JMdict.xml";
-	std::string kanjidicXML = "kanjidic2.xml";
+	std::string resDir = "../res/";
 	int port = 8080;
 	if(auto* c = std::getenv("JDICT_DIST_DIR")) distDir = c;
-	if(auto* c = std::getenv("JDICT_JMDICT_XML")) jdictXML = c;
-	if(auto* c = std::getenv("JDICT_KANJIDIC_XML")) kanjidicXML = c;
+	if(auto* c = std::getenv("JDICT_RES_DIR")) resDir = c;
 	if(auto* c = std::getenv("JDICT_PORT")) port = atoi(c);
+
+	std::string jdictXML    = resDir + "/JMdict.xml";
+	std::string kanjidicXML = resDir + "/kanjidic2.xml";
 
 	auto dict  = jmdict();
 	auto dict_idx = jmdict_index();
