@@ -72,8 +72,7 @@ export function replaceEntities(s: string) {
 	});
 }
 
-export const Entities = {
-	// <dial> (dialect) entities
+export const DialectEntities = {
 	bra: "Brazilian",
 	hob: "Hokkaido-ben",
 	ksb: "Kansai-ben",
@@ -86,7 +85,8 @@ export const Entities = {
 	thb: "Touhoku-ben",
 	tsb: "Tosa-ben",
 	tsug: "Tsugaru-ben",
-	// <field> entities
+};
+export const FieldEntities = {
 	agric: "agriculture",
 	anat: "anatomy",
 	archeol: "archeology",
@@ -172,7 +172,8 @@ export const Entities = {
 	tv: "television",
 	vidg: "video games",
 	zool: "zoology",
-	// <ke_inf> (kanji info) entities
+};
+export const KanjiInfoEntities = {
 	ateji: "ateji (phonetic) reading",
 	ik: "word containing irregular kana usage",
 	iK: "word containing irregular kanji usage",
@@ -180,7 +181,9 @@ export const Entities = {
 	oK: "word containing out-dated kanji or kanji usage",
 	rK: "rarely-used kanji form",
 	sK: "search-only kanji form",
-	// <misc> (miscellaneous) entities
+};
+
+export const MiscEntities = {
 	abbr: "abbreviation",
 	arch: "archaic",
 	char: "character",
@@ -236,7 +239,10 @@ export const Entities = {
 	work: "work of art, literature, music, etc. name",
 	X: "rude or X-rated term (not displayed in educational software)",
 	yoji: "yojijukugo",
-	// <pos> (part-of-speech) entities
+};
+
+// <pos> (part-of-speech) entities
+export const PartOfSpeechEntities = {
 	"adj-f": "noun or verb acting prenominally",
 	"adj-i": "adjective (keiyoushi)",
 	"adj-ix": "adjective (keiyoushi) - yoi/ii class",
@@ -329,11 +335,22 @@ export const Entities = {
 	"vs-s": "suru verb - special class",
 	vt: "transitive verb",
 	vz: "Ichidan verb - zuru verb (alternative form of -jiru verbs)",
-	// <re_inf> (reading info) entities
+};
+
+export const ReadingInfoEntities = {
 	gikun: "gikun (meaning as reading) or jukujikun (special kanji reading)",
 	ok: "out-dated or obsolete kana usage",
 	sk: "search-only kana form",
-}
+};
+
+export const Entities = {
+	...DialectEntities,
+	...FieldEntities,
+	...KanjiInfoEntities,
+	...MiscEntities,
+	...PartOfSpeechEntities,
+	...ReadingInfoEntities,
+};
 
 export type EntityName = keyof(typeof Entities);
 
