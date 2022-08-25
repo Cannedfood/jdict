@@ -5,6 +5,13 @@ export interface Codepoint {
 	ucs?: string;
 }
 
+export const CodepointTypeValues = [
+	"jis208",
+	"jis212",
+	"jis213",
+	"ucs",
+] as Array<keyof Codepoint>;
+
 export interface Radical {
 	classical?: number;
 	nelson_c?: number;

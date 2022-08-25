@@ -5,13 +5,9 @@ const props = defineProps<{
 	kanji: Character
 }>();
 
-function variants(t: VariantType) {
-	const result = props.kanji.variant?.filter(v => v.type == t).map(v => v.value);
-	if(!result?.length)
-		return null;
-	else
-		return result;
-}
+// function variants(t: VariantType) {
+// 	return props.kanji.variant?.filter(v => v.type == t).map(v => v.value) ?? [];
+// }
 
 </script>
 
@@ -27,20 +23,17 @@ function variants(t: VariantType) {
 			//- span(v-if="kanji.stroke_count.length > 1")
 			//- 	| ({{kanji.stroke_count.slice(1).join(', ')}})
 	.info
-		.nanori(v-if="kanji.nanori") Nanori: {{kanji.nanori?.join(', ')}}
-		.radical(v-if="kanji.rad_name") Radical: {{kanji.rad_name.join(', ')}}
 		.mr_group(v-for="g of kanji.reading_meaning_groups")
 			.reading-kun On: {{g.readings?.filter(r => r.type == 'ja_kun').map(r => r.value).join(', ')}}
 			.reading-on Kun: {{g.readings?.filter(r => r.type == 'ja_on').map(r => r.value).join(', ')}}
 			.meaning {{g.meanings?.filter(m => !m.lang).map(m => m.value).join(', ')}}
+		.nanori(v-if="kanji.nanori") Nanori: {{kanji.nanori?.join(', ')}}
+		.radical(v-if="kanji.rad_name") Radical: {{kanji.rad_name.join(', ')}}
 	.bonus-info
-		.codepoint(v-if="kanji.codepoint")
-			.c(v-for="v, k in kanji.codepoint")
-				| {{k}}: {{v}}
-				span(v-if="variants(k)") {{variants(k)?.join(', ')}}
-		.variants(v-if="kanji.variant" v-for="v of kanji.variant")
-			span alt {{v.type}}:
-				a(:href="`/#/search/${v.value}`") {{v.value}}
+		.codepoint(
+			v-if="kanji.codepoint"
+			v-for="value, key of kanji.codepoint"
+		) {{key}}: {{value}}
 
 </template>
 
@@ -84,9 +77,22 @@ function variants(t: VariantType) {
 	}
 	.info {
 		grid-area: info;
+		.mr_group {
+			margin-bottom: 2em;
+			.meaning {
+				margin-block: 1em;
+			}
+		}
 	}
 	.bonus-info {
 		grid-area: bonus;
+		display: flex;
+		flex-flow: wrap row;
+		&>* {
+			border: 1px solid #888;
+			padding-inline: .2em;
+			margin-inline: .2em;
+		}
 	}
 }
 </style>

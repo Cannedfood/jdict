@@ -47,7 +47,7 @@ span.kanji-text
 .kanji-text {
 	.han {
 		text-decoration: none;
-		cursor: help;
+		cursor: pointer;
 		&:hover {
 			font-weight: bolder;
 		}
