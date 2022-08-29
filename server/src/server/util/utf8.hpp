@@ -6,6 +6,7 @@
 namespace jdict::utf8 {
 
 constexpr char32_t ReplacementCharacter = 0xFFFD;
+constexpr char32_t EndOfTextCharacter   = 0x0000;
 
 constexpr inline static
 bool is_continuation_byte(char c) noexcept { return (c & 0b1100'0000) == 0b1000'0000; }
@@ -21,90 +22,133 @@ int encoded_size(char c) noexcept {
 	return 0;
 }
 
+struct decode_result {
+	unsigned bytes;
+	char32_t codepoint;
+};
+
 constexpr inline
-int decode(char const* bytes, int nbytes, char32_t* out_codepoint) {
-	const auto decodingFailure = [&] {
-		*out_codepoint = ReplacementCharacter;
-		if(nbytes == 1) return 1;
-		int n = 1;
+decode_result decode(char const* bytes, unsigned nbytes) {
+	const auto decodingFailure = [&]() -> decode_result {
+		unsigned n = 1;
 		while(n < nbytes && is_continuation_byte(bytes[n]))
 			n++;
-		return n;
+		return { .bytes = n, .codepoint = ReplacementCharacter };
 	};
 
 	if(nbytes == 0) {
-		out_codepoint = 0;
-		return 0;
+		return { .bytes = 0, .codepoint = EndOfTextCharacter };
 	}
 
 	char c = bytes[0];
 	if((c & 0b10000000) == 0) {
-		*out_codepoint = c;
-		return 1;
+		return { .bytes = 1, .codepoint = (char32_t) c };
 	}
 	else if((c & 0b11100000) == 0b11000000) {
 		if(nbytes < 2) return decodingFailure();
-		*out_codepoint =
-			(bytes[0] & 0b00011111) << 1*6 |
-			(bytes[1] & 0b00111111) << 0*6;
-		return 2;
+		return {
+			.bytes = 2,
+			.codepoint = char32_t(
+				(bytes[0] & 0b00011111) << 1*6 |
+				(bytes[1] & 0b00111111) << 0*6
+			)
+		};
 	}
 	else if((c & 0b11110000) == 0b11100000) {
 		if(nbytes < 3) return decodingFailure();
-		*out_codepoint =
-			(bytes[0] & 0b00001111) << 2*6 |
-			(bytes[1] & 0b00111111) << 1*6 |
-			(bytes[2] & 0b00111111) << 0*6;
-		return 3;
+		return {
+			.bytes = 3,
+			.codepoint = char32_t(
+				(bytes[0] & 0b00001111) << 2*6 |
+				(bytes[1] & 0b00111111) << 1*6 |
+				(bytes[2] & 0b00111111) << 0*6
+			)
+		};
 	}
 	else if((c & 0b11111000) == 0b111100000) {
 		if(nbytes < 4) return decodingFailure();
-		*out_codepoint =
-			(bytes[0] & 0b00000111) << 3*6 |
-			(bytes[1] & 0b00111111) << 2*6 |
-			(bytes[2] & 0b00111111) << 1*6 |
-			(bytes[3] & 0b00111111) << 0*6;
-		return 4;
+		return {
+			.bytes = 4,
+			.codepoint = char32_t(
+				(bytes[0] & 0b00000111) << 3*6 |
+				(bytes[1] & 0b00111111) << 2*6 |
+				(bytes[2] & 0b00111111) << 1*6 |
+				(bytes[3] & 0b00111111) << 0*6
+			)
+		};
 	}
 	else if((c & 0b11111100) == 0b11111000) {
 		if(nbytes < 5) return decodingFailure();
-		*out_codepoint =
-			(bytes[0] & 0b00000011) << 4*6 |
-			(bytes[1] & 0b00111111) << 3*6 |
-			(bytes[2] & 0b00111111) << 2*6 |
-			(bytes[3] & 0b00111111) << 1*6 |
-			(bytes[4] & 0b00111111) << 0*6;
-		return 5;
+		return {
+			.bytes = 5,
+			.codepoint = char32_t(
+				(bytes[0] & 0b00000011) << 4*6 |
+				(bytes[1] & 0b00111111) << 3*6 |
+				(bytes[2] & 0b00111111) << 2*6 |
+				(bytes[3] & 0b00111111) << 1*6 |
+				(bytes[4] & 0b00111111) << 0*6
+			)
+		};
 	}
 	else if((c & 0b11111110) == 0b11111100) {
 		if(nbytes < 6) return decodingFailure();
-		*out_codepoint =
-			(bytes[0] & 0b00000001) << 5*6 |
-			(bytes[1] & 0b00111111) << 4*6 |
-			(bytes[2] & 0b00111111) << 3*6 |
-			(bytes[3] & 0b00111111) << 2*6 |
-			(bytes[4] & 0b00111111) << 1*6 |
-			(bytes[5] & 0b00111111) << 0*6;
-		return 6;
+		return {
+			.bytes = 6,
+			.codepoint = char32_t(
+				(bytes[0] & 0b00000001) << 5*6 |
+				(bytes[1] & 0b00111111) << 4*6 |
+				(bytes[2] & 0b00111111) << 3*6 |
+				(bytes[3] & 0b00111111) << 2*6 |
+				(bytes[4] & 0b00111111) << 1*6 |
+				(bytes[5] & 0b00111111) << 0*6
+			)
+		};
 	}
 	return decodingFailure();
 }
 
 constexpr inline
-char32_t decode(std::string_view s, unsigned* count_out = nullptr) noexcept {
-	char32_t result = 0;
-	if(count_out)
-		*count_out = decode(s.data(), s.size(), &result);
-	else
-		decode(s.data(), s.size(), &result);
-	return result;
+decode_result decode(std::string_view s) noexcept {
+	return decode(s.data(), s.length());
 }
 
 constexpr inline
 char32_t decode_and_snip(std::string_view& s) noexcept {
-	char32_t result = 0;
-	s.remove_prefix(decode(s.data(), s.size(), &result));
+	auto [nbytes, codepoint] = decode(s.data(), s.size());
+	s.remove_prefix(nbytes);
+	return codepoint;
+}
+
+inline
+std::string_view snip_bytes(std::string_view& s, unsigned nbytes) {
+	auto result = s.substr(0, nbytes);
+	s.remove_prefix(nbytes);
 	return result;
+}
+
+template<class CodeptPred>
+std::string_view snip_while(std::string_view& s, CodeptPred pred) {
+	const char* const start = s.data();
+	const char* const end   = s.data() + s.size();
+
+	const char* cursor = start;
+	while(cursor < end) {
+		auto [nbytes, codepoint] = decode(cursor, end - cursor);
+		if(!pred(codepoint)) {
+			break;
+		}
+		cursor += nbytes;
+	}
+	s = std::string_view(cursor, end);
+	return std::string_view(start, cursor);
+}
+
+template<class CodeptPred>
+std::string_view snip_if(std::string_view& s, CodeptPred pred) {
+	auto [nbytes, codepoint] = decode(s);
+	if(!pred(codepoint))
+		return {};
+	return snip_bytes(s, nbytes);
 }
 
 constexpr inline
