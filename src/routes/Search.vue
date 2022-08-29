@@ -52,7 +52,7 @@ onScrolledToBottom(
 </script>
 
 <template lang="pug">
-.stats.float-left(v-if="search") {{search.resultsTotal}} Results (server: {{search.time}}, client: {{search.clientTime}})
+.stats(v-if="search") {{search.resultsTotal}} Results (server: {{search.time}}, client: {{search.clientTime}})
 .container
 	KanjiInfo(
 		v-if="search && search.kanji"
