@@ -22,13 +22,26 @@ kanjidic_index::kanjidic_index(kanjidic const& dic) {
 
 std::vector<kanjidic::character_t const*> kanjidic_index::search(std::string_view term) {
 	std::vector<kanjidic::character_t const*> result;
-	auto [start, end] = text_idx.equal_range(term);
-	std::transform(
-		start, end, std::back_inserter(result),
-		[](std::pair<std::string_view, kanjidic::character_t const*> p) {
-			return p.second;
-		}
-	);
+
+	auto subsearch = [&](std::string_view term) {
+		auto [start, end] = text_idx.equal_range(term);
+		std::transform(
+			start, end, std::back_inserter(result),
+			[](std::pair<std::string_view, kanjidic::character_t const*> p) {
+				return p.second;
+			}
+		);
+	};
+
+	while(!term.empty()) {
+		utf8::snip_while(term, [](char32_t c) {
+			return !utf8::is_alpha(c) && !utf8::is_cjk(c);
+		});
+		if(auto text = utf8::snip_while(term, utf8::is_alpha); !text.empty())
+			subsearch(text);
+		if(auto character = utf8::snip_if(term, utf8::is_cjk); !character.empty())
+			subsearch(character);
+	}
 	return result;
 }
 
