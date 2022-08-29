@@ -1,6 +1,7 @@
 #include "./database/jmdict/jmdict.hpp"
 #include "./database/kanjidic/kanjidic.hpp"
 
+#include <map>
 #include <nlohmann/json.hpp>
 #include <type_traits>
 #include <utility>
@@ -42,5 +43,25 @@ nlohmann::json to_json(std::vector<T> const& j) {
 	for(auto& e : j) result.push_back(to_json(e));
 	return result;
 }
+
+inline std::string_view to_string(std::string& s) { return s; }
+inline std::string_view to_string(std::string_view s) { return s; }
+
+template<class K, class V>
+nlohmann::json to_json(std::map<K, V> const& j) {
+	auto result = nlohmann::json::value_type::object();
+	for(auto& [k, v] : j)
+		result[to_string(k)] = to_json(v);
+	return result;
+}
+
+template<class K, class V>
+nlohmann::json to_json(std::multimap<K, V> const& j) {
+	auto result = nlohmann::json::value_type::object();
+	for(auto& [k, v] : j)
+		result[to_string(k)].push(to_json(v));
+	return result;
+}
+
 
 } // namespace jdict
