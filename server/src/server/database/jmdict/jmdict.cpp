@@ -141,6 +141,8 @@ jmdict jmdict::parse_file(const char* path) {
 		}
 	}
 
+	result.generate_romaji();
+
 	return result;
 }
 

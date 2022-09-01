@@ -56,12 +56,10 @@ int main(int argc, char** argv) {
 	auto cache = jdict::cache<std::string, jmdict_index::results_t>(1024);
 
 	auto dictionary_loaded = std::async(std::launch::async, [&] {
-		dict = jmdict::parse_file(jdictXML.c_str());
-		dict.generate_romaji();
-
+		dict  = jmdict::parse_file(jdictXML.c_str());
 		kanji = kanjidic::parse_file(kanjidicXML.c_str());
 
-		dict_idx = jmdict_index(dict);
+		dict_idx  = jmdict_index(dict);
 		kanji_idx = kanjidic_index(kanji);
 
 		printf("Loaded %zu dictionary entries.\n", dict.entries.size());
