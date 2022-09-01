@@ -5,6 +5,7 @@
 #include <cassert>
 #include <span>
 #include <string_view>
+#include <utility>
 
 namespace jdict {
 
@@ -24,6 +25,13 @@ public:
 		new_block_size(block_size)
 	{}
 	~arena_allocator() noexcept { clear(); }
+
+	arena_allocator(arena_allocator&& other) noexcept { *this = std::move(other); }
+	arena_allocator& operator=(arena_allocator&& other) noexcept {
+		current_block  = std::exchange(other.current_block, nullptr);
+		new_block_size = other.new_block_size;
+		return *this;
+	}
 
 	void* alloc(size_t nbytes, size_t align) noexcept {
 		assert(align < MaxAlign);
