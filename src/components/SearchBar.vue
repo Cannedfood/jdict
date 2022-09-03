@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onKeyboardShortcut } from '@/util/OnKeyboardShortcut';
 import { nextTick, onMounted, ref } from 'vue';
 import SearchBarSuggestions from './SearchBarSuggestions.vue';
 
@@ -15,6 +16,14 @@ function targetValue(e: any) { return e.target.value; }
 
 const searchInput = ref<HTMLInputElement | null>(null);
 onMounted(() => nextTick(() => searchInput.value?.focus()))
+
+onKeyboardShortcut({
+	'f,u': () => {
+		if(searchInput.value === document.activeElement)
+			return false;
+		searchInput.value?.focus();
+	}
+});
 
 function send() {
 	if(searchInput.value?.value !== '')
