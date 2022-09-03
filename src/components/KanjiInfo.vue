@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Character, ReadingMeaningGroup, ReadingType, VariantType } from '@/backend/kanjidic';
+import type { Character, ReadingMeaningGroup, ReadingType } from '@/backend/kanjidic';
 import { ref } from 'vue';
-import Octicon from './Octicon.vue';
 
 const props = defineProps<{
 	kanji: Character
@@ -114,6 +113,8 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 			margin-bottom: 2em;
 			.meaning {
 				margin-block: 1em;
+				font-size: 1.3em;
+				// font-weight: bold;
 			}
 		}
 	}

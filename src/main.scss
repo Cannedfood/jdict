@@ -1,5 +1,6 @@
 :root {
-	font-family: 'Courier New', Courier, monospace;
+	// font-family: 'Courier New', Courier, monospace;
+	font-family: Arial, Helvetica, sans-serif;
 
 	color-scheme: dark light;
 
@@ -34,6 +35,10 @@
 }
 hr {
 	border: 1px solid #8886;
+}
+
+.serif {
+	font-family: 'Courier New', Courier, monospace;
 }
 
 .container {
