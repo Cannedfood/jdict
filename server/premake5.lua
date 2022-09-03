@@ -14,6 +14,8 @@ workspace 'MyWorkspace'
 		linkoptions '-static'
 	filter '*'
 
+	defines '_CRT_SECURE_NO_WARNINGS'
+
 project 'server'
 	kind 'ConsoleApp'
 		language 'C++'
@@ -34,14 +36,14 @@ project 'server'
 		optimize 'Speed'
 	filter '*'
 
-project 'server-test'
-	kind 'ConsoleApp'
-		language 'C++'
-		cppdialect 'C++20'
-
-	files {
-		'src/server-test/**',
-		'src/server/http/http.router.cpp',
-		'src/server/http/http.cpp',
-	}
+-- project 'server-test'
+-- 	kind 'ConsoleApp'
+-- 		language 'C++'
+-- 		cppdialect 'C++20'
+--
+-- 	files {
+-- 		'src/server-test/**',
+-- 		'src/server/http/http.router.cpp',
+-- 		'src/server/http/http.cpp',
+-- 	}
 

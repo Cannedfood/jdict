@@ -7,6 +7,7 @@
 #include <bitset>
 #include <rapidxml.hpp>
 #include <stdexcept>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -159,9 +160,9 @@ static std::vector<kanjidic::dic_ref_t> parse_dic_number(xml_node& dic_number) {
 		else throw std::runtime_error("<dic_ref> node is missing a 'dr_type' attribute");
 
 		if(auto* m_vol = child.first_attribute("m_vol"))
-			result.back().moro_volume = std::stoul(value(m_vol));
+			result.back().moro_volume = (uint16_t) std::stoul(value(m_vol));
 		if(auto* m_page = child.first_attribute("m_page"))
-			result.back().moro_volume = std::stoul(value(m_page));
+			result.back().moro_volume = (uint16_t) std::stoul(value(m_page));
 	}
 	return result;
 }
@@ -190,12 +191,12 @@ static kanjidic::variant_t parse_variant(xml_node& variant) {
 static kanjidic::misc_t parse_misc(xml_node& misc) {
 	kanjidic::misc_t result;
 	for(auto& child : children(misc)) {
-		if     (child.name() == "grade"sv)        result.grade = std::stoul(value(child));
-		else if(child.name() == "stroke_count"sv) result.stroke_count.push_back(std::stoul(value(child)));
+		if     (child.name() == "grade"sv)        result.grade = (uint8_t) std::stoul(value(child));
+		else if(child.name() == "stroke_count"sv) result.stroke_count.push_back((uint8_t) std::stoul(value(child)));
 		else if(child.name() == "variant"sv)      result.variant.push_back(parse_variant(child));
 		else if(child.name() == "freq"sv)         result.freq = std::stoul(value(child));
 		else if(child.name() == "rad_name"sv)     result.rad_name.push_back(value(child));
-		else if(child.name() == "jlpt"sv)         result.jlpt = std::stoul(value(child));
+		else if(child.name() == "jlpt"sv)         result.jlpt = (uint8_t) std::stoul(value(child));
 		else UNHANDLED_NODE("misc", child);
 	}
 	return result;
@@ -212,9 +213,9 @@ static kanjidic::radical_t parse_radical(xml_node& radical) {
 			throw std::runtime_error("<radical> node is missing 'rad_type' attribute");
 
 		if(rad_type->value() == "classical"sv)
-			result.classical = std::stoul(value(child));
+			result.classical = (uint16_t) std::stoul(value(child));
 		else if(rad_type->value() == "nelson_c"sv)
-			result.nelson_c = std::stoul(value(child));
+			result.nelson_c = (uint16_t) std::stoul(value(child));
 		else
 			throw std::runtime_error("Unhandled rad_type: " + value(rad_type));
 	}
@@ -315,6 +316,7 @@ const char* to_string(kanjidic::variant_type_t v) noexcept {
 	case kanjidic::variant_type_t::oneill: return "oneill";
 	case kanjidic::variant_type_t::ucs: return "ucs";
 	}
+	return "";
 }
 const char* to_string(kanjidic::dic_ref_type_t v) noexcept {
 	switch (v) {
@@ -343,6 +345,7 @@ const char* to_string(kanjidic::dic_ref_type_t v) noexcept {
 	case kanjidic::dic_ref_type_t::kodansha_compact: return "kodansha_compact";
 	case kanjidic::dic_ref_type_t::maniette: return "maniette";
 	}
+	return "";
 }
 const char* to_string(kanjidic::query_code_type_t v) noexcept {
 	switch (v) {
@@ -352,6 +355,7 @@ const char* to_string(kanjidic::query_code_type_t v) noexcept {
 	case kanjidic::query_code_type_t::deroo: return "deroo";
 	case kanjidic::query_code_type_t::misclass: return "misclass";
 	}
+	return "";
 }
 const char* to_string(kanjidic::skip_misclass_t v) noexcept {
 	switch (v) {
@@ -361,6 +365,7 @@ const char* to_string(kanjidic::skip_misclass_t v) noexcept {
 	case kanjidic::skip_misclass_t::stroke_and_posn: return "stroke_and_posn";
 	case kanjidic::skip_misclass_t::stroke_diff: return "stroke_diff";
 	}
+	return "";
 }
 const char* to_string(kanjidic::reading_type_t v) noexcept {
 	switch (v) {
@@ -371,6 +376,7 @@ const char* to_string(kanjidic::reading_type_t v) noexcept {
 	case kanjidic::reading_type_t::ja_on: return "ja_on";
 	case kanjidic::reading_type_t::ja_kun: return "ja_kun";
 	}
+	return "";
 }
 const char* to_string(kanjidic::on_type_t v) noexcept {
 	switch (v) {
@@ -380,6 +386,7 @@ const char* to_string(kanjidic::on_type_t v) noexcept {
 	case kanjidic::on_type_t::tou: return "tou";
 	case kanjidic::on_type_t::kanyou: return "kan'you";
 	}
+	return "";
 }
 
 } // namespace jdict

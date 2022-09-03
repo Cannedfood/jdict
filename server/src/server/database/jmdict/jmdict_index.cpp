@@ -93,7 +93,7 @@ static inline rating_t rate_word_length(std::string_view query, std::string_view
 	if(match.starts_with("to ") && !query.starts_with("to ")) match.remove_prefix(3);
 
 	float n = ((int)utf8::count_codepoints(match) - (int) utf8::count_codepoints(query)) / float(max_word_length);
-	return ratings::word_length * std::max(0.f, 1 - n);
+	return (rating_t) (ratings::word_length * std::max(0.f, 1 - n));
 }
 
 static inline rating_t priority(std::vector<std::string> const& v) {

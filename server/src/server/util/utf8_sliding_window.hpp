@@ -27,12 +27,12 @@ struct utf8_sliding_window {
 	}
 
 	template<class Callback>
-	bool slide(int windowSize, Callback&& emit_fragment) {
+	bool slide(size_t windowSize, Callback&& emit_fragment) {
 		return slide(windowSize, std::forward<Callback>(emit_fragment));
 	}
 
 	template<class Callback, class CharPred>
-	bool slide(int windowSize, Callback&& emit_fragment, CharPred&& accepts_char_class) {
+	bool slide(size_t windowSize, Callback&& emit_fragment, CharPred&& accepts_char_class) {
 		while(accepts_char_class(peek()) && size() < windowSize) {
 			if(!grow_back())
 				break;

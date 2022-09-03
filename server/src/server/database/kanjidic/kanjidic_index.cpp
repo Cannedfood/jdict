@@ -1,7 +1,9 @@
 #include "./kanjidic_index.hpp"
 
-#include <algorithm>
 #include <server/util/utf8.hpp>
+
+#include <algorithm>
+#include <iterator>
 #include <utility>
 
 namespace jdict {
