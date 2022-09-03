@@ -14,6 +14,18 @@ export function onKeyboardShortcut(desc: { [key: string]: () => boolean|void }) 
             }
         }
     };
-    onMounted(() => document.addEventListener('keydown', cb));
-    onUnmounted(() => document.removeEventListener('keydown', cb));
+    const self = {
+        subscribed: false,
+        subscribe: () => {
+            if(!self.subscribed)
+                document.addEventListener('keydown', cb);
+        },
+        unsubscribe: () => {
+            if(self.subscribed)
+                document.removeEventListener('keydown', cb);
+        }
+    }
+    onMounted(() => self.subscribe());
+    onUnmounted(() => self.unsubscribe());
+    return self;
 }
