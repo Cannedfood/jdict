@@ -22,9 +22,9 @@
 using namespace jdict;
 
 template<class T>
-std::vector<T> applyPaging(int skip, int take, std::vector<T> const& v) {
-	int start = skip;
-	int end = start + take;
+std::vector<T> applyPaging(size_t skip, size_t take, std::vector<T> const& v) {
+	size_t start = skip;
+	size_t end = start + take;
 
 	if(start == 0 && end >= v.size()) return v;
 

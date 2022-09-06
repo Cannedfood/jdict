@@ -40,7 +40,7 @@ struct ngram_indexing_strategy {
 				utf8::is_punct_ascii(c);
 		};
 
-		auto window = utf8_sliding_window(s);
+		auto window = utf8::sliding_window(s);
 		do { window.skip(ignored_characters); }
 		while(
 			window.slide(n_alpha,   emit_fragment, utf8::is_alpha) ||
