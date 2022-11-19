@@ -59,14 +59,25 @@ onScrolledToBottom(
 		v-for="kanji of search.kanji"
 		:kanji="kanji"
 	)
-	.results(v-if="search")
-		Entry(v-for="entry of search.results" :entry="entry")
+	.results(:class="{ visible: search?.results?.length }")
+		Entry(v-for="entry of search?.results" :entry="entry")
 	Spinner(v-if="searchInProgress")
 	hr(v-if="allResultsLoaded")
 
 </template>
 
 <style lang="scss" scoped>
+@keyframes appear {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+.results {
+	opacity: 0;
+	&.visible {
+		animation: appear 0.1s ease-in-out;
+		opacity: 1;
+	}
+}
 .stats {
 	color: #888A;
 	// text-align: right;
