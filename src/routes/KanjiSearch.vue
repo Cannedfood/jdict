@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { debounce } from 'lodash';
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { nextTick, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useSearch } from '../backend/search';
 
 const search = useSearch();
@@ -9,6 +9,7 @@ const search = useSearch();
 const results = ref([] as string[]);
 const searchTerm = ref('');
 const route = useRoute();
+const router = useRouter();
 
 const runSearch = debounce(async(term: string) => {
 	if(term.length > 2)
@@ -29,15 +30,28 @@ watch(
 
 const hovered = ref(undefined as string|undefined);
 
+const kanjiSearchInput = ref<HTMLInputElement|null>(null);
+function addKanji(kanji: string) {
+	router.replace(route.fullPath + kanji);
+	nextTick(() => {
+		kanjiSearchInput.value?.focus();
+	});
+}
+
 </script>
 
 <template lang="pug">
 .container
-	input(type="search" v-model="searchTerm")
+	input(
+		ref="kanjiSearchInput"
+		type="search"
+		v-model="searchTerm"
+		autofocus
+	)
 	.kanji
 		.entry(
 			v-for="r in results"
-			@click="route.params.query += r; searchTerm = '';"
+			@click="searchTerm = ''; addKanji(r);"
 			@mouseenter="hovered = r"
 			@mouseleave="hovered = undefined"
 		) {{r}}
@@ -53,6 +67,12 @@ input {
 	border-radius: .2em;
 	width: 100%;
 	margin-inline: auto;
+
+	transition: 400ms border-color;
+	border: 1px solid transparent;
+	&:focus {
+		border-color: purple;
+	}
 }
 .kanji {
 	display: flex;
