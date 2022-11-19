@@ -13,11 +13,13 @@
 #include <chrono>
 #include <cstdlib>
 #include <exception>
+#include <future>
+#include <set>
 #include <span>
 #include <stdio.h>
-#include <set>
 #include <vector>
-#include <future>
+
+using namespace std::chrono_literals;
 
 using namespace jdict;
 
@@ -47,10 +49,10 @@ int main(int argc, char** argv) {
 	std::string jdictXML    = resDir + "/JMdict.xml";
 	std::string kanjidicXML = resDir + "/kanjidic2.xml";
 
-	auto dict  = jmdict();
+	auto dict     = jmdict();
 	auto dict_idx = jmdict_index();
 
-	auto kanji = kanjidic();
+	auto kanji     = kanjidic();
 	auto kanji_idx = kanjidic_index();
 
 	auto cache = jdict::cache<std::string, jmdict_index::results_t>(1024);
@@ -101,6 +103,9 @@ int main(int argc, char** argv) {
 	router.files("/**", distDir);
 
 	printf("\nStart listening at http://localhost:%i\n", port);
-	http::listen(port, router);
+	http::listen(port, [&](http::request& req, http::response& res) {
+		// std::this_thread::sleep_for(1s);
+		router(req, res);
+	});
 	return EXIT_SUCCESS;
 }
