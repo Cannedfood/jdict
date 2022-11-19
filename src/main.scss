@@ -27,6 +27,11 @@
 		background-color: #FFF;
 	}
 }
+body {
+	margin: 0;
+	padding: 0;
+}
+
 * {
 	background: none;
 	outline: none;
@@ -47,7 +52,7 @@ hr {
 	margin-inline: auto;
 }
 
-.center {
+.text-center {
 	text-align: center;
 }
 
@@ -61,4 +66,5 @@ button, .btn, [role="button"] {
 	border-radius: .5em;
 	background: #8883;
 	text-align: center;
+	margin: .2em;
 }

@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { onKeyboardShortcut } from '@/util/OnKeyboardShortcut';
-import { nextTick, onMounted, ref } from 'vue';
-import SearchBarSuggestions from './SearchBarSuggestions.vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
 	modelValue: string,
-	suggestions: string[],
 }>();
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void,
@@ -15,10 +13,9 @@ const emit = defineEmits<{
 function targetValue(e: any) { return e.target.value; }
 
 const searchInput = ref<HTMLInputElement | null>(null);
-onMounted(() => nextTick(() => searchInput.value?.focus()))
 
 onKeyboardShortcut({
-	'f,u': () => {
+	'alt+f,alt+u': () => {
 		if(searchInput.value === document.activeElement)
 			return false;
 		searchInput.value?.focus();
@@ -26,12 +23,9 @@ onKeyboardShortcut({
 });
 
 function send() {
-	if(searchInput.value?.value !== '')
-		searchInput.value?.blur();
+	searchInput.value?.select();
 	emit('send', props.modelValue);
 }
-
-const suggestionBox = ref<typeof SearchBarSuggestions>(undefined!);
 
 </script>
 
@@ -45,17 +39,10 @@ const suggestionBox = ref<typeof SearchBarSuggestions>(undefined!);
 		autocomplete="off"
 		@input="emit('update:modelValue', targetValue($event).toLowerCase())"
 		@keydown.enter.prevent="send()"
-		@keydown.up.prevent="suggestionBox.suggestionUp()"
-		@keydown.down.prevent="suggestionBox.suggestionDown()"
-		@keydown.tab.prevent="suggestionBox.acceptSuggestion()"
 		onfocus="this.select();"
+		autofocus
 	)
 	slot
-	SearchBarSuggestions(
-		ref="suggestionBox"
-		:suggestions="suggestions"
-		@accept="emit('update:modelValue', $event)"
-	)
 </template>
 
 <style lang="scss">
@@ -67,10 +54,9 @@ const suggestionBox = ref<typeof SearchBarSuggestions>(undefined!);
 	position: relative;
 
 	box-sizing: border-box;
-	width: 100%;
-	max-width: 14cm;
-
-	margin: 0;
+	width: 14cm;
+	max-width: calc(100vw - .5em);
+	margin-block: .2em;
 	margin-inline: auto;
 
 	font-size: 2em;
@@ -84,25 +70,6 @@ const suggestionBox = ref<typeof SearchBarSuggestions>(undefined!);
 	border: 1px solid transparent;
 	&:focus-within {
 		border-color: purple;
-	}
-
-	.suggestions {
-		position: absolute;
-		top: 100%;
-		left: .5em;
-		right: .5em;
-		border-bottom-left-radius: .2em;
-		border-bottom-right-radius: .2em;
-		border: 1px solid purple;
-		border-top: none;
-		background: #242424;
-
-		text-align: left;
-	}
-	&:not(:focus-within) {
-		.suggestions {
-			display: none;
-		}
 	}
 
 	* {

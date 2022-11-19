@@ -50,8 +50,10 @@ const showJson = window.location.search.includes("debug=json")
 
 <style lang="scss">
 .entry {
-	margin-bottom: 2em;
-
+	.word {
+		// Used to allow floating the romaji text. See .romaji
+		position: relative;
+	}
 	.debug-info {
 		display: none;
 		opacity: 50%;
@@ -72,6 +74,9 @@ const showJson = window.location.search.includes("debug=json")
 	.reading-entry {
 		display: inline-block;
 		.romaji {
+			bottom: 100%;
+			position: absolute;
+
 			opacity: 0;
 			transition: opacity 100ms;
 		}
@@ -84,6 +89,7 @@ const showJson = window.location.search.includes("debug=json")
 		width: fit-content;
 		font-size: .7rem;
 		color: #888A;
+		top: 0;
 	}
 	.kanji {
 		font-size: 1.2rem;

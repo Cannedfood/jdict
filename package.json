@@ -9,14 +9,12 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@primer/octicons": "^17.4.1",
 		"lodash": "^4.17.21",
 		"vue": "^3.2.45",
 		"vue-router": "^4.1.6"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.182",
-		"@types/primer__octicons": "^17.3.0",
 		"@vitejs/plugin-vue": "^3.0.3",
 		"@volar/vue-language-plugin-pug": "^1.0.9",
 		"pug": "^3.0.2",
