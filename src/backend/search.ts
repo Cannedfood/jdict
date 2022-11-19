@@ -2,6 +2,7 @@ import { uniq } from 'lodash';
 import { inject } from 'vue';
 import type { Entry } from "./jmdict";
 import { Character } from './kanjidic';
+import { Cache } from './cache'
 
 interface BasicSearchResult {
 	kanji: Character[],
@@ -18,7 +19,11 @@ export interface SearchResult extends BasicSearchResult {
 }
 
 export class SearchService {
-	constructor(public baseUrl = '/api') {}
+	private readonly cache = new Cache();
+
+	constructor(public baseUrl = '/api') {
+		this.cache.disabled = true;
+	}
 
 	async search(searchTerm: string, params = {} as { skip?: number, take?: number }) {
 		const start = performance.now();
@@ -64,7 +69,11 @@ export class SearchService {
 				.map(x => `${encodeURIComponent(x[0])}=${encodeURIComponent(x[1])}`)
 				.join('&')
 		}
-		return fetch(completeURL).then(r => r.json() as Promise<T>);
+
+		return this.cache.getOrCreate(
+			completeURL,
+			() => fetch(completeURL).then(r => r.json() as Promise<T>)
+		);
 	}
 }
 
