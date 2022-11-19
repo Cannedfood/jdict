@@ -56,7 +56,7 @@ const showJson = window.location.search.includes("debug=json")
 	}
 	.debug-info {
 		display: none;
-		opacity: 50%;
+		color: var(--text-muted1);
 	}
 	&:hover {
 		.debug-info {
@@ -65,7 +65,7 @@ const showJson = window.location.search.includes("debug=json")
 	}
 	.floating-container {
 		position: absolute;
-		background: #242424;
+		background: var(--background1);
 		width: 100%;
 		max-width: 20cm;
 		border: 2px solid white;
@@ -81,25 +81,25 @@ const showJson = window.location.search.includes("debug=json")
 			transition: opacity 100ms;
 		}
 		&:hover .romaji {
-			opacity: 100%;
+			opacity: 1;
 		}
 	}
 
 	.reading {
 		width: fit-content;
 		font-size: .7rem;
-		color: #888A;
+		color: var(--text-muted);
 		top: 0;
 	}
 	.kanji {
 		font-size: 1.2rem;
 		.phoneticReading { font-weight: bold; }
-		.irregularUsage { opacity: 60%; }
-		.rarelyUsed { opacity: 30%; }
+		.irregularUsage { color: var(--text-muted1); }
+		.rarelyUsed { color: var(--text-muted2); }
 	}
 	.extra-info {
 		display: inline;
-		opacity: 30%;
+		color: var(--text-muted2);
 		&> * {
 			display: inline-block;
 			margin-inline: .5em;

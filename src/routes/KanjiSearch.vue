@@ -69,7 +69,7 @@ input {
 	margin-inline: auto;
 
 	transition: 400ms border-color;
-	border: 1px solid transparent;
+	border: var(--outline-width) solid transparent;
 	&:focus {
 		border-color: purple;
 	}

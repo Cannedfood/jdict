@@ -14,22 +14,54 @@
 	-webkit-text-size-adjust: 100%;
 }
 
-// Dark Theme
+
+// Light Theme (default)
 :root {
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
+	--background1: #FFF;
+	--background2: #FFF;
+	--layer1: #666A;
+	--accent1: #A000A0;
+	--accent2: #ff00ff;
+	--neutral1: rgba(0, 0, 0, .8);
+	--text1: rgba(0, 0, 0, 1);
+	--text-muted1: #666;
+	--text-muted2: #888;
+
+	--outline-width: 3px;
+
+	--home-transition-time: .2s;
 }
 
-// Light Theme
-@media(prefers-colors-scheme: light) {
+// Dark Theme
+@media(prefers-color-scheme: dark) {
 	:root {
-		color: rgba(0, 0, 0, .87);
-		background-color: #FFF;
+		--background1: #242424;
+		--background2: #1e1e1e;
+		--layer1: #111D;
+		--accent1: #800080;
+		--accent2: #ff00ff;
+		--neutral1: rgba(255, 255, 255, 0.2);
+		--text-muted1: #AAA;
+		--text-muted2: #888;
+		--text1: rgba(255, 255, 255, 0.87);
+		--text2: #ccc;
+
+		--outline-width: 1px;
+
+		--home-transition-time: .2s;
 	}
 }
+
+:root {
+	color: var(--text1);
+	background-color: var(--background1);
+}
+
 body {
 	margin: 0;
 	padding: 0;
+
+	min-height: 100vh;
 }
 
 * {
@@ -39,7 +71,7 @@ body {
 	color: inherit;
 }
 hr {
-	border: 1px solid #8886;
+	border: var(--outline-width) solid #8886;
 }
 
 .serif {
@@ -50,6 +82,7 @@ hr {
 	max-width: 20cm;
 	// max-width: 75em;
 	margin-inline: auto;
+	padding-inline: .5em;
 }
 
 .text-center {
@@ -68,3 +101,15 @@ button, .btn, [role="button"] {
 	text-align: center;
 	margin: .2em;
 }
+
+// Platform specific fixes
+
+//// Remove x from input elements
+////// clears the ‘X’ from Internet Explorer
+input[type=search]::-ms-clear { display: none; width : 0; height: 0; }
+input[type=search]::-ms-reveal { display: none; width : 0; height: 0; }
+////// clears the ‘X’ from Chrome
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }

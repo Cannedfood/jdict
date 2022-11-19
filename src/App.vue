@@ -4,6 +4,7 @@ import SearchBar from './components/SearchBar.vue';
 
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from '@vue/reactivity';
+import BackgroundImage from './components/BackgroundImage.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,6 +20,7 @@ const home = computed(() => !route.name || route.name == 'home');
 </script>
 
 <template lang="pug">
+BackgroundImage(:visible="home")
 nav(:class="{ home: home }")
 	SearchBar(
 		v-model="searchQuery"
@@ -29,15 +31,28 @@ RouterView
 </template>
 
 <style lang="scss" scoped>
+
 nav {
 	// Stick to top
 	position: sticky;
 	top: 0;
 	z-index: 2;
-	background-color: #242424;
+
+	display: flex;
+	flex-flow: nowrap row;
+	align-items: center;
+
+	margin: 0;
+
+	padding-block: .1em;
 
 	// Show in center of screen when on home page
-	transition: transform 80ms ease-in-out;
-	&.home { transform: translateY(40vh); }
+	transition: transform var(--home-transition-time) ease-out;
+	min-height: 0;
+	&.home {
+		transform: translateY(40vh);
+		background-color: var(--layer1);
+		min-height: 20vh;
+	}
 }
 </style>

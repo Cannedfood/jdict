@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onKeyboardShortcut } from '@/util/OnKeyboardShortcut';
+import { onScrolledUsingTouch } from '@/util/OnScrolledUsingTouch';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -22,6 +23,8 @@ onKeyboardShortcut({
 	}
 });
 
+onScrolledUsingTouch(() => searchInput.value?.blur());
+
 function send() {
 	searchInput.value?.select();
 	emit('send', props.modelValue);
@@ -31,16 +34,17 @@ function send() {
 
 <template lang="pug">
 .search-bar
-	input(
-		ref="searchInput"
-		type="search"
+	input(type="search" ref="searchInput"
 		placeholder="Search..."
+
 		:value="modelValue"
-		autocomplete="off"
-		@input="emit('update:modelValue', targetValue($event).toLowerCase())"
-		@keydown.enter.prevent="send()"
-		onfocus="this.select();"
+		@keydown.enter.prevent="emit('update:modelValue', targetValue($event).toLowerCase()); send()"
+
+		onfocus="this.select()"
+
 		autofocus
+		autocomplete="off"
+		autocapitalize="none"
 	)
 	slot
 </template>
@@ -61,15 +65,15 @@ function send() {
 
 	font-size: 2em;
 
-	background: #0002;
+	background: var(--background2);
 	border-radius: .5em;
 	padding-inline: .3em;
 	padding-block: .2em;
 
 	transition: 400ms border-color;
-	border: 1px solid transparent;
+	border: var(--outline-width) solid var(--neutral1);
 	&:focus-within {
-		border-color: purple;
+		border-color: var(--accent1);
 	}
 
 	* {
@@ -89,9 +93,10 @@ function send() {
 		width: 1.5em;
 		border-radius: inherit;
 		cursor: pointer;
-		opacity: 20%;
+		color: var(--text-muted2);
+		transition: color 200ms;
 		&:hover {
-			opacity: 100%;
+			color: var(--text1);
 		}
 	}
 	select {
