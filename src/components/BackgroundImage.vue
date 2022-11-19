@@ -1,52 +1,52 @@
 <script setup lang="ts">
 import { computed, ref, watch, watchEffect } from 'vue';
 import { useMatchMedia } from '@/util/UseMedia';
+import ImageLodChain from './ImageLodChain.vue';
 
 const props = defineProps<{
 	visible: boolean;
 }>();
 
-const loaded = ref(false);
-const wasVisible = ref(false);
-watchEffect(() => wasVisible.value ||= props.visible);
+const isDarkTheme = useMatchMedia('(prefers-color-scheme: dark)');
 
-const dark_mode = useMatchMedia('(prefers-color-scheme: dark)');
+const backgroundDark = [
+	// '/japanese-street--unsplash-oCZHIa1D4EU-small.webp',
+	'/japanese-street--unsplash-oCZHIa1D4EU-medium.webp',
+	'/japanese-street--unsplash-oCZHIa1D4EU-high.webp',
+];
+const backgroundBright = [
+	// '/cherry-blossoms--unsplash-McsNra2VRQQ-small.webp',
+	'/cherry-blossoms--unsplash-McsNra2VRQQ-medium.webp',
+	'/cherry-blossoms--unsplash-McsNra2VRQQ-high.webp',
+];
 
-const url = computed(() =>
-	!wasVisible.value ? '' :
-	dark_mode.value? '/japanese-street--unsplash-oCZHIa1D4EU.jpg' :
-	/* light mode */ 'cherry-blossoms--unsplash-McsNra2VRQQ.jpg'
-);
+const lodChain = computed(() => isDarkTheme.value? backgroundDark : backgroundBright);
 
-const log = (...args: any[]) => console.log(...args);
+const highest_loaded = ref(-1);
+
+const log = console.log;
 
 </script>
 
 <template lang="pug">
-img.website-background(
-	:class="{ visible: visible && loaded }"
-	@loadstart="loaded = false"
-	@load="loaded = true; log('Loaded')"
-	:src="url"
-	loading="lazy"
-)
+.website-backgrounds(:class="{ visible }")
+	ImageLodChain(:urls="lodChain")
 </template>
 
-<style lang="scss">
-.website-background {
-	display: block;
+<style lang="scss" scoped>
+.website-backgrounds {
 	position: fixed;
 	top: 0;
 	left: 0;
-	height: 100vh;
-	width: 100vw;
+	right: 0;
+	bottom: 0;
 	z-index: -1;
 
-	object-fit: cover;
-
 	opacity: 0;
-	&.visible { opacity: 1; }
-	transition: opacity var(--home-transition-time) ease-out;
+	&.visible {
+		opacity: 1;
+		transition: opacity var(--home-transition-time) ease-out;
+	}
 }
 </style>
 
