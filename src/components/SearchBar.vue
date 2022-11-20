@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onKeyboardShortcut } from '@/util/OnKeyboardShortcut';
 import { onScrolledUsingTouch } from '@/util/OnScrolledUsingTouch';
+import { onTabFocusChange } from '@/util/OnTabFocusChange';
 import { ref } from 'vue';
 
 const props = defineProps<{
@@ -24,6 +25,16 @@ onKeyboardShortcut({
 });
 
 onScrolledUsingTouch(() => searchInput.value?.blur());
+
+onTabFocusChange(focus => {
+	if(focus) {
+		// Need a timeout so the click event (from clicking into the tab) and doesn't immediately steal the focus back
+		setTimeout(() => searchInput.value?.focus(), 50);
+	}
+	else {
+		searchInput.value?.blur();
+	}
+});
 
 function send() {
 	searchInput.value?.select();
