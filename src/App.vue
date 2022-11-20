@@ -31,19 +31,18 @@ RouterView
 </template>
 
 <style lang="scss" scoped>
-
 nav {
 	// Stick to top
 	position: sticky;
 	top: 0;
 	z-index: 2;
 
+	// Center search bar vertically
 	display: flex;
 	flex-flow: nowrap row;
 	align-items: center;
 
-	margin: 0;
-
+	// Padding
 	padding-block: .1em;
 
 	// Show in center of screen when on home page
