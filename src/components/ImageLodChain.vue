@@ -38,7 +38,6 @@ const loadedLevels = reactive([] as number[]);
 	&.loaded {
 		opacity: 1;
 		transition: opacity .5s ease-out;
-		transition-delay: 1s;
 	}
 	&.loaded.first {
 		transition: opacity .2s ease-out;

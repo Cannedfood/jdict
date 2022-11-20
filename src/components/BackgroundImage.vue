@@ -8,6 +8,7 @@ const props = defineProps<{
 }>();
 
 const isDarkTheme = useMatchMedia('(prefers-color-scheme: dark)');
+const preferReducedData = useMatchMedia('(prefers-reduced-data: reduce)');
 
 const backgroundDark = [
 	// '/japanese-street--unsplash-oCZHIa1D4EU-small.webp',
@@ -20,11 +21,11 @@ const backgroundBright = [
 	'/cherry-blossoms--unsplash-McsNra2VRQQ-high.webp',
 ];
 
-const lodChain = computed(() => isDarkTheme.value? backgroundDark : backgroundBright);
-
-const highest_loaded = ref(-1);
-
-const log = console.log;
+const lodChain = computed(() =>
+	preferReducedData.value? [] :
+	isDarkTheme.value? backgroundDark :
+	backgroundBright
+);
 
 </script>
 
