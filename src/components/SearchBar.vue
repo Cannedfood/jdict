@@ -15,31 +15,32 @@ const emit = defineEmits<{
 function targetValue(e: any) { return e.target.value; }
 
 const searchInput = ref<HTMLInputElement | null>(null);
+function focus() {
+	searchInput.value?.focus();
+	(navigator as any).virtualKeyboard?.show();
+}
+function blur() { searchInput.value?.blur(); }
+function send() {
+	searchInput.value?.select();
+	emit('send', props.modelValue);
+}
 
 onKeyboardShortcut({
 	'alt+f,alt+u': () => {
 		if(searchInput.value === document.activeElement)
 			return false;
-		searchInput.value?.focus();
+		focus();
 	}
 });
 
 onScrolledUsingTouch(() => searchInput.value?.blur());
 
-onTabFocusChange(focus => {
-	if(focus) {
-		// Need a timeout so the click event (from clicking into the tab) and doesn't immediately steal the focus back
-		setTimeout(() => searchInput.value?.focus(), 50);
-	}
-	else {
-		searchInput.value?.blur();
-	}
+onTabFocusChange(hasFocus => {
+	if(hasFocus)
+		setTimeout(() => focus(), 100); // Need a timeout so the click event (from clicking into the tab) and doesn't immediately steal the focus back
+	else
+		blur();
 });
-
-function send() {
-	searchInput.value?.select();
-	emit('send', props.modelValue);
-}
 
 </script>
 
