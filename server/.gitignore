@@ -1,12 +1,1 @@
-# General files
-tmp.txt
-# Build results
-bin
-obj
-# Visual Studio
-.vs
-*.sln
-*.vcxproj*
-# GNU Make
-Makefile
-*.make
+target

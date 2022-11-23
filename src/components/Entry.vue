@@ -6,11 +6,12 @@ import MeaningText from './entry/MeaningText.vue';
 
 const props = defineProps<{ entry: Entry }>();
 
-const senses = computed(() => props.entry.senses.filter(s => s.glosses.some(g => !g.lang)))
+// const senses = computed(() => props.entry.senses)
+const senses = computed(() => props.entry.senses.filter(s => s.glosses.some(g => g.lang == 'eng')))
 
 const highlightReading = computed(() =>
-	props.entry.kanji.every(k => k.infos?.includes('&rK;')) ||
-	senses.value.every(s => s.misc_info?.includes('&uk;')) // "word usually written using kana alone"
+	props.entry.kanji?.every(k => k.infos?.includes('&rK;')) ||
+	senses.value.every(s => s.misc?.includes('&uk;')) // "word usually written using kana alone"
 );
 
 function kanjiClasses(kanji: Kanji) {
@@ -33,19 +34,16 @@ const showJson = window.location.search.includes("debug=json")
 			.reading-entry(v-for="reading, i of entry.readings")
 				.romaji {{reading.romaji}}
 				.kana   {{reading.value + (i + 1 != entry.readings.length? ', ' : '')}}
-		.kanji
-			span(v-if="highlightReading" v-for="kanji, i in entry.readings")
-				span(:class="kanjiClasses(kanji)")
-					span {{kanji.value}}
+		.kanji(v-if="entry.kanji")
+			span(v-if="highlightReading" v-for="reading, i in entry.readings")
+				span(:class="kanjiClasses(reading)")
+					span {{reading.value}}
 					span(v-if="i + 1 != entry.kanji.length || entry.kanji.length > 0") ,&nbsp;
 			span(v-for="kanji, i in entry.kanji")
 				KanjiText(:kanji="kanji" :class="kanjiClasses(kanji)")
 					h1 Kapow!
-				span(v-if="i + 1 != entry.kanji.length") ,&nbsp;
+				span(v-if="i + 1 != entry.kanji?.length") ,&nbsp;
 	MeaningText(:senses="senses")
-	.debug-info.float-right(v-if="showDebugInfo")
-		p rating: {{entry.rating?.toString(10)}}
-		p(v-if="showJson") {{entry}}
 </template>
 
 <style lang="scss">

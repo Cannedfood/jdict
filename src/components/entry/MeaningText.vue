@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 function generateGlossText(g: Gloss) {
-	let result = g.content;
+	let result = g.value;
 
 	const extra = [ g.type, g.gender ].filter(v => v);
 	if(extra.length > 0)
@@ -24,29 +24,29 @@ function generateGlossText(g: Gloss) {
 			.content
 				| {{sense.glosses.map(generateGlossText).join('; ')}}
 				.extra-info &nbsp;
-					.restrict-kanji(v-if="sense.restrict_kanji")
-						| Only {{sense.restrict_kanji.join(', ')}}
-					.restrict-reading(v-if="sense.restrict_reading")
-						| Only {{sense.restrict_reading.join(', ')}}
+					.restrict-kanji(v-if="sense.restrict_to_kanji")
+						| Only {{sense.restrict_to_kanji.join(', ')}}
+					.restrict-reading(v-if="sense.restrict_to_reading")
+						| Only {{sense.restrict_to_reading.join(', ')}}
 					//- Stuff like "na-adjective"
 					//- .part-of-speech(v-if="sense.part_of_speech_tags")
 					//- 	| Part of Speech: {{sense.part_of_speech_tags.map(replaceEntities).join(', ')}}
 					.fields(v-if="sense.fields")
 						| {{sense.fields.map(replaceEntities).join(', ')}}
-					.misc(v-if="sense.misc_info")
-						| {{sense.misc_info.map(replaceEntities).join(', ')}}
-					.sense-info(v-if="sense.sense_info")
-						| {{sense.sense_info.map(replaceEntities).join(', ')}}
-					.source-lang(v-if="sense.lang_origin")
-						| Source Language: {{sense.lang_origin.map(o => `${o.lang}: ${o.word}`)}}
+					.misc(v-if="sense.misc")
+						| {{sense.misc.map(replaceEntities).join(', ')}}
+					.sense-info(v-if="sense.info")
+						| {{sense.info.map(replaceEntities).join(', ')}}
+					.source-lang(v-if="sense.origin")
+						| Source Language: {{sense.origin.map(o => `${o.lang}: ${o.word}`)}}
 					.dialects(v-if="sense.dialects")
 						| Dialect: {{sense.dialects?.map(replaceEntities).join(', ')}}
 					.examples(v-if="sense.examples")
 						.example(v-for="ex of sense.examples")
 							| Example: {{ex.sentences}}
-					.crossref(v-if="sense.cross_references")
+					.crossref(v-if="sense.xrefs")
 						| See also&nbsp;
-						a(v-for="xref in sense.cross_references" :href="`#/search/${xref.split('・')[0]}`") {{xref}}
+						a(v-for="xref in sense.xrefs" :href="`#/search/${xref.split('・')[0]}`") {{xref}}
 					.antonyms(v-if="sense.antonyms")
 						| Antonyms:
 						a(v-for="ant in sense.antonyms" :href="`#/search/${ant.split('・')[0]}`") {{ant}}

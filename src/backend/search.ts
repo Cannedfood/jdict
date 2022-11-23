@@ -52,8 +52,8 @@ export class SearchService {
 		const results = await this.search(searchTerm, {  });
 		const kanji = uniq(
 			results.results
-			.flatMap(r => r.kanji)
-			.filter(k => k)
+			.flatMap(r => r.kanji!)
+			.filter(k => k != undefined)
 			.map(k => k.value)
 			.flatMap(text => text.split(''))
 			.filter(k => k.charCodeAt(0) >= 0x4e00 && k.charCodeAt(0) < 0x9FBF)

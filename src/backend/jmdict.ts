@@ -21,7 +21,7 @@ export interface SourceLanguage {
 }
 
 export interface Gloss {
-	content: string;
+	value: string;
 	lang?: string;
 	gender?: string;
 	type?: string;
@@ -40,16 +40,16 @@ export interface Example {
 }
 
 export interface Sense {
-	restrict_kanji?: string[];
-	restrict_reading?: string[];
-	part_of_speech_tags?: string[];
-	cross_references?: string[];
+	restrict_to_kanji?: string[];
+	restrict_to_reading?: string[];
+	part_of_speech?: string[];
+	xrefs?: string[];
 	antonyms?: string[];
 	fields?: string[];
-	misc_info?: string[];
-	sense_info?: string[];
+	misc?: string[];
+	info?: string[];
 
-	lang_origin?: SourceLanguage[];
+	origin?: SourceLanguage[];
 	dialects?: string[];
 
 	glosses: Gloss[];
@@ -58,8 +58,7 @@ export interface Sense {
 
 export interface Entry {
 	id: string;
-	rating?: number, // Rating used by search algorithm
-	kanji: Kanji[];
+	kanji?: Kanji[];
 	readings: Reading[];
 	senses: Sense[];
 }
