@@ -23,9 +23,6 @@ function kanjiClasses(kanji: Kanji) {
 	};
 }
 
-const showDebugInfo = window.location.search.includes("debug=");
-const showJson = window.location.search.includes("debug=json")
-
 </script>
 
 <template lang="pug">
