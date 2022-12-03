@@ -14,7 +14,7 @@ function readings(g: ReadingMeaningGroup, type: ReadingType) {
 	if(!g.readings) return undefined;
 	if(hidden.includes(type)) return undefined;
 
-	const result = g.readings.filter(r => r.type == type).map(r => r.value);
+	const result = g.readings.filter(r => r.typ == type).map(r => r.value);
 	return result.length? result : undefined;
 }
 
@@ -31,11 +31,11 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 .kanji-info(:class="{expanded}")
 	.kanji {{kanji.literal}}
 	.tags
-		span(v-if="kanji.jlpt") JLPT {{kanji.jlpt}}
-		span(v-if="kanji.grade") Grade {{kanji.grade}}
-		span(v-if="kanji.freq") Freq: {{kanji.freq}}
-		span(v-if="kanji.stroke_count && kanji.stroke_count.length > 0")
-			| Strokes: {{kanji.stroke_count[0]}}
+		span(v-if="kanji.misc.jlpt") JLPT {{kanji.misc.jlpt}}
+		span(v-if="kanji.misc.grade") Grade {{kanji.misc.grade}}
+		span(v-if="kanji.misc.freq") Freq: {{kanji.misc.freq}}
+		span(v-if="kanji.misc.stroke_count && kanji.misc.stroke_count.length > 0")
+			| Strokes: {{kanji.misc.stroke_count[0]}}
 			//- span(v-if="kanji.stroke_count.length > 1")
 			//- 	| ({{kanji.stroke_count.slice(1).join(', ')}})
 	.info
@@ -46,8 +46,8 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 			.reading-korean(v-if="zipKoreanReadings(g)") Korean: {{zipKoreanReadings(g)?.join(', ')}}
 			.reading-vietnam(v-if="readings(g, 'vietnam')") Vietnamese: {{readings(g, 'vietnam')?.join(', ')}}
 			.reading-pinyin(v-if="readings(g, 'pinyin')") Pinyin: {{readings(g, 'pinyin')?.join(', ')}}
-		.nanori(v-if="kanji.nanori") Nanori: {{kanji.nanori?.join(', ')}}
-		.radical(v-if="kanji.rad_name") Radical: {{kanji.rad_name.join(', ')}}
+			.nanori(v-if="g.nanori?.length") Nanori: {{g.nanori?.join(', ')}}
+		.radical(v-if="kanji.misc.rad_name?.length") Radical: {{kanji.misc.rad_name.join(', ')}}
 	.bonus-info
 		.codepoint(
 			v-if="kanji.codepoint"

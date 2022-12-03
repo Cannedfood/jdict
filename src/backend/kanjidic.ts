@@ -55,13 +55,13 @@ export type OnType =
 	"kan'you";
 
 export interface QueryCode {
-	type: QueryCodeType;
+	typ: QueryCodeType;
 	value: string;
 	skip_misclassification?: SkipMisclassification
 }
 
 export interface Reading {
-	type: ReadingType;
+	typ: ReadingType;
 	value: string;
 	approved_for_joyou_kanji?: true;
 	on_type: OnType;
@@ -75,6 +75,7 @@ export interface Meaning {
 export interface ReadingMeaningGroup {
 	readings?: Reading[];
 	meanings?: Meaning[];
+	nanori?: string[];
 }
 
 export type VariantType =
@@ -89,15 +90,50 @@ export type VariantType =
 	"ucs";
 
 export interface Variant {
-	type: VariantType;
+	typ: VariantType;
 	value: string;
 }
 
-export interface Character extends Misc {
-	literal: string;
-	codepoint: Codepoint;
-	radical: Radical;
-	query_code?: QueryCode[];
-	reading_meaning_groups?: ReadingMeaningGroup[];
-	nanori?: string[];
+export type DicRefType =
+	'nelson_c' |
+	'nelson_n' |
+	'halpern_njecd' |
+	'halpern_kkd' |
+	'halpern_kkld' |
+	'halpern_kkld_2ed' |
+	'heisig' |
+	'heisig6' |
+	'gakken' |
+	'oneill_names' |
+	'oneill_kk' |
+	'moro' |
+	'henshall' |
+	'sh_kk' |
+	'sh_kk2' |
+	'sakade' |
+	'jf_cards' |
+	'henshall3' |
+	'tutt_cards' |
+	'crowley' |
+	'kanji_in_context' |
+	'busy_people' |
+	'kodansha_compact' |
+	'maniette';
+
+export interface DicRef {
+    typ: DicRefType, // <!ATTLIST dic_ref dr_type CDATA #REQUIRED> The dr_type defines the dictionary or reference book, etc. to which dic_ref element applies.
+    index_number: string, // <!ELEMENT dic_ref (#PCDATA)> Each dic_ref contains an index number. The particular dictionary, etc. is defined by the dr_type attribute.
+    moro_volume: number,
+    moro_page: number,
+}
+
+export interface Character {
+    literal: string, // <!ELEMENT literal (#PCDATA)> The literal element contains the actual kanji character.
+    codepoint: Codepoint,
+    radical: Radical,
+    misc: Misc,
+
+    dic_number: Array<DicRef>,
+    query_code: Array<QueryCode>,
+    reading_meaning_groups: Array<ReadingMeaningGroup>, // <!ELEMENT reading_meaning (rmgroup*, nanori*)> The readings for the kanji in several languages, and the meanings, also in several languages. The readings and meanings are grouped to enable the handling of the situation where the meaning is differentiated by reading. [T1]
 }

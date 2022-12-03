@@ -2,7 +2,7 @@ use std::{collections::HashMap, time::Duration};
 
 use itertools::Itertools;
 
-use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::Kanjidic, jmdict_result_rating::rate_entry_match};
+use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match};
 
 pub struct ServerState {
     pub dict: JMdict,
@@ -38,6 +38,13 @@ impl ServerState {
         .filter(|(_, rating)| rating > &0)
         .sorted_by(|(_, rating1), (_, rating2)| rating2.cmp(rating1))
         .map(|(entry, _)| entry.clone())
+        .collect()
+    }
+
+    pub fn search_kanji(&self, query: &str) -> Vec<Character> {
+        query.chars()
+        .filter_map(|c| self.kanjidic_index.get(&c))
+        .map(|idx| self.kanjidic.characters[*idx as usize].clone())
         .collect()
     }
 }
