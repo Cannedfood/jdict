@@ -17,410 +17,430 @@ fn remove_first_char(text: &mut &str) -> Option<char> {
 pub fn to_romaji(text: &str) -> String {
     let mut result = String::new();
     let mut text_copy = text;
+
+    let mut was_tsu = false;
+
     while !text_copy.is_empty() {
-        if      snip_prefix("きゃ", &mut text_copy) { result.push_str("kya"); }
-        else if snip_prefix("きゅ", &mut text_copy) { result.push_str("kyu"); }
-        else if snip_prefix("きょ", &mut text_copy) { result.push_str("kyo"); }
-        else if snip_prefix("しゃ", &mut text_copy) { result.push_str("sha"); }
-        else if snip_prefix("しゅ", &mut text_copy) { result.push_str("shu"); }
-        else if snip_prefix("しょ", &mut text_copy) { result.push_str("sho"); }
-        else if snip_prefix("ちゃ", &mut text_copy) { result.push_str("cha"); }
-        else if snip_prefix("ちゅ", &mut text_copy) { result.push_str("chu"); }
-        else if snip_prefix("ちょ", &mut text_copy) { result.push_str("cho"); }
-        else if snip_prefix("にゃ", &mut text_copy) { result.push_str("nya"); }
-        else if snip_prefix("にゅ", &mut text_copy) { result.push_str("nyu"); }
-        else if snip_prefix("にょ", &mut text_copy) { result.push_str("nyo"); }
-        else if snip_prefix("ひゃ", &mut text_copy) { result.push_str("hya"); }
-        else if snip_prefix("ひゅ", &mut text_copy) { result.push_str("hyu"); }
-        else if snip_prefix("ひょ", &mut text_copy) { result.push_str("hyo"); }
-        else if snip_prefix("みゃ", &mut text_copy) { result.push_str("mya"); }
-        else if snip_prefix("みゅ", &mut text_copy) { result.push_str("myu"); }
-        else if snip_prefix("みょ", &mut text_copy) { result.push_str("myo"); }
-        else if snip_prefix("りゃ", &mut text_copy) { result.push_str("rya"); }
-        else if snip_prefix("りゅ", &mut text_copy) { result.push_str("ryu"); }
-        else if snip_prefix("りょ", &mut text_copy) { result.push_str("ryo"); }
-        else if snip_prefix("ぎゃ", &mut text_copy) { result.push_str("gya"); }
-        else if snip_prefix("ぎゅ", &mut text_copy) { result.push_str("gyu"); }
-        else if snip_prefix("ぎょ", &mut text_copy) { result.push_str("gyo"); }
-        else if snip_prefix("じゃ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("じゅ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("じょ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ぢゃ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ぢゅ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ぢょ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("びゃ", &mut text_copy) { result.push_str("bya"); }
-        else if snip_prefix("びゅ", &mut text_copy) { result.push_str("byu"); }
-        else if snip_prefix("びょ", &mut text_copy) { result.push_str("byo"); }
-        else if snip_prefix("ぴゃ", &mut text_copy) { result.push_str("pya"); }
-        else if snip_prefix("ぴゅ", &mut text_copy) { result.push_str("pyu"); }
-        else if snip_prefix("ぴょ", &mut text_copy) { result.push_str("pyo"); }
-        else if snip_prefix("ふぁ", &mut text_copy) { result.push_str("fa"); }
-        else if snip_prefix("ふぃ", &mut text_copy) { result.push_str("fi"); }
-        else if snip_prefix("ふぇ", &mut text_copy) { result.push_str("fe"); }
-        else if snip_prefix("ふぉ", &mut text_copy) { result.push_str("fo"); }
-        else if snip_prefix("うぃ", &mut text_copy) { result.push_str("wi"); }
-        else if snip_prefix("うぇ", &mut text_copy) { result.push_str("we"); }
-        else if snip_prefix("うぉ", &mut text_copy) { result.push_str("wo"); }
-        else if snip_prefix("きぇ", &mut text_copy) { result.push_str("kye"); }
-        else if snip_prefix("しぇ", &mut text_copy) { result.push_str("she"); }
-        else if snip_prefix("ちぇ", &mut text_copy) { result.push_str("che"); }
-        else if snip_prefix("にぇ", &mut text_copy) { result.push_str("nye"); }
-        else if snip_prefix("ひぇ", &mut text_copy) { result.push_str("hye"); }
-        else if snip_prefix("みぇ", &mut text_copy) { result.push_str("mye"); }
-        else if snip_prefix("りぇ", &mut text_copy) { result.push_str("rye"); }
-        else if snip_prefix("ぎぇ", &mut text_copy) { result.push_str("gye"); }
-        else if snip_prefix("じぇ", &mut text_copy) { result.push_str("je"); }
-        else if snip_prefix("ぢぇ", &mut text_copy) { result.push_str("je"); }
-        else if snip_prefix("びぇ", &mut text_copy) { result.push_str("bye"); }
-        else if snip_prefix("ぴぇ", &mut text_copy) { result.push_str("pye"); }
-        else if snip_prefix("ふぇ", &mut text_copy) { result.push_str("fe"); }
-        else if snip_prefix("ふぉ", &mut text_copy) { result.push_str("fo"); }
-        else if snip_prefix("きゃ", &mut text_copy) { result.push_str("kya"); }
-        else if snip_prefix("きゅ", &mut text_copy) { result.push_str("kyu"); }
-        else if snip_prefix("きょ", &mut text_copy) { result.push_str("kyo"); }
-        else if snip_prefix("しゃ", &mut text_copy) { result.push_str("sha"); }
-        else if snip_prefix("しゅ", &mut text_copy) { result.push_str("shu"); }
-        else if snip_prefix("しょ", &mut text_copy) { result.push_str("sho"); }
-        else if snip_prefix("ちゃ", &mut text_copy) { result.push_str("cha"); }
-        else if snip_prefix("ちゅ", &mut text_copy) { result.push_str("chu"); }
-        else if snip_prefix("ちょ", &mut text_copy) { result.push_str("cho"); }
-        else if snip_prefix("にゃ", &mut text_copy) { result.push_str("nya"); }
-        else if snip_prefix("にゅ", &mut text_copy) { result.push_str("nyu"); }
-        else if snip_prefix("にょ", &mut text_copy) { result.push_str("nyo"); }
-        else if snip_prefix("ひゃ", &mut text_copy) { result.push_str("hya"); }
-        else if snip_prefix("ひゅ", &mut text_copy) { result.push_str("hyu"); }
-        else if snip_prefix("ひょ", &mut text_copy) { result.push_str("hyo"); }
-        else if snip_prefix("みゃ", &mut text_copy) { result.push_str("mya"); }
-        else if snip_prefix("みゅ", &mut text_copy) { result.push_str("myu"); }
-        else if snip_prefix("みょ", &mut text_copy) { result.push_str("myo"); }
-        else if snip_prefix("りゃ", &mut text_copy) { result.push_str("rya"); }
-        else if snip_prefix("りゅ", &mut text_copy) { result.push_str("ryu"); }
-        else if snip_prefix("りょ", &mut text_copy) { result.push_str("ryo"); }
-        else if snip_prefix("ぎゃ", &mut text_copy) { result.push_str("gya"); }
-        else if snip_prefix("ぎゅ", &mut text_copy) { result.push_str("gyu"); }
-        else if snip_prefix("ぎょ", &mut text_copy) { result.push_str("gyo"); }
-        else if snip_prefix("じゃ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("じゅ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("じょ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ぢゃ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ぢゅ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ぢょ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("びゃ", &mut text_copy) { result.push_str("bya"); }
-        else if snip_prefix("びゅ", &mut text_copy) { result.push_str("byu"); }
-        else if snip_prefix("びょ", &mut text_copy) { result.push_str("byo"); }
-        else if snip_prefix("ぴゃ", &mut text_copy) { result.push_str("pya"); }
-        else if snip_prefix("ぴゅ", &mut text_copy) { result.push_str("pyu"); }
-        else if snip_prefix("ぴょ", &mut text_copy) { result.push_str("pyo"); }
-        else if snip_prefix("あ", &mut text_copy) { result.push_str("a"); }
-        else if snip_prefix("い", &mut text_copy) { result.push_str("i"); }
-        else if snip_prefix("う", &mut text_copy) { result.push_str("u"); }
-        else if snip_prefix("え", &mut text_copy) { result.push_str("e"); }
-        else if snip_prefix("お", &mut text_copy) { result.push_str("o"); }
-        else if snip_prefix("か", &mut text_copy) { result.push_str("ka"); }
-        else if snip_prefix("き", &mut text_copy) { result.push_str("ki"); }
-        else if snip_prefix("く", &mut text_copy) { result.push_str("ku"); }
-        else if snip_prefix("け", &mut text_copy) { result.push_str("ke"); }
-        else if snip_prefix("こ", &mut text_copy) { result.push_str("ko"); }
-        else if snip_prefix("さ", &mut text_copy) { result.push_str("sa"); }
-        else if snip_prefix("し", &mut text_copy) { result.push_str("shi"); }
-        else if snip_prefix("す", &mut text_copy) { result.push_str("su"); }
-        else if snip_prefix("せ", &mut text_copy) { result.push_str("se"); }
-        else if snip_prefix("そ", &mut text_copy) { result.push_str("so"); }
-        else if snip_prefix("た", &mut text_copy) { result.push_str("ta"); }
-        else if snip_prefix("ち", &mut text_copy) { result.push_str("chi"); }
-        else if snip_prefix("つ", &mut text_copy) { result.push_str("tsu"); }
-        else if snip_prefix("て", &mut text_copy) { result.push_str("te"); }
-        else if snip_prefix("と", &mut text_copy) { result.push_str("to"); }
-        else if snip_prefix("な", &mut text_copy) { result.push_str("na"); }
-        else if snip_prefix("に", &mut text_copy) { result.push_str("ni"); }
-        else if snip_prefix("ぬ", &mut text_copy) { result.push_str("nu"); }
-        else if snip_prefix("ね", &mut text_copy) { result.push_str("ne"); }
-        else if snip_prefix("の", &mut text_copy) { result.push_str("no"); }
-        else if snip_prefix("は", &mut text_copy) { result.push_str("ha"); }
-        else if snip_prefix("ひ", &mut text_copy) { result.push_str("hi"); }
-        else if snip_prefix("ふ", &mut text_copy) { result.push_str("fu"); }
-        else if snip_prefix("へ", &mut text_copy) { result.push_str("he"); }
-        else if snip_prefix("ほ", &mut text_copy) { result.push_str("ho"); }
-        else if snip_prefix("ま", &mut text_copy) { result.push_str("ma"); }
-        else if snip_prefix("み", &mut text_copy) { result.push_str("mi"); }
-        else if snip_prefix("む", &mut text_copy) { result.push_str("mu"); }
-        else if snip_prefix("め", &mut text_copy) { result.push_str("me"); }
-        else if snip_prefix("も", &mut text_copy) { result.push_str("mo"); }
-        else if snip_prefix("や", &mut text_copy) { result.push_str("ya"); }
-        else if snip_prefix("ゆ", &mut text_copy) { result.push_str("yu"); }
-        else if snip_prefix("よ", &mut text_copy) { result.push_str("yo"); }
-        else if snip_prefix("ら", &mut text_copy) { result.push_str("ra"); }
-        else if snip_prefix("り", &mut text_copy) { result.push_str("ri"); }
-        else if snip_prefix("る", &mut text_copy) { result.push_str("ru"); }
-        else if snip_prefix("れ", &mut text_copy) { result.push_str("re"); }
-        else if snip_prefix("ろ", &mut text_copy) { result.push_str("ro"); }
-        else if snip_prefix("わ", &mut text_copy) { result.push_str("wa"); }
-        else if snip_prefix("を", &mut text_copy) { result.push_str("wo"); }
-        else if snip_prefix("ん", &mut text_copy) { result.push_str("n"); }
-        else if snip_prefix("が", &mut text_copy) { result.push_str("ga"); }
-        else if snip_prefix("ぎ", &mut text_copy) { result.push_str("gi"); }
-        else if snip_prefix("ぐ", &mut text_copy) { result.push_str("gu"); }
-        else if snip_prefix("げ", &mut text_copy) { result.push_str("ge"); }
-        else if snip_prefix("ご", &mut text_copy) { result.push_str("go"); }
-        else if snip_prefix("ざ", &mut text_copy) { result.push_str("za"); }
-        else if snip_prefix("じ", &mut text_copy) { result.push_str("ji"); }
-        else if snip_prefix("ず", &mut text_copy) { result.push_str("zu"); }
-        else if snip_prefix("ぜ", &mut text_copy) { result.push_str("ze"); }
-        else if snip_prefix("ぞ", &mut text_copy) { result.push_str("zo"); }
-        else if snip_prefix("だ", &mut text_copy) { result.push_str("da"); }
-        else if snip_prefix("ぢ", &mut text_copy) { result.push_str("ji"); }
-        else if snip_prefix("づ", &mut text_copy) { result.push_str("zu"); }
-        else if snip_prefix("で", &mut text_copy) { result.push_str("de"); }
-        else if snip_prefix("ど", &mut text_copy) { result.push_str("do"); }
-        else if snip_prefix("ば", &mut text_copy) { result.push_str("ba"); }
-        else if snip_prefix("び", &mut text_copy) { result.push_str("bi"); }
-        else if snip_prefix("ぶ", &mut text_copy) { result.push_str("bu"); }
-        else if snip_prefix("べ", &mut text_copy) { result.push_str("be"); }
-        else if snip_prefix("ぼ", &mut text_copy) { result.push_str("bo"); }
-        else if snip_prefix("ぱ", &mut text_copy) { result.push_str("pa"); }
-        else if snip_prefix("ぴ", &mut text_copy) { result.push_str("pi"); }
-        else if snip_prefix("ぷ", &mut text_copy) { result.push_str("pu"); }
-        else if snip_prefix("ぺ", &mut text_copy) { result.push_str("pe"); }
-        else if snip_prefix("ぽ", &mut text_copy) { result.push_str("po"); }
-        else if snip_prefix("ヴァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ヴィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ヴ", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ヴェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ヴォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("う゛ぁ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("う゛ぃ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("う゛", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("う゛ぇ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("う゛ぉ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("キャ", &mut text_copy) { result.push_str("kya"); }
-        else if snip_prefix("キュ", &mut text_copy) { result.push_str("kyu"); }
-        else if snip_prefix("キョ", &mut text_copy) { result.push_str("kyo"); }
-        else if snip_prefix("シャ", &mut text_copy) { result.push_str("sha"); }
-        else if snip_prefix("シュ", &mut text_copy) { result.push_str("shu"); }
-        else if snip_prefix("ショ", &mut text_copy) { result.push_str("sho"); }
-        else if snip_prefix("チャ", &mut text_copy) { result.push_str("cha"); }
-        else if snip_prefix("チュ", &mut text_copy) { result.push_str("chu"); }
-        else if snip_prefix("チョ", &mut text_copy) { result.push_str("cho"); }
-        else if snip_prefix("ニャ", &mut text_copy) { result.push_str("nya"); }
-        else if snip_prefix("ニュ", &mut text_copy) { result.push_str("nyu"); }
-        else if snip_prefix("ニョ", &mut text_copy) { result.push_str("nyo"); }
-        else if snip_prefix("ヒャ", &mut text_copy) { result.push_str("hya"); }
-        else if snip_prefix("ヒュ", &mut text_copy) { result.push_str("hyu"); }
-        else if snip_prefix("ヒョ", &mut text_copy) { result.push_str("hyo"); }
-        else if snip_prefix("ミャ", &mut text_copy) { result.push_str("mya"); }
-        else if snip_prefix("ミュ", &mut text_copy) { result.push_str("myu"); }
-        else if snip_prefix("ミョ", &mut text_copy) { result.push_str("myo"); }
-        else if snip_prefix("リャ", &mut text_copy) { result.push_str("rya"); }
-        else if snip_prefix("リュ", &mut text_copy) { result.push_str("ryu"); }
-        else if snip_prefix("リョ", &mut text_copy) { result.push_str("ryo"); }
-        else if snip_prefix("ギャ", &mut text_copy) { result.push_str("gya"); }
-        else if snip_prefix("ギュ", &mut text_copy) { result.push_str("gyu"); }
-        else if snip_prefix("ギョ", &mut text_copy) { result.push_str("gyo"); }
-        else if snip_prefix("ジャ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ジュ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ジョ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ヂャ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ヂュ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ヂョ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ビャ", &mut text_copy) { result.push_str("bya"); }
-        else if snip_prefix("ビュ", &mut text_copy) { result.push_str("byu"); }
-        else if snip_prefix("ビョ", &mut text_copy) { result.push_str("byo"); }
-        else if snip_prefix("ピャ", &mut text_copy) { result.push_str("pya"); }
-        else if snip_prefix("ピュ", &mut text_copy) { result.push_str("pyu"); }
-        else if snip_prefix("ピョ", &mut text_copy) { result.push_str("pyo"); }
-        else if snip_prefix("ヴァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ヴィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ヴ", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ヴェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ヴォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("ウ゛ァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ウ゛ィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ウ゛", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ウ゛ェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ウ゛ォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("キャ", &mut text_copy) { result.push_str("kya"); }
-        else if snip_prefix("キュ", &mut text_copy) { result.push_str("kyu"); }
-        else if snip_prefix("キョ", &mut text_copy) { result.push_str("kyo"); }
-        else if snip_prefix("シャ", &mut text_copy) { result.push_str("sha"); }
-        else if snip_prefix("シュ", &mut text_copy) { result.push_str("shu"); }
-        else if snip_prefix("ショ", &mut text_copy) { result.push_str("sho"); }
-        else if snip_prefix("チャ", &mut text_copy) { result.push_str("cha"); }
-        else if snip_prefix("チュ", &mut text_copy) { result.push_str("chu"); }
-        else if snip_prefix("チョ", &mut text_copy) { result.push_str("cho"); }
-        else if snip_prefix("ニャ", &mut text_copy) { result.push_str("nya"); }
-        else if snip_prefix("ニュ", &mut text_copy) { result.push_str("nyu"); }
-        else if snip_prefix("ニョ", &mut text_copy) { result.push_str("nyo"); }
-        else if snip_prefix("ヒャ", &mut text_copy) { result.push_str("hya"); }
-        else if snip_prefix("ヒュ", &mut text_copy) { result.push_str("hyu"); }
-        else if snip_prefix("ヒョ", &mut text_copy) { result.push_str("hyo"); }
-        else if snip_prefix("ミャ", &mut text_copy) { result.push_str("mya"); }
-        else if snip_prefix("ミュ", &mut text_copy) { result.push_str("myu"); }
-        else if snip_prefix("ミョ", &mut text_copy) { result.push_str("myo"); }
-        else if snip_prefix("リャ", &mut text_copy) { result.push_str("rya"); }
-        else if snip_prefix("リュ", &mut text_copy) { result.push_str("ryu"); }
-        else if snip_prefix("リョ", &mut text_copy) { result.push_str("ryo"); }
-        else if snip_prefix("ギャ", &mut text_copy) { result.push_str("gya"); }
-        else if snip_prefix("ギュ", &mut text_copy) { result.push_str("gyu"); }
-        else if snip_prefix("ギョ", &mut text_copy) { result.push_str("gyo"); }
-        else if snip_prefix("ジャ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ジュ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ジョ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ヂャ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ヂュ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ヂョ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ビャ", &mut text_copy) { result.push_str("bya"); }
-        else if snip_prefix("ビュ", &mut text_copy) { result.push_str("byu"); }
-        else if snip_prefix("ビョ", &mut text_copy) { result.push_str("byo"); }
-        else if snip_prefix("ピャ", &mut text_copy) { result.push_str("pya"); }
-        else if snip_prefix("ピュ", &mut text_copy) { result.push_str("pyu"); }
-        else if snip_prefix("ピョ", &mut text_copy) { result.push_str("pyo"); }
-        else if snip_prefix("ヴァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ヴィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ヴ", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ヴェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ヴォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("ウ゛ァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ウ゛ィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ウ゛", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ウ゛ェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ウ゛ォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("キャ", &mut text_copy) { result.push_str("kya"); }
-        else if snip_prefix("キュ", &mut text_copy) { result.push_str("kyu"); }
-        else if snip_prefix("キョ", &mut text_copy) { result.push_str("kyo"); }
-        else if snip_prefix("シャ", &mut text_copy) { result.push_str("sha"); }
-        else if snip_prefix("シュ", &mut text_copy) { result.push_str("shu"); }
-        else if snip_prefix("ショ", &mut text_copy) { result.push_str("sho"); }
-        else if snip_prefix("チャ", &mut text_copy) { result.push_str("cha"); }
-        else if snip_prefix("チュ", &mut text_copy) { result.push_str("chu"); }
-        else if snip_prefix("チョ", &mut text_copy) { result.push_str("cho"); }
-        else if snip_prefix("ニャ", &mut text_copy) { result.push_str("nya"); }
-        else if snip_prefix("ニュ", &mut text_copy) { result.push_str("nyu"); }
-        else if snip_prefix("ニョ", &mut text_copy) { result.push_str("nyo"); }
-        else if snip_prefix("ヒャ", &mut text_copy) { result.push_str("hya"); }
-        else if snip_prefix("ヒュ", &mut text_copy) { result.push_str("hyu"); }
-        else if snip_prefix("ヒョ", &mut text_copy) { result.push_str("hyo"); }
-        else if snip_prefix("ミャ", &mut text_copy) { result.push_str("mya"); }
-        else if snip_prefix("ミュ", &mut text_copy) { result.push_str("myu"); }
-        else if snip_prefix("ミョ", &mut text_copy) { result.push_str("myo"); }
-        else if snip_prefix("リャ", &mut text_copy) { result.push_str("rya"); }
-        else if snip_prefix("リュ", &mut text_copy) { result.push_str("ryu"); }
-        else if snip_prefix("リョ", &mut text_copy) { result.push_str("ryo"); }
-        else if snip_prefix("ギャ", &mut text_copy) { result.push_str("gya"); }
-        else if snip_prefix("ギュ", &mut text_copy) { result.push_str("gyu"); }
-        else if snip_prefix("ギョ", &mut text_copy) { result.push_str("gyo"); }
-        else if snip_prefix("ジャ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ジュ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ジョ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ヂャ", &mut text_copy) { result.push_str("ja"); }
-        else if snip_prefix("ヂュ", &mut text_copy) { result.push_str("ju"); }
-        else if snip_prefix("ヂョ", &mut text_copy) { result.push_str("jo"); }
-        else if snip_prefix("ビャ", &mut text_copy) { result.push_str("bya"); }
-        else if snip_prefix("ビュ", &mut text_copy) { result.push_str("byu"); }
-        else if snip_prefix("ビョ", &mut text_copy) { result.push_str("byo"); }
-        else if snip_prefix("ピャ", &mut text_copy) { result.push_str("pya"); }
-        else if snip_prefix("ピュ", &mut text_copy) { result.push_str("pyu"); }
-        else if snip_prefix("ピョ", &mut text_copy) { result.push_str("pyo"); }
-        else if snip_prefix("ヴァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ヴィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ヴ", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ヴェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ヴォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("ウ゛ァ", &mut text_copy) { result.push_str("va"); }
-        else if snip_prefix("ウ゛ィ", &mut text_copy) { result.push_str("vi"); }
-        else if snip_prefix("ウ゛", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ウ゛ェ", &mut text_copy) { result.push_str("ve"); }
-        else if snip_prefix("ウ゛ォ", &mut text_copy) { result.push_str("vo"); }
-        else if snip_prefix("ア", &mut text_copy) { result.push_str("a"); }
-        else if snip_prefix("イ", &mut text_copy) { result.push_str("i"); }
-        else if snip_prefix("ウ", &mut text_copy) { result.push_str("u"); }
-        else if snip_prefix("エ", &mut text_copy) { result.push_str("e"); }
-        else if snip_prefix("オ", &mut text_copy) { result.push_str("o"); }
-        else if snip_prefix("カ", &mut text_copy) { result.push_str("ka"); }
-        else if snip_prefix("キ", &mut text_copy) { result.push_str("ki"); }
-        else if snip_prefix("ク", &mut text_copy) { result.push_str("ku"); }
-        else if snip_prefix("ケ", &mut text_copy) { result.push_str("ke"); }
-        else if snip_prefix("コ", &mut text_copy) { result.push_str("ko"); }
-        else if snip_prefix("サ", &mut text_copy) { result.push_str("sa"); }
-        else if snip_prefix("シ", &mut text_copy) { result.push_str("shi"); }
-        else if snip_prefix("ス", &mut text_copy) { result.push_str("su"); }
-        else if snip_prefix("セ", &mut text_copy) { result.push_str("se"); }
-        else if snip_prefix("ソ", &mut text_copy) { result.push_str("so"); }
-        else if snip_prefix("タ", &mut text_copy) { result.push_str("ta"); }
-        else if snip_prefix("チ", &mut text_copy) { result.push_str("chi"); }
-        else if snip_prefix("ツ", &mut text_copy) { result.push_str("tsu"); }
-        else if snip_prefix("テ", &mut text_copy) { result.push_str("te"); }
-        else if snip_prefix("ト", &mut text_copy) { result.push_str("to"); }
-        else if snip_prefix("ナ", &mut text_copy) { result.push_str("na"); }
-        else if snip_prefix("ニ", &mut text_copy) { result.push_str("ni"); }
-        else if snip_prefix("ヌ", &mut text_copy) { result.push_str("nu"); }
-        else if snip_prefix("ネ", &mut text_copy) { result.push_str("ne"); }
-        else if snip_prefix("ノ", &mut text_copy) { result.push_str("no"); }
-        else if snip_prefix("ハ", &mut text_copy) { result.push_str("ha"); }
-        else if snip_prefix("ヒ", &mut text_copy) { result.push_str("hi"); }
-        else if snip_prefix("フ", &mut text_copy) { result.push_str("fu"); }
-        else if snip_prefix("ヘ", &mut text_copy) { result.push_str("he"); }
-        else if snip_prefix("ホ", &mut text_copy) { result.push_str("ho"); }
-        else if snip_prefix("マ", &mut text_copy) { result.push_str("ma"); }
-        else if snip_prefix("ミ", &mut text_copy) { result.push_str("mi"); }
-        else if snip_prefix("ム", &mut text_copy) { result.push_str("mu"); }
-        else if snip_prefix("メ", &mut text_copy) { result.push_str("me"); }
-        else if snip_prefix("モ", &mut text_copy) { result.push_str("mo"); }
-        else if snip_prefix("ヤ", &mut text_copy) { result.push_str("ya"); }
-        else if snip_prefix("ユ", &mut text_copy) { result.push_str("yu"); }
-        else if snip_prefix("ヨ", &mut text_copy) { result.push_str("yo"); }
-        else if snip_prefix("ラ", &mut text_copy) { result.push_str("ra"); }
-        else if snip_prefix("リ", &mut text_copy) { result.push_str("ri"); }
-        else if snip_prefix("ル", &mut text_copy) { result.push_str("ru"); }
-        else if snip_prefix("レ", &mut text_copy) { result.push_str("re"); }
-        else if snip_prefix("ロ", &mut text_copy) { result.push_str("ro"); }
-        else if snip_prefix("ワ", &mut text_copy) { result.push_str("wa"); }
-        else if snip_prefix("ヲ", &mut text_copy) { result.push_str("wo"); }
-        else if snip_prefix("ン", &mut text_copy) { result.push_str("n"); }
-        else if snip_prefix("ガ", &mut text_copy) { result.push_str("ga"); }
-        else if snip_prefix("ギ", &mut text_copy) { result.push_str("gi"); }
-        else if snip_prefix("グ", &mut text_copy) { result.push_str("gu"); }
-        else if snip_prefix("ゲ", &mut text_copy) { result.push_str("ge"); }
-        else if snip_prefix("ゴ", &mut text_copy) { result.push_str("go"); }
-        else if snip_prefix("ザ", &mut text_copy) { result.push_str("za"); }
-        else if snip_prefix("ジ", &mut text_copy) { result.push_str("ji"); }
-        else if snip_prefix("ズ", &mut text_copy) { result.push_str("zu"); }
-        else if snip_prefix("ゼ", &mut text_copy) { result.push_str("ze"); }
-        else if snip_prefix("ゾ", &mut text_copy) { result.push_str("zo"); }
-        else if snip_prefix("ダ", &mut text_copy) { result.push_str("da"); }
-        else if snip_prefix("ヂ", &mut text_copy) { result.push_str("ji"); }
-        else if snip_prefix("ヅ", &mut text_copy) { result.push_str("zu"); }
-        else if snip_prefix("デ", &mut text_copy) { result.push_str("de"); }
-        else if snip_prefix("ド", &mut text_copy) { result.push_str("do"); }
-        else if snip_prefix("バ", &mut text_copy) { result.push_str("ba"); }
-        else if snip_prefix("ビ", &mut text_copy) { result.push_str("bi"); }
-        else if snip_prefix("ブ", &mut text_copy) { result.push_str("bu"); }
-        else if snip_prefix("ベ", &mut text_copy) { result.push_str("be"); }
-        else if snip_prefix("ボ", &mut text_copy) { result.push_str("bo"); }
-        else if snip_prefix("パ", &mut text_copy) { result.push_str("pa"); }
-        else if snip_prefix("ピ", &mut text_copy) { result.push_str("pi"); }
-        else if snip_prefix("プ", &mut text_copy) { result.push_str("pu"); }
-        else if snip_prefix("ペ", &mut text_copy) { result.push_str("pe"); }
-        else if snip_prefix("ポ", &mut text_copy) { result.push_str("po"); }
-        else if snip_prefix("ァ", &mut text_copy) { result.push_str("a"); }
-        else if snip_prefix("ィ", &mut text_copy) { result.push_str("i"); }
-        else if snip_prefix("ゥ", &mut text_copy) { result.push_str("u"); }
-        else if snip_prefix("ェ", &mut text_copy) { result.push_str("e"); }
-        else if snip_prefix("ォ", &mut text_copy) { result.push_str("o"); }
-        else if snip_prefix("ャ", &mut text_copy) { result.push_str("ya"); }
-        else if snip_prefix("ュ", &mut text_copy) { result.push_str("yu"); }
-        else if snip_prefix("ョ", &mut text_copy) { result.push_str("yo"); }
-        else if snip_prefix("ッ", &mut text_copy) { result.push_str("tu"); }
-        else if snip_prefix("ヴ", &mut text_copy) { result.push_str("vu"); }
-        else if snip_prefix("ー", &mut text_copy) { result.push_str("-"); }
-        else if snip_prefix("。", &mut text_copy) { result.push_str("."); }
-        else if snip_prefix("、", &mut text_copy) { result.push_str(","); }
-        else if snip_prefix("！", &mut text_copy) { result.push_str("!"); }
-        else if snip_prefix("？", &mut text_copy) { result.push_str("?"); }
-        else if snip_prefix("　", &mut text_copy) { result.push_str(" "); }
+        if snip_prefix("っ", &mut text_copy) {
+            was_tsu = true;
+            continue;
+        }
+        else if let Some(translation) = snip_and_translate_prefix_to_romaji(&mut text_copy) {
+            if was_tsu {
+                result.push_str(&translation[0..1]);
+            }
+            result.push_str(translation);
+        }
         else {
             // Strip first char from text_copy and push it to result
             result.push(remove_first_char(&mut text_copy).unwrap());
         }
+        was_tsu = false;
     }
     result
+}
+
+fn snip_and_translate_prefix_to_romaji(text: &mut &str) -> Option<&'static str> {
+    if      snip_prefix("きゃ", text) { Some("kya") }
+    else if snip_prefix("きゅ", text) { Some("kyu") }
+    else if snip_prefix("きょ", text) { Some("kyo") }
+    else if snip_prefix("しゃ", text) { Some("sha") }
+    else if snip_prefix("しゅ", text) { Some("shu") }
+    else if snip_prefix("しょ", text) { Some("sho") }
+    else if snip_prefix("ちゃ", text) { Some("cha") }
+    else if snip_prefix("ちゅ", text) { Some("chu") }
+    else if snip_prefix("ちょ", text) { Some("cho") }
+    else if snip_prefix("にゃ", text) { Some("nya") }
+    else if snip_prefix("にゅ", text) { Some("nyu") }
+    else if snip_prefix("にょ", text) { Some("nyo") }
+    else if snip_prefix("ひゃ", text) { Some("hya") }
+    else if snip_prefix("ひゅ", text) { Some("hyu") }
+    else if snip_prefix("ひょ", text) { Some("hyo") }
+    else if snip_prefix("みゃ", text) { Some("mya") }
+    else if snip_prefix("みゅ", text) { Some("myu") }
+    else if snip_prefix("みょ", text) { Some("myo") }
+    else if snip_prefix("りゃ", text) { Some("rya") }
+    else if snip_prefix("りゅ", text) { Some("ryu") }
+    else if snip_prefix("りょ", text) { Some("ryo") }
+    else if snip_prefix("ぎゃ", text) { Some("gya") }
+    else if snip_prefix("ぎゅ", text) { Some("gyu") }
+    else if snip_prefix("ぎょ", text) { Some("gyo") }
+    else if snip_prefix("じゃ", text) { Some("ja") }
+    else if snip_prefix("じゅ", text) { Some("ju") }
+    else if snip_prefix("じょ", text) { Some("jo") }
+    else if snip_prefix("ぢゃ", text) { Some("ja") }
+    else if snip_prefix("ぢゅ", text) { Some("ju") }
+    else if snip_prefix("ぢょ", text) { Some("jo") }
+    else if snip_prefix("びゃ", text) { Some("bya") }
+    else if snip_prefix("びゅ", text) { Some("byu") }
+    else if snip_prefix("びょ", text) { Some("byo") }
+    else if snip_prefix("ぴゃ", text) { Some("pya") }
+    else if snip_prefix("ぴゅ", text) { Some("pyu") }
+    else if snip_prefix("ぴょ", text) { Some("pyo") }
+    else if snip_prefix("ふぁ", text) { Some("fa") }
+    else if snip_prefix("ふぃ", text) { Some("fi") }
+    else if snip_prefix("ふぇ", text) { Some("fe") }
+    else if snip_prefix("ふぉ", text) { Some("fo") }
+    else if snip_prefix("うぃ", text) { Some("wi") }
+    else if snip_prefix("うぇ", text) { Some("we") }
+    else if snip_prefix("うぉ", text) { Some("wo") }
+    else if snip_prefix("きぇ", text) { Some("kye") }
+    else if snip_prefix("しぇ", text) { Some("she") }
+    else if snip_prefix("ちぇ", text) { Some("che") }
+    else if snip_prefix("にぇ", text) { Some("nye") }
+    else if snip_prefix("ひぇ", text) { Some("hye") }
+    else if snip_prefix("みぇ", text) { Some("mye") }
+    else if snip_prefix("りぇ", text) { Some("rye") }
+    else if snip_prefix("ぎぇ", text) { Some("gye") }
+    else if snip_prefix("じぇ", text) { Some("je") }
+    else if snip_prefix("ぢぇ", text) { Some("je") }
+    else if snip_prefix("びぇ", text) { Some("bye") }
+    else if snip_prefix("ぴぇ", text) { Some("pye") }
+    else if snip_prefix("ふぇ", text) { Some("fe") }
+    else if snip_prefix("ふぉ", text) { Some("fo") }
+    else if snip_prefix("きゃ", text) { Some("kya") }
+    else if snip_prefix("きゅ", text) { Some("kyu") }
+    else if snip_prefix("きょ", text) { Some("kyo") }
+    else if snip_prefix("しゃ", text) { Some("sha") }
+    else if snip_prefix("しゅ", text) { Some("shu") }
+    else if snip_prefix("しょ", text) { Some("sho") }
+    else if snip_prefix("ちゃ", text) { Some("cha") }
+    else if snip_prefix("ちゅ", text) { Some("chu") }
+    else if snip_prefix("ちょ", text) { Some("cho") }
+    else if snip_prefix("にゃ", text) { Some("nya") }
+    else if snip_prefix("にゅ", text) { Some("nyu") }
+    else if snip_prefix("にょ", text) { Some("nyo") }
+    else if snip_prefix("ひゃ", text) { Some("hya") }
+    else if snip_prefix("ひゅ", text) { Some("hyu") }
+    else if snip_prefix("ひょ", text) { Some("hyo") }
+    else if snip_prefix("みゃ", text) { Some("mya") }
+    else if snip_prefix("みゅ", text) { Some("myu") }
+    else if snip_prefix("みょ", text) { Some("myo") }
+    else if snip_prefix("りゃ", text) { Some("rya") }
+    else if snip_prefix("りゅ", text) { Some("ryu") }
+    else if snip_prefix("りょ", text) { Some("ryo") }
+    else if snip_prefix("ぎゃ", text) { Some("gya") }
+    else if snip_prefix("ぎゅ", text) { Some("gyu") }
+    else if snip_prefix("ぎょ", text) { Some("gyo") }
+    else if snip_prefix("じゃ", text) { Some("ja") }
+    else if snip_prefix("じゅ", text) { Some("ju") }
+    else if snip_prefix("じょ", text) { Some("jo") }
+    else if snip_prefix("ぢゃ", text) { Some("ja") }
+    else if snip_prefix("ぢゅ", text) { Some("ju") }
+    else if snip_prefix("ぢょ", text) { Some("jo") }
+    else if snip_prefix("びゃ", text) { Some("bya") }
+    else if snip_prefix("びゅ", text) { Some("byu") }
+    else if snip_prefix("びょ", text) { Some("byo") }
+    else if snip_prefix("ぴゃ", text) { Some("pya") }
+    else if snip_prefix("ぴゅ", text) { Some("pyu") }
+    else if snip_prefix("ぴょ", text) { Some("pyo") }
+    else if snip_prefix("あ", text) { Some("a") }
+    else if snip_prefix("い", text) { Some("i") }
+    else if snip_prefix("う", text) { Some("u") }
+    else if snip_prefix("え", text) { Some("e") }
+    else if snip_prefix("お", text) { Some("o") }
+    else if snip_prefix("か", text) { Some("ka") }
+    else if snip_prefix("き", text) { Some("ki") }
+    else if snip_prefix("く", text) { Some("ku") }
+    else if snip_prefix("け", text) { Some("ke") }
+    else if snip_prefix("こ", text) { Some("ko") }
+    else if snip_prefix("さ", text) { Some("sa") }
+    else if snip_prefix("し", text) { Some("shi") }
+    else if snip_prefix("す", text) { Some("su") }
+    else if snip_prefix("せ", text) { Some("se") }
+    else if snip_prefix("そ", text) { Some("so") }
+    else if snip_prefix("た", text) { Some("ta") }
+    else if snip_prefix("ち", text) { Some("chi") }
+    else if snip_prefix("つ", text) { Some("tsu") }
+    else if snip_prefix("て", text) { Some("te") }
+    else if snip_prefix("と", text) { Some("to") }
+    else if snip_prefix("な", text) { Some("na") }
+    else if snip_prefix("に", text) { Some("ni") }
+    else if snip_prefix("ぬ", text) { Some("nu") }
+    else if snip_prefix("ね", text) { Some("ne") }
+    else if snip_prefix("の", text) { Some("no") }
+    else if snip_prefix("は", text) { Some("ha") }
+    else if snip_prefix("ひ", text) { Some("hi") }
+    else if snip_prefix("ふ", text) { Some("fu") }
+    else if snip_prefix("へ", text) { Some("he") }
+    else if snip_prefix("ほ", text) { Some("ho") }
+    else if snip_prefix("ま", text) { Some("ma") }
+    else if snip_prefix("み", text) { Some("mi") }
+    else if snip_prefix("む", text) { Some("mu") }
+    else if snip_prefix("め", text) { Some("me") }
+    else if snip_prefix("も", text) { Some("mo") }
+    else if snip_prefix("や", text) { Some("ya") }
+    else if snip_prefix("ゆ", text) { Some("yu") }
+    else if snip_prefix("よ", text) { Some("yo") }
+    else if snip_prefix("ら", text) { Some("ra") }
+    else if snip_prefix("り", text) { Some("ri") }
+    else if snip_prefix("る", text) { Some("ru") }
+    else if snip_prefix("れ", text) { Some("re") }
+    else if snip_prefix("ろ", text) { Some("ro") }
+    else if snip_prefix("わ", text) { Some("wa") }
+    else if snip_prefix("を", text) { Some("wo") }
+    else if snip_prefix("ん", text) { Some("n") }
+    else if snip_prefix("が", text) { Some("ga") }
+    else if snip_prefix("ぎ", text) { Some("gi") }
+    else if snip_prefix("ぐ", text) { Some("gu") }
+    else if snip_prefix("げ", text) { Some("ge") }
+    else if snip_prefix("ご", text) { Some("go") }
+    else if snip_prefix("ざ", text) { Some("za") }
+    else if snip_prefix("じ", text) { Some("ji") }
+    else if snip_prefix("ず", text) { Some("zu") }
+    else if snip_prefix("ぜ", text) { Some("ze") }
+    else if snip_prefix("ぞ", text) { Some("zo") }
+    else if snip_prefix("だ", text) { Some("da") }
+    else if snip_prefix("ぢ", text) { Some("ji") }
+    else if snip_prefix("づ", text) { Some("zu") }
+    else if snip_prefix("で", text) { Some("de") }
+    else if snip_prefix("ど", text) { Some("do") }
+    else if snip_prefix("ば", text) { Some("ba") }
+    else if snip_prefix("び", text) { Some("bi") }
+    else if snip_prefix("ぶ", text) { Some("bu") }
+    else if snip_prefix("べ", text) { Some("be") }
+    else if snip_prefix("ぼ", text) { Some("bo") }
+    else if snip_prefix("ぱ", text) { Some("pa") }
+    else if snip_prefix("ぴ", text) { Some("pi") }
+    else if snip_prefix("ぷ", text) { Some("pu") }
+    else if snip_prefix("ぺ", text) { Some("pe") }
+    else if snip_prefix("ぽ", text) { Some("po") }
+    else if snip_prefix("ヴァ", text) { Some("va") }
+    else if snip_prefix("ヴィ", text) { Some("vi") }
+    else if snip_prefix("ヴ", text) { Some("vu") }
+    else if snip_prefix("ヴェ", text) { Some("ve") }
+    else if snip_prefix("ヴォ", text) { Some("vo") }
+    else if snip_prefix("う゛ぁ", text) { Some("va") }
+    else if snip_prefix("う゛ぃ", text) { Some("vi") }
+    else if snip_prefix("う゛", text) { Some("vu") }
+    else if snip_prefix("う゛ぇ", text) { Some("ve") }
+    else if snip_prefix("う゛ぉ", text) { Some("vo") }
+    else if snip_prefix("キャ", text) { Some("kya") }
+    else if snip_prefix("キュ", text) { Some("kyu") }
+    else if snip_prefix("キョ", text) { Some("kyo") }
+    else if snip_prefix("シャ", text) { Some("sha") }
+    else if snip_prefix("シュ", text) { Some("shu") }
+    else if snip_prefix("ショ", text) { Some("sho") }
+    else if snip_prefix("チャ", text) { Some("cha") }
+    else if snip_prefix("チュ", text) { Some("chu") }
+    else if snip_prefix("チョ", text) { Some("cho") }
+    else if snip_prefix("ニャ", text) { Some("nya") }
+    else if snip_prefix("ニュ", text) { Some("nyu") }
+    else if snip_prefix("ニョ", text) { Some("nyo") }
+    else if snip_prefix("ヒャ", text) { Some("hya") }
+    else if snip_prefix("ヒュ", text) { Some("hyu") }
+    else if snip_prefix("ヒョ", text) { Some("hyo") }
+    else if snip_prefix("ミャ", text) { Some("mya") }
+    else if snip_prefix("ミュ", text) { Some("myu") }
+    else if snip_prefix("ミョ", text) { Some("myo") }
+    else if snip_prefix("リャ", text) { Some("rya") }
+    else if snip_prefix("リュ", text) { Some("ryu") }
+    else if snip_prefix("リョ", text) { Some("ryo") }
+    else if snip_prefix("ギャ", text) { Some("gya") }
+    else if snip_prefix("ギュ", text) { Some("gyu") }
+    else if snip_prefix("ギョ", text) { Some("gyo") }
+    else if snip_prefix("ジャ", text) { Some("ja") }
+    else if snip_prefix("ジュ", text) { Some("ju") }
+    else if snip_prefix("ジョ", text) { Some("jo") }
+    else if snip_prefix("ヂャ", text) { Some("ja") }
+    else if snip_prefix("ヂュ", text) { Some("ju") }
+    else if snip_prefix("ヂョ", text) { Some("jo") }
+    else if snip_prefix("ビャ", text) { Some("bya") }
+    else if snip_prefix("ビュ", text) { Some("byu") }
+    else if snip_prefix("ビョ", text) { Some("byo") }
+    else if snip_prefix("ピャ", text) { Some("pya") }
+    else if snip_prefix("ピュ", text) { Some("pyu") }
+    else if snip_prefix("ピョ", text) { Some("pyo") }
+    else if snip_prefix("ヴァ", text) { Some("va") }
+    else if snip_prefix("ヴィ", text) { Some("vi") }
+    else if snip_prefix("ヴ", text) { Some("vu") }
+    else if snip_prefix("ヴェ", text) { Some("ve") }
+    else if snip_prefix("ヴォ", text) { Some("vo") }
+    else if snip_prefix("ウ゛ァ", text) { Some("va") }
+    else if snip_prefix("ウ゛ィ", text) { Some("vi") }
+    else if snip_prefix("ウ゛", text) { Some("vu") }
+    else if snip_prefix("ウ゛ェ", text) { Some("ve") }
+    else if snip_prefix("ウ゛ォ", text) { Some("vo") }
+    else if snip_prefix("キャ", text) { Some("kya") }
+    else if snip_prefix("キュ", text) { Some("kyu") }
+    else if snip_prefix("キョ", text) { Some("kyo") }
+    else if snip_prefix("シャ", text) { Some("sha") }
+    else if snip_prefix("シュ", text) { Some("shu") }
+    else if snip_prefix("ショ", text) { Some("sho") }
+    else if snip_prefix("チャ", text) { Some("cha") }
+    else if snip_prefix("チュ", text) { Some("chu") }
+    else if snip_prefix("チョ", text) { Some("cho") }
+    else if snip_prefix("ニャ", text) { Some("nya") }
+    else if snip_prefix("ニュ", text) { Some("nyu") }
+    else if snip_prefix("ニョ", text) { Some("nyo") }
+    else if snip_prefix("ヒャ", text) { Some("hya") }
+    else if snip_prefix("ヒュ", text) { Some("hyu") }
+    else if snip_prefix("ヒョ", text) { Some("hyo") }
+    else if snip_prefix("ミャ", text) { Some("mya") }
+    else if snip_prefix("ミュ", text) { Some("myu") }
+    else if snip_prefix("ミョ", text) { Some("myo") }
+    else if snip_prefix("リャ", text) { Some("rya") }
+    else if snip_prefix("リュ", text) { Some("ryu") }
+    else if snip_prefix("リョ", text) { Some("ryo") }
+    else if snip_prefix("ギャ", text) { Some("gya") }
+    else if snip_prefix("ギュ", text) { Some("gyu") }
+    else if snip_prefix("ギョ", text) { Some("gyo") }
+    else if snip_prefix("ジャ", text) { Some("ja") }
+    else if snip_prefix("ジュ", text) { Some("ju") }
+    else if snip_prefix("ジョ", text) { Some("jo") }
+    else if snip_prefix("ヂャ", text) { Some("ja") }
+    else if snip_prefix("ヂュ", text) { Some("ju") }
+    else if snip_prefix("ヂョ", text) { Some("jo") }
+    else if snip_prefix("ビャ", text) { Some("bya") }
+    else if snip_prefix("ビュ", text) { Some("byu") }
+    else if snip_prefix("ビョ", text) { Some("byo") }
+    else if snip_prefix("ピャ", text) { Some("pya") }
+    else if snip_prefix("ピュ", text) { Some("pyu") }
+    else if snip_prefix("ピョ", text) { Some("pyo") }
+    else if snip_prefix("ヴァ", text) { Some("va") }
+    else if snip_prefix("ヴィ", text) { Some("vi") }
+    else if snip_prefix("ヴ", text) { Some("vu") }
+    else if snip_prefix("ヴェ", text) { Some("ve") }
+    else if snip_prefix("ヴォ", text) { Some("vo") }
+    else if snip_prefix("ウ゛ァ", text) { Some("va") }
+    else if snip_prefix("ウ゛ィ", text) { Some("vi") }
+    else if snip_prefix("ウ゛", text) { Some("vu") }
+    else if snip_prefix("ウ゛ェ", text) { Some("ve") }
+    else if snip_prefix("ウ゛ォ", text) { Some("vo") }
+    else if snip_prefix("キャ", text) { Some("kya") }
+    else if snip_prefix("キュ", text) { Some("kyu") }
+    else if snip_prefix("キョ", text) { Some("kyo") }
+    else if snip_prefix("シャ", text) { Some("sha") }
+    else if snip_prefix("シュ", text) { Some("shu") }
+    else if snip_prefix("ショ", text) { Some("sho") }
+    else if snip_prefix("チャ", text) { Some("cha") }
+    else if snip_prefix("チュ", text) { Some("chu") }
+    else if snip_prefix("チョ", text) { Some("cho") }
+    else if snip_prefix("ニャ", text) { Some("nya") }
+    else if snip_prefix("ニュ", text) { Some("nyu") }
+    else if snip_prefix("ニョ", text) { Some("nyo") }
+    else if snip_prefix("ヒャ", text) { Some("hya") }
+    else if snip_prefix("ヒュ", text) { Some("hyu") }
+    else if snip_prefix("ヒョ", text) { Some("hyo") }
+    else if snip_prefix("ミャ", text) { Some("mya") }
+    else if snip_prefix("ミュ", text) { Some("myu") }
+    else if snip_prefix("ミョ", text) { Some("myo") }
+    else if snip_prefix("リャ", text) { Some("rya") }
+    else if snip_prefix("リュ", text) { Some("ryu") }
+    else if snip_prefix("リョ", text) { Some("ryo") }
+    else if snip_prefix("ギャ", text) { Some("gya") }
+    else if snip_prefix("ギュ", text) { Some("gyu") }
+    else if snip_prefix("ギョ", text) { Some("gyo") }
+    else if snip_prefix("ジャ", text) { Some("ja") }
+    else if snip_prefix("ジュ", text) { Some("ju") }
+    else if snip_prefix("ジョ", text) { Some("jo") }
+    else if snip_prefix("ヂャ", text) { Some("ja") }
+    else if snip_prefix("ヂュ", text) { Some("ju") }
+    else if snip_prefix("ヂョ", text) { Some("jo") }
+    else if snip_prefix("ビャ", text) { Some("bya") }
+    else if snip_prefix("ビュ", text) { Some("byu") }
+    else if snip_prefix("ビョ", text) { Some("byo") }
+    else if snip_prefix("ピャ", text) { Some("pya") }
+    else if snip_prefix("ピュ", text) { Some("pyu") }
+    else if snip_prefix("ピョ", text) { Some("pyo") }
+    else if snip_prefix("ヴァ", text) { Some("va") }
+    else if snip_prefix("ヴィ", text) { Some("vi") }
+    else if snip_prefix("ヴ", text) { Some("vu") }
+    else if snip_prefix("ヴェ", text) { Some("ve") }
+    else if snip_prefix("ヴォ", text) { Some("vo") }
+    else if snip_prefix("ウ゛ァ", text) { Some("va") }
+    else if snip_prefix("ウ゛ィ", text) { Some("vi") }
+    else if snip_prefix("ウ゛", text) { Some("vu") }
+    else if snip_prefix("ウ゛ェ", text) { Some("ve") }
+    else if snip_prefix("ウ゛ォ", text) { Some("vo") }
+    else if snip_prefix("ア", text) { Some("a") }
+    else if snip_prefix("イ", text) { Some("i") }
+    else if snip_prefix("ウ", text) { Some("u") }
+    else if snip_prefix("エ", text) { Some("e") }
+    else if snip_prefix("オ", text) { Some("o") }
+    else if snip_prefix("カ", text) { Some("ka") }
+    else if snip_prefix("キ", text) { Some("ki") }
+    else if snip_prefix("ク", text) { Some("ku") }
+    else if snip_prefix("ケ", text) { Some("ke") }
+    else if snip_prefix("コ", text) { Some("ko") }
+    else if snip_prefix("サ", text) { Some("sa") }
+    else if snip_prefix("シ", text) { Some("shi") }
+    else if snip_prefix("ス", text) { Some("su") }
+    else if snip_prefix("セ", text) { Some("se") }
+    else if snip_prefix("ソ", text) { Some("so") }
+    else if snip_prefix("タ", text) { Some("ta") }
+    else if snip_prefix("チ", text) { Some("chi") }
+    else if snip_prefix("ツ", text) { Some("tsu") }
+    else if snip_prefix("テ", text) { Some("te") }
+    else if snip_prefix("ト", text) { Some("to") }
+    else if snip_prefix("ナ", text) { Some("na") }
+    else if snip_prefix("ニ", text) { Some("ni") }
+    else if snip_prefix("ヌ", text) { Some("nu") }
+    else if snip_prefix("ネ", text) { Some("ne") }
+    else if snip_prefix("ノ", text) { Some("no") }
+    else if snip_prefix("ハ", text) { Some("ha") }
+    else if snip_prefix("ヒ", text) { Some("hi") }
+    else if snip_prefix("フ", text) { Some("fu") }
+    else if snip_prefix("ヘ", text) { Some("he") }
+    else if snip_prefix("ホ", text) { Some("ho") }
+    else if snip_prefix("マ", text) { Some("ma") }
+    else if snip_prefix("ミ", text) { Some("mi") }
+    else if snip_prefix("ム", text) { Some("mu") }
+    else if snip_prefix("メ", text) { Some("me") }
+    else if snip_prefix("モ", text) { Some("mo") }
+    else if snip_prefix("ヤ", text) { Some("ya") }
+    else if snip_prefix("ユ", text) { Some("yu") }
+    else if snip_prefix("ヨ", text) { Some("yo") }
+    else if snip_prefix("ラ", text) { Some("ra") }
+    else if snip_prefix("リ", text) { Some("ri") }
+    else if snip_prefix("ル", text) { Some("ru") }
+    else if snip_prefix("レ", text) { Some("re") }
+    else if snip_prefix("ロ", text) { Some("ro") }
+    else if snip_prefix("ワ", text) { Some("wa") }
+    else if snip_prefix("ヲ", text) { Some("wo") }
+    else if snip_prefix("ン", text) { Some("n") }
+    else if snip_prefix("ガ", text) { Some("ga") }
+    else if snip_prefix("ギ", text) { Some("gi") }
+    else if snip_prefix("グ", text) { Some("gu") }
+    else if snip_prefix("ゲ", text) { Some("ge") }
+    else if snip_prefix("ゴ", text) { Some("go") }
+    else if snip_prefix("ザ", text) { Some("za") }
+    else if snip_prefix("ジ", text) { Some("ji") }
+    else if snip_prefix("ズ", text) { Some("zu") }
+    else if snip_prefix("ゼ", text) { Some("ze") }
+    else if snip_prefix("ゾ", text) { Some("zo") }
+    else if snip_prefix("ダ", text) { Some("da") }
+    else if snip_prefix("ヂ", text) { Some("ji") }
+    else if snip_prefix("ヅ", text) { Some("zu") }
+    else if snip_prefix("デ", text) { Some("de") }
+    else if snip_prefix("ド", text) { Some("do") }
+    else if snip_prefix("バ", text) { Some("ba") }
+    else if snip_prefix("ビ", text) { Some("bi") }
+    else if snip_prefix("ブ", text) { Some("bu") }
+    else if snip_prefix("ベ", text) { Some("be") }
+    else if snip_prefix("ボ", text) { Some("bo") }
+    else if snip_prefix("パ", text) { Some("pa") }
+    else if snip_prefix("ピ", text) { Some("pi") }
+    else if snip_prefix("プ", text) { Some("pu") }
+    else if snip_prefix("ペ", text) { Some("pe") }
+    else if snip_prefix("ポ", text) { Some("po") }
+    else if snip_prefix("ァ", text) { Some("a") }
+    else if snip_prefix("ィ", text) { Some("i") }
+    else if snip_prefix("ゥ", text) { Some("u") }
+    else if snip_prefix("ェ", text) { Some("e") }
+    else if snip_prefix("ォ", text) { Some("o") }
+    else if snip_prefix("ャ", text) { Some("ya") }
+    else if snip_prefix("ュ", text) { Some("yu") }
+    else if snip_prefix("ョ", text) { Some("yo") }
+    else if snip_prefix("ッ", text) { Some("tu") }
+    else if snip_prefix("ヴ", text) { Some("vu") }
+    else if snip_prefix("ー", text) { Some("-") }
+    else if snip_prefix("。", text) { Some(".") }
+    else if snip_prefix("、", text) { Some(",") }
+    else if snip_prefix("！", text) { Some("!") }
+    else if snip_prefix("？", text) { Some("?") }
+    else if snip_prefix("　", text) { Some(" ") }
+    else {
+        None
+    }
 }
