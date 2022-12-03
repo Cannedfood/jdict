@@ -13,12 +13,12 @@ pub struct ServerState {
 
 impl ServerState {
     pub fn new() -> Self {
-        let (kanjidic, kanjidic_time) = measure_time(|| Kanjidic::parse("../res/kanjidic2.xml"));
+        let (kanjidic, kanjidic_time) = measure_time(|| Kanjidic::parse("../res/kanjidic2_no_doctype.xml"));
         println!("Parsed kanjidic in {:?}", kanjidic_time);
         let (kanjidic_index, kanjidic_index_time) = measure_time(|| build_kanjidic_index(&kanjidic));
         println!("Built kanjidic index in {:?}", kanjidic_index_time);
 
-        let (dict, dict_time) = measure_time(|| JMdict::parse("../res/JMdict.xml"));
+        let (dict, dict_time) = measure_time(|| JMdict::parse("../res/JMdict_e_no_doctype.xml"));
         println!("Parsed JMdict in {:?}", dict_time);
         let (index, index_time) = measure_time(|| build_jmdict_index(&dict));
         println!("Built JMdict index in {:?}", index_time);

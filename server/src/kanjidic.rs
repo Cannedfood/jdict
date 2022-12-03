@@ -1,5 +1,7 @@
 #![allow(non_camel_case_types)]
 
+use std::str::FromStr;
+
 #[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum VariantType {
     jis208, // In JIS X 0208 - kuten coding
@@ -74,6 +76,39 @@ pub enum DicRefType {
     maniette, // Codes from Yves Maniette's "Les Kanjis dans la tete" French adaptation of Heisig.
 }
 
+impl FromStr for DicRefType {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "nelson_c"         => Ok(Self::nelson_c),
+            "nelson_n"         => Ok(Self::nelson_n),
+            "halpern_njecd"    => Ok(Self::halpern_njecd),
+            "halpern_kkd"      => Ok(Self::halpern_kkd),
+            "halpern_kkld"     => Ok(Self::halpern_kkld),
+            "halpern_kkld_2ed" => Ok(Self::halpern_kkld_2ed),
+            "heisig"           => Ok(Self::heisig),
+            "heisig6"          => Ok(Self::heisig6),
+            "gakken"           => Ok(Self::gakken),
+            "oneill_names"     => Ok(Self::oneill_names),
+            "oneill_kk"        => Ok(Self::oneill_kk),
+            "moro"             => Ok(Self::moro),
+            "henshall"         => Ok(Self::henshall),
+            "sh_kk"            => Ok(Self::sh_kk),
+            "sh_kk2"           => Ok(Self::sh_kk2),
+            "sakade"           => Ok(Self::sakade),
+            "jf_cards"         => Ok(Self::jf_cards),
+            "henshall3"        => Ok(Self::henshall3),
+            "tutt_cards"       => Ok(Self::tutt_cards),
+            "crowley"          => Ok(Self::crowley),
+            "kanji_in_context" => Ok(Self::kanji_in_context),
+            "busy_people"      => Ok(Self::busy_people),
+            "kodansha_compact" => Ok(Self::kodansha_compact),
+            "maniette"         => Ok(Self::maniette),
+            _ => Err(()),
+        }
+    }
+}
+
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct DicRef {
     pub typ: DicRefType, // <!ATTLIST dic_ref dr_type CDATA #REQUIRED> The dr_type defines the dictionary or reference book, etc. to which dic_ref element applies.
@@ -99,6 +134,9 @@ pub enum SkipMisclass {
     stroke_and_posn,
     stroke_diff
 }
+impl Default for SkipMisclass {
+    fn default() -> Self { SkipMisclass::none }
+}
 
 /// <!ELEMENT query_code (q_code+)> These codes contain information relating to the glyph, and can be used for finding a required kanji. The type of code is defined by the qc_type attribute.
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
@@ -117,6 +155,19 @@ pub enum ReadingType {
     ja_on, // The "on" Japanese reading of the kanji, in katakana.  Another attribute r_status, if present, will indicate with a value of "jy" whether the reading is approved for a "Jouyou kanji". (The r_status attribute is not currently used.) A further attribute on_type, if present,  will indicate with  a value of kan, go, tou or kan'you the type of on-reading. (The on_type attribute is not currently used.)
     ja_kun, // The "kun" Japanese reading of the kanji, usually in  hiragana.  Where relevant the okurigana is also included separated by a  ".". Readings associated with prefixes and suffixes are  marked with a "-". A second attribute r_status, if present,  will indicate with a value of "jy" whether the reading is  approved for a "Jouyou kanji". (The r_status attribute is  not currently used.)
 }
+impl FromStr for ReadingType {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "pinyin"   => Ok(ReadingType::pinyin),
+            "korean_r" => Ok(ReadingType::korean_r),
+            "korean_h" => Ok(ReadingType::korean_h),
+            "ja_on"    => Ok(ReadingType::ja_on),
+            "ja_kun"   => Ok(ReadingType::ja_kun),
+            _ => Err(()),
+        }
+    }
+}
 
 #[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum OnType {
@@ -125,6 +176,21 @@ pub enum OnType {
     go,
     tou,
     kanyou,
+}
+impl Default for OnType {
+    fn default() -> Self { OnType::none }
+}
+impl FromStr for OnType {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "kan"     => Ok(OnType::kan),
+            "go"      => Ok(OnType::go),
+            "tou"     => Ok(OnType::tou),
+            "kan'you" => Ok(OnType::kanyou),
+            _ => Err(()),
+        }
+    }
 }
 
 /// <!ELEMENT reading (#PCDATA)> The reading element contains the reading or pronunciation of the kanji.

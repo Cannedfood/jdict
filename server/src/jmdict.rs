@@ -1,3 +1,5 @@
+#![allow(non_camel_case_types)]
+
 use std::str::FromStr;
 
 #[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]

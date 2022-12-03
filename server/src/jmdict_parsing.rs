@@ -1,126 +1,136 @@
-use crate::{jmdict::{self, Gender}, kana::to_romaji};
+use std::{fs::File, io::Read};
 
-use libxml::parser::Parser;
+use roxmltree::{Node, ParsingOptions};
+
+use crate::{jmdict::{self, Gender}, kana::to_romaji};
 
 impl jmdict::JMdict {
     pub fn parse(path: &str) -> Self {
-        let data = std::fs::read_to_string(path).unwrap();
+        let mut file_content: String = String::new();
+        File::open(path).unwrap().read_to_string(&mut file_content).unwrap();
 
-        let parser = Parser::default();
-        let document = parser.parse_string(&data).unwrap();
-        let root = document.get_root_element().unwrap();
+        let document = roxmltree::Document::parse_with_options(
+            &file_content,
+            ParsingOptions {
+                allow_dtd: true,
+                ..Default::default()
+            }
+        ).unwrap();
+        let root = document.root_element();
 
-        assert!(root.get_name() == "JMdict");
+        assert!(root.tag_name().name() == "JMdict");
 
         Self {
-            entries: root.get_child_elements().iter().map(parse_entry).collect()
+            entries: root.children().filter(|e| e.is_element()).map(parse_entry).collect()
         }
     }
 }
 
-fn parse_entry(entry: &libxml::tree::Node) -> jmdict::Entry {
-    assert!(entry.get_name() == "entry");
+fn parse_entry(entry: Node) -> jmdict::Entry {
+    assert!(entry.tag_name().name() == "entry");
 
     let mut result = jmdict::Entry::default();
-    for child in entry.get_child_elements() {
-        match child.get_name().as_str() {
-            "ent_seq" => result.id = child.get_content().parse().unwrap(),
+    for child in entry.children().filter(|n| n.is_element()) {
+        match child.tag_name().name() {
+            "ent_seq" => result.id = child.text().unwrap().parse().unwrap(),
             "k_ele"   => result.kanji.push(parse_kanji(&child)),
             "r_ele"   => result.readings.push(parse_reading(&child)),
             "sense"   => result.senses.push(parse_sense(&child)),
-            _ => panic!("Unexpected child of <entry>: {}", child.get_name())
+            _ => panic!("Unexpected child of <entry>: {}", child.tag_name().name())
         }
     }
     return result
 }
 
-fn parse_kanji(kanji: &libxml::tree::Node) -> jmdict::Kanji {
+fn parse_kanji(kanji: &Node) -> jmdict::Kanji {
     let mut result: jmdict::Kanji = Default::default();
 
-    for child in kanji.get_child_elements().iter() {
-        match child.get_name().as_str() {
-            "keb" => result.value = child.get_content(),
-            "ke_pri" => result.priorities.push(child.get_content().parse().unwrap()),
-            "ke_inf" => result.infos.push(child.get_content()),
-            _ => panic!("Unexpected child of <k_ele>: {}", child.get_name()),
+    for child in kanji.children().filter(|n| n.is_element()) {
+        match child.tag_name().name() {
+            "keb" => result.value = child.text().unwrap().to_string(),
+            "ke_pri" => result.priorities.push(child.text().unwrap().parse().unwrap()),
+            "ke_inf" => result.infos.push(child.text().unwrap().to_string()),
+            _ => panic!("Unexpected child of <k_ele>: {}", child.tag_name().name()),
         }
     }
 
     result
 }
 
-fn parse_reading(reading: &libxml::tree::Node) -> jmdict::Reading {
+fn parse_reading(reading: &Node) -> jmdict::Reading {
     let mut result = jmdict::Reading::default();
-    for child in reading.get_child_elements().iter() {
-        match child.get_name().as_str() {
+    for child in reading.children().filter(|n| n.is_element()) {
+        match child.tag_name().name() {
             "reb" => {
-                let value = child.get_content();
-                let romaji = to_romaji(&value);
-                result.value = value;
-                result.romaji = Some(romaji);
+                result.value = child.text().unwrap().to_string();
+                result.romaji = Some(to_romaji(&result.value));
             },
-            "re_inf" => result.info.push(child.get_content()),
+            "re_inf" => result.info.push(child.text().unwrap().to_string()),
             "re_nokanji" => result.no_kanji = true,
-            "re_restr" => result.restrict.push(child.get_content()),
-            "re_pri" => result.priority.push(child.get_content().parse().unwrap()),
-            _ => panic!("Unexpected child of <r_ele>: {}", child.get_name()),
+            "re_restr" => result.restrict.push(child.text().unwrap().to_string()),
+            "re_pri" => result.priority.push(child.text().unwrap().parse().unwrap()),
+            _ => panic!("Unexpected child of <r_ele>: {}", child.tag_name().name()),
         }
     }
     result
 }
 
-fn parse_sense(sense: &libxml::tree::Node) -> jmdict::Sense {
+fn parse_sense(sense: &Node) -> jmdict::Sense {
     let mut result = jmdict::Sense::default();
-    for child in sense.get_child_elements() {
-        match child.get_name().as_str() {
-            "stagk"   => result.restrict_to_kanji.push(child.get_content()),
-            "stagr"   => result.restrict_to_reading.push(child.get_content()),
-            "pos"     => result.part_of_speech.push(child.get_content()),
-            "xref"    => result.xrefs   .push(child.get_content()),
-            "ant"     => result.antonyms.push(child.get_content()),
-            "field"   => result.fields  .push(child.get_content()),
-            "misc"    => result.misc    .push(child.get_content()),
-            "s_inf"   => result.info    .push(child.get_content()),
+    for child in sense.children().filter(|n| n.is_element()) {
+        match child.tag_name().name() {
+            "stagk"   => result.restrict_to_kanji.push(child.text().unwrap().to_string()),
+            "stagr"   => result.restrict_to_reading.push(child.text().unwrap().to_string()),
+            "pos"     => result.part_of_speech.push(child.text().unwrap().to_string()),
+            "xref"    => result.xrefs   .push(child.text().unwrap().to_string()),
+            "ant"     => result.antonyms.push(child.text().unwrap().to_string()),
+            "field"   => result.fields  .push(child.text().unwrap().to_string()),
+            "misc"    => result.misc    .push(child.text().unwrap().to_string()),
+            "s_inf"   => result.info    .push(child.text().unwrap().to_string()),
             "gloss"   => result.glosses .push(parse_gloss(&child)),
             "example" => result.examples.push(parse_example(&child)),
-            "dial"    => result.dialect .push(child.get_content().parse().unwrap()),
+            "dial"    => result.dialect .push(child.text().unwrap().parse().unwrap()),
             "lsource" => { /* TODO */},
-            _ => panic!("Unknown child of <sense>: {}", child.get_name()),
+            _ => panic!("Unknown child of <sense>: {}", child.tag_name().name()),
         }
     }
     result
 }
 
-fn parse_gloss(gloss: &libxml::tree::Node) -> jmdict::Gloss {
+fn parse_gloss(gloss: &Node) -> jmdict::Gloss {
     jmdict::Gloss {
-        value: gloss.get_content(),
-        lang: gloss.get_attribute("xml:lang").unwrap_or_else(|| "eng".to_string()),
-        gender: gloss.get_attribute("g_gend").map_or(Gender::None, |g_gend| match g_gend.as_str() {
-            "male" => Gender::Male,
-            "female" => Gender::Female,
-            "neutral" => Gender::Neutral,
-            _ => panic!("Failed parsing gender: {}", g_gend),
-        }),
+        value: gloss.text().unwrap().to_string(),
+        lang: gloss.attribute("xml:lang").unwrap_or("eng").to_string(),
+        gender: gloss.attribute("g_gend").map_or(
+            Gender::None,
+            |g_gend| match g_gend {
+                "male" => Gender::Male,
+                "female" => Gender::Female,
+                "neutral" => Gender::Neutral,
+                _ => panic!("Failed parsing gender: {}", g_gend),
+            }
+        ),
         typ:
-            gloss.get_attribute("g_type")
+            gloss.attribute("g_type")
             .map_or_else(
                 || jmdict::GlossType::None,
                 |s| match &s[..] {
-                "literal" => jmdict::GlossType::Literal,
-                "figurative" => jmdict::GlossType::Figurative,
-                _ => jmdict::GlossType::None,
-            }),
-        highlight: gloss.get_child_nodes().iter().any(|c| c.get_name() == "pri"),
+                    "literal" => jmdict::GlossType::Literal,
+                    "figurative" => jmdict::GlossType::Figurative,
+                    _ => jmdict::GlossType::None,
+                }
+            ),
+        highlight: gloss.children().any(|c| c.tag_name().name() == "pri"),
     }
 }
 
-fn parse_example(example: &libxml::tree::Node) -> jmdict::Example {
-    assert!(example.get_name() == "example");
+fn parse_example(example: &Node) -> jmdict::Example {
+    assert!(example.tag_name().name() == "example");
 
     Default::default() // TODO
     // jmdict::Example {
 
-    //     // text: example.get_content(),
-    //     // language: example.get_attribute("xml:lang").unwrap_or("eng"),
+    //     // text: example.text().unwrap(),
+    //     // language: example.attribute("xml:lang").unwrap_or("eng"),
     // }
 }
