@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read};
 
-use roxmltree::Node;
+use roxmltree::{Node, ParsingOptions};
 
 use crate::kanjidic::{Kanjidic, Header, Character, ReadingMeaningGroup, Codepoint, Radical, Misc, DicRef, QueryCode, Reading, Meaning, ReadingType, OnType, QueryCodeType, SkipMisclass, Variant, VariantType};
 
@@ -9,7 +9,13 @@ impl Kanjidic {
         let mut file_content: String = String::new();
         File::open(path).unwrap().read_to_string(&mut file_content).unwrap();
 
-        let document = roxmltree::Document::parse(&file_content).unwrap();
+        let document = roxmltree::Document::parse_with_options(
+            &file_content,
+            ParsingOptions {
+                allow_dtd: true,
+                ..Default::default()
+            }
+        ).unwrap();
 
         let root = document.root_element();
         if root.tag_name().name() != "kanjidic2" {
