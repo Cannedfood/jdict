@@ -6,7 +6,7 @@ const MATCH_EXACT: i32         = 400000;
 const MATCH_STARTS_WITH: i32   = 300000;
 const MATCH_ENDS_WITH: i32     = 200000;
 const MATCH_CONTAINS: i32      = 100000;
-const MATCH_FUZZY_PENALTY: i32  =   1000;
+const MATCH_FUZZY_PENALTY: i32 =   1000;
 
 const HAS_NEWS1: i32 = 2000;
 const HAS_NEWS2: i32 = 1000;
@@ -103,6 +103,5 @@ fn prio_rating(priorities: &Priorities) -> i32 {
         Priority::Gai2 => HAS_GAI2,
         Priority::NF(_) => 0,
     })
-    .max()
-    .unwrap_or(0)
+    .sum::<i32>()
 }
