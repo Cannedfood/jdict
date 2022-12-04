@@ -10,9 +10,9 @@ const props = defineProps<{
 	visible: boolean;
 }>();
 
-const isDarkTheme = useMatchMedia('(prefers-color-scheme: dark)');
+const isDarkTheme       = useMatchMedia('(prefers-color-scheme: dark)');
 const preferReducedData = useMatchMedia('(prefers-reduced-data: reduce)');
-const viewportSize = useViewportSize();
+const viewportSize      = useViewportSize();
 
 const backgroundDark   = sample(Object.values(BackgroundImages).filter(x => x.style == 'dark'));
 const backgroundBright = sample(Object.values(BackgroundImages).filter(x => x.style == 'light'));
