@@ -36,16 +36,18 @@ function isKanji(s: string) {
 
 <template lang="pug">
 span.kanji-text
-	a(
-		v-for="s in sections"
-		:class="{ han: isKanji(s) }"
-		:href="isKanji(s)?`/#/search/${s}` : undefined"
-	) {{s}}
+	template(v-for="s in sections")
+		router-link(
+			v-if="isKanji(s)"
+			class="kanji-character"
+			:to="`/#/search/${s}`"
+		) {{s}}
+		span(v-else) {{s}}
 </template>
 
 <style lang="scss">
 .kanji-text {
-	.han {
+	.kanji-character {
 		text-decoration: none;
 		cursor: pointer;
 		&:hover {
