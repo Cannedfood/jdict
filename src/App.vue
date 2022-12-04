@@ -26,7 +26,7 @@ nav(:class="{ home: home }")
 		v-model="searchQuery"
 		@send="router.push(`/search/${searchQuery}`)"
 	)
-		a(@click="router.replace(`/kanji-grid/${searchQuery}`)") 漢
+		router-link(:to="`/kanji-grid/${searchQuery}`") 漢
 RouterView
 </template>
 

@@ -104,6 +104,7 @@ onTabFocusChange(hasFocus => {
 		height: 100%;
 		width: 1.5em;
 		border-radius: inherit;
+		text-decoration: none;
 		cursor: pointer;
 		color: var(--text-muted2);
 		transition: color 200ms;

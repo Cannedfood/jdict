@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 
-const props = defineProps<{ urls: string[]; }>();
+const props = defineProps<{ urls: string[]; alt: string; }>();
 
 const loadedLevels = reactive([] as number[]);
 </script>
@@ -11,6 +11,7 @@ const loadedLevels = reactive([] as number[]);
 	img.lod-level(
 		v-for="(url, i) in urls" :key="url" :src="url"
 		@load="loadedLevels.push(i)"
+		:alt="alt"
 		:class=`{
 			first: i == 0,
 			loaded: loadedLevels.includes(i),

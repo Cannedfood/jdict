@@ -1,5 +1,6 @@
 #![feature(generators, generator_trait)]
 
+use rocket_async_compression::CachedCompression;
 use server_state::ServerState;
 
 mod server_state;
@@ -16,9 +17,15 @@ mod kana;
 fn rocket() -> _ {
     let state = ServerState::new();
 
-    rocket::build()
-    .configure(rocket::Config::figment().merge(("port", 8000)))
-    .manage(state)
-    .mount("/", rocket::routes![api::search])
-    .mount("/", rocket::fs::FileServer::new("../dist/", rocket::fs::Options::Index))
+    let server = rocket::build()
+        .configure(rocket::Config::figment().merge(("port", 8000)))
+        .manage(state)
+        .mount("/", rocket::routes![api::search])
+        .mount("/", rocket::fs::FileServer::new("../dist/", rocket::fs::Options::Index));
+
+    if cfg!(debug_assertions) {
+        server
+    } else {
+        server.attach(CachedCompression::fairing(vec![".js", ".css", ".html", ".wasm", ".json"]))
+    }
 }
