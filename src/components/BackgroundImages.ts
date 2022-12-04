@@ -58,6 +58,6 @@ const BackgroundImages: Record<string, BackgroundImage> = {
     'x95-rxpCmkE': {
         credit: `Photo by <a href="https://unsplash.com/@alexandrelallemand?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">ALEXANDRE LALLEMAND</a> on <a href="https://unsplash.com/?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>`,
         levels: generated_files("images/alexandre-lallemand-x95-rxpCmkE-unsplash.jpg"),
-        style: 'light',
+        style: 'dark',
     }
 }
