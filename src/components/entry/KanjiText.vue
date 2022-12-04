@@ -40,7 +40,7 @@ span.kanji-text
 		router-link(
 			v-if="isKanji(s)"
 			class="kanji-character"
-			:to="`/#/search/${s}`"
+			:to="`/search/${s}`"
 		) {{s}}
 		span(v-else) {{s}}
 </template>
