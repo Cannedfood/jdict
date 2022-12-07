@@ -40,7 +40,7 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 			//- 	| ({{kanji.stroke_count.slice(1).join(', ')}})
 	.info
 		.mr_group(v-for="g of kanji.reading_meaning_groups")
-			.meaning {{g.meanings?.filter(m => !m.lang).map(m => m.value).join(', ')}}
+			.meaning {{g.meanings?.filter(m => m.lang == 'en').map(m => m.value).join(', ')}}
 			.reading-kun(v-if="readings(g, 'ja_kun')") On: {{readings(g, 'ja_kun')?.join(', ')}}
 			.reading-on(v-if="readings(g, 'ja_on')") Kun: {{readings(g, 'ja_on')?.join(', ')}}
 			.reading-korean(v-if="zipKoreanReadings(g)") Korean: {{zipKoreanReadings(g)?.join(', ')}}
