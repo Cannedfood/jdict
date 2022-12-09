@@ -43,6 +43,7 @@ impl ServerState {
 
     pub fn search_kanji(&self, query: &str) -> Vec<Character> {
         query.chars()
+        .unique()
         .filter_map(|c| self.kanjidic_index.get(&c))
         .map(|idx| self.kanjidic.characters[*idx as usize].clone())
         .collect()
