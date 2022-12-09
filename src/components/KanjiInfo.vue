@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import type { Character, ReadingMeaningGroup, ReadingType } from '@/backend/kanjidic';
-import { ref } from 'vue';
 
 const props = defineProps<{
 	kanji: Character
 }>();
-
-const expanded = ref(false);
-
 
 const hidden = [ 'korean_h', 'korean_r', 'vietnam' ];
 function readings(g: ReadingMeaningGroup, type: ReadingType) {
@@ -28,7 +24,7 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 </script>
 
 <template lang="pug">
-.kanji-info(:class="{expanded}")
+.kanji-info
 	.kanji {{kanji.literal}}
 	.tags
 		.pill(v-if="kanji.misc.jlpt") JLPT {{kanji.misc.jlpt}}

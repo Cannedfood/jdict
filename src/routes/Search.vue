@@ -54,19 +54,27 @@ onScrolledToBottom(
 <template lang="pug">
 .stats(v-if="search") {{search.resultsTotal}} Results (server: {{search.time}}, client: {{search.clientTime}})
 .container
-	KanjiInfo(
-		v-if="search && search.kanji"
-		v-for="kanji of search.kanji"
-		:kanji="kanji"
-	)
+	.kanji-infos
+		KanjiInfo(
+			v-if="search && search.kanji"
+			v-for="kanji of search.kanji"
+			:kanji="kanji"
+		)
 	.results(:class="{ visible: search?.results?.length }")
 		Entry(v-for="entry of search?.results" :entry="entry")
-	Spinner(v-if="searchInProgress")
-	hr(v-if="allResultsLoaded")
-
+		Spinner(v-if="searchInProgress")
+		hr(v-if="allResultsLoaded")
 </template>
 
 <style lang="scss" scoped>
+@media (min-width: 1600px) {
+	.kanji-infos {
+		position: absolute;
+		left: 0;
+		max-width: 20em;
+	}
+}
+
 @keyframes appear {
 	from { opacity: 0; }
 	to   { opacity: 1; }
