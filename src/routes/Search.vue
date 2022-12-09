@@ -90,6 +90,7 @@ onScrolledToBottom(
 	color: #888A;
 	// text-align: right;
 	margin-block: 1em;
+	margin-inline: .6em;
 	font-size: .8em;
 }
 </style>
