@@ -102,6 +102,17 @@ button, .btn, [role="button"] {
 	margin: .2em;
 }
 
+.pill {
+	white-space: nowrap;
+	display: inline-block;
+	border-radius: .5em;
+	padding-inline: .4em;
+	margin-inline: .1em;
+	margin-block: 1px;
+
+	border: 1.5px solid var(--text-muted1);
+}
+
 // Platform specific fixes
 
 //// Remove x from input elements

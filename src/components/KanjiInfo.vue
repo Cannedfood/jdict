@@ -31,10 +31,10 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 .kanji-info(:class="{expanded}")
 	.kanji {{kanji.literal}}
 	.tags
-		span(v-if="kanji.misc.jlpt") JLPT {{kanji.misc.jlpt}}
-		span(v-if="kanji.misc.grade") Grade {{kanji.misc.grade}}
-		span(v-if="kanji.misc.freq") Freq: {{kanji.misc.freq}}
-		span(v-if="kanji.misc.stroke_count && kanji.misc.stroke_count.length > 0")
+		.pill(v-if="kanji.misc.jlpt") JLPT {{kanji.misc.jlpt}}
+		.pill(v-if="kanji.misc.grade") Grade {{kanji.misc.grade}}
+		.pill(v-if="kanji.misc.freq") Freq: {{kanji.misc.freq}}
+		.pill(v-if="kanji.misc.stroke_count && kanji.misc.stroke_count.length > 0")
 			| Strokes: {{kanji.misc.stroke_count[0]}}
 			//- span(v-if="kanji.stroke_count.length > 1")
 			//- 	| ({{kanji.stroke_count.slice(1).join(', ')}})
@@ -98,14 +98,6 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 	}
 	.tags {
 		grid-area: tags;
-		&>span {
-			white-space: nowrap;
-			display: inline-block;
-			background: #888;
-			border-radius: .5em;
-			padding-inline: .4em;
-			margin-inline: .1em;
-		}
 	}
 	.info {
 		grid-area: info;
