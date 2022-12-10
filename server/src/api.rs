@@ -9,7 +9,7 @@ pub struct SearchResult {
     pub kanji: Vec<Character>,
     pub results: Vec<Entry>,
     pub resultsTotal: usize,
-    time: String,
+    pub time: String,
 }
 
 #[rocket::get("/api/search?<searchTerm>&<take>&<skip>")]
