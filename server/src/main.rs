@@ -21,7 +21,7 @@ fn rocket() -> _ {
         .configure(rocket::Config::figment().merge(("port", 8000)))
         .manage(state)
         .mount("/", rocket::routes![api::search, api::search_kanji_in])
-        .mount("/", rocket::fs::FileServer::new("../dist/", rocket::fs::Options::Index));
+        .mount("/", rocket::fs::FileServer::new("../web/dist/", rocket::fs::Options::Index));
 
     if cfg!(debug_assertions) {
         server
