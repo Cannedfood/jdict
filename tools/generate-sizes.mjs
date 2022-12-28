@@ -40,4 +40,10 @@ for(const jpg of await fs.readdir(input_dir)) {
         );
     }
 }
-await Promise.all(tasks);
+
+process.stdout.write("Rendering images: 0/0")
+for(const [task, i] of tasks.map((task, i) => [task, i+1])) {
+    await task;
+    process.stdout.write(`\rRendering images: ${i}/${tasks.length} (${Math.floor(i/tasks.length*100)}%)`)
+}
+process.stdout.write(`\rRendering images: Rendered ${tasks.length} images\n`)
