@@ -24,14 +24,15 @@ await fs.rm(output_dir, { recursive: true, force: true });
 fs.mkdir(output_dir, { recursive: true });
 
 // Generate new files
+let tasks = [];
 for(const jpg of await fs.readdir(input_dir)) {
     const path = `${input_dir}/${jpg}`;
-    console.log(`${path}`)
+    // console.log(`${path}`)
 
     for(const [w, h, suffix, quality] of sizes) {
         const output_path = `${output_dir}/${jpg.replace('.jpg', suffix)}`;
-        console.log(`\t${output_path} ${w}x${h}`);
-        await (
+        // console.log(`\t${output_path} ${w}x${h}`);
+        tasks.push(
             sharp(path)
             .resize(w, h)
             .webp({ quality })
@@ -39,3 +40,4 @@ for(const jpg of await fs.readdir(input_dir)) {
         );
     }
 }
+await Promise.all(tasks);
