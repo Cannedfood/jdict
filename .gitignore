@@ -1,8 +1,9 @@
 # Stuff
 package-lock.json
-res
+res/
 *.jpg
 *.webp
+target/
 
 # Logs
 logs

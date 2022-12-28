@@ -12,6 +12,7 @@ mod kanjidic;
 mod kanjidic_parsing;
 mod fulltext_index;
 mod kana;
+mod zipped_xml_file;
 
 #[rocket::launch]
 fn rocket() -> _ {

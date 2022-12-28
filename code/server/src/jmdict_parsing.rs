@@ -1,13 +1,12 @@
-use std::{fs::File, io::Read};
+use std::path::Path;
 
 use roxmltree::{Node, ParsingOptions};
 
-use crate::{jmdict::{self, Gender}, kana::to_romaji};
+use crate::{jmdict::{self, Gender}, kana::to_romaji, zipped_xml_file::read_zipped_xml_file};
 
 impl jmdict::JMdict {
-    pub fn parse(path: &str) -> Self {
-        let mut file_content: String = String::new();
-        File::open(path).unwrap().read_to_string(&mut file_content).unwrap();
+    pub fn parse(path: &Path) -> Self {
+        let file_content = read_zipped_xml_file(&path).unwrap();
 
         let document = roxmltree::Document::parse_with_options(
             &file_content,

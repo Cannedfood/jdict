@@ -9,15 +9,14 @@
 
 (
     echo
-    echo "=============== Installing dependencies in web/... =============="
-    cd web
+    echo "=============== Installing dependencies in code/web/... =============="
+    cd code/web
     npm install
 )
 
 (
     echo
-    echo "=============== Pre-Building server/... ==================="
-    cd server
+    echo "=============== Pre-Building code/server/ and code/tauri/... ==================="
     cargo build
     cargo build --release
 )

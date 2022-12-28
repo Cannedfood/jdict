@@ -1,8 +1,10 @@
+#!/usr/bin/env node
+
 import sharp from 'sharp';
 import fs from 'fs/promises';
 
-const input_dir = './web/images';
-const output_dir = './web/public/images';
+const input_dir = './res/images';
+const output_dir = './code/web/public/images';
 
 const sizes = [
     [640,  360,   '-360p.webp', 80],
@@ -10,6 +12,11 @@ const sizes = [
     [1920, 1080, '-1080p.webp', 90],
     [2560, 1440, '-1440p.webp', 90],
     [3840, 2160, '-2160p.webp', 90],
+    [ 360,  640,  '-360p-vertical.webp', 80],
+    [ 720, 1280,  '-720p-vertical.webp', 90],
+    [1080, 1920, '-1080p-vertical.webp', 90],
+    [1440, 2560, '-1440p-vertical.webp', 90],
+    [2160, 3840, '-2160p-vertical.webp', 90],
 ];
 
 // Delete old files / create output directory
@@ -17,7 +24,7 @@ await fs.rm(output_dir, { recursive: true, force: true });
 fs.mkdir(output_dir, { recursive: true });
 
 // Generate new files
-for(const jpg of await fs.readdir('./images')) {
+for(const jpg of await fs.readdir(input_dir)) {
     const path = `${input_dir}/${jpg}`;
     console.log(`${path}`)
 

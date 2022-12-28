@@ -16,6 +16,11 @@ const Sizes: Array<[number, number, string, number]> = [
     [1920, 1080, '-1080p.webp', 90],
     [2560, 1440, '-1440p.webp', 90],
     [3840, 2160, '-2160p.webp', 90],
+    [ 360,  640,  '-360p-vertical.webp', 80],
+    [ 720, 1280,  '-720p-vertical.webp', 90],
+    [1080, 1920, '-1080p-vertical.webp', 90],
+    [1440, 2560, '-1440p-vertical.webp', 90],
+    [2160, 3840, '-2160p-vertical.webp', 90],
 ]
 
 function generated_files(s: string): LodLevel[] {

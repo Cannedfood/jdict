@@ -29,7 +29,7 @@ const lodChain = computed(() => {
 
 	const initial = levels[0];
 	const optimal = (() => {
-		for(const level of levels) {
+		for(const level of [...levels].sort((a, b) => a.height * a.width - b.height * b.width)) {
 			if(level.width >= viewportSize.width && level.height >= viewportSize.height)
 				return level;
 		}
