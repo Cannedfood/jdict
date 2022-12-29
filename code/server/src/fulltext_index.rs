@@ -48,10 +48,12 @@ fn first_syllable(s: &str) -> Syllable {
     let b_codeblock = find_unicode_block(b).unwrap();
     let c_codeblock = find_unicode_block(c).unwrap();
 
-    if is_cjk_block(a_codeblock) || a_codeblock != b_codeblock {
+    let codeblock_max_len = if is_cjk_block(a_codeblock) { 1 } else { 3 };
+
+    if a_codeblock != b_codeblock || codeblock_max_len == 1 {
         [a, '\0', '\0']
     }
-    else if a_codeblock != c_codeblock {
+    else if a_codeblock != c_codeblock || codeblock_max_len == 2 {
         [a, b, '\0']
     }
     else {
@@ -62,6 +64,6 @@ fn first_syllable(s: &str) -> Syllable {
 fn syllables<'a>(s: &'a str) -> impl Iterator<Item = Syllable> + 'a {
     s.char_indices()
     .map(
-        |c| first_syllable(&s[c.0..])
+        |(char_position, _char)| first_syllable(&s[char_position..])
     )
 }
