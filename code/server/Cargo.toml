@@ -8,6 +8,7 @@ edition = "2021"
 opt-level = 3
 
 [dependencies]
+figment = { version = "0.10.8", features = ["toml", "env"] }
 flate2 = "1.0.25"
 itertools = "0.10.5"
 rocket = { version = "0.5.0-rc.2", features = ["http2", "json"] }

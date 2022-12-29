@@ -1,0 +1,3 @@
+public_path="code/web/dist/"
+jmdict_file="res/JMdict_e.gz"
+kanjidic_file="res/kanjidic2.xml.gz"

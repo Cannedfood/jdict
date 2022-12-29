@@ -2,7 +2,7 @@ use std::path::Path;
 
 use roxmltree::{Node, ParsingOptions};
 
-use crate::{kanjidic::{Kanjidic, Header, Character, ReadingMeaningGroup, Codepoint, Radical, Misc, DicRef, QueryCode, Reading, Meaning, ReadingType, OnType, QueryCodeType, SkipMisclass, Variant, VariantType}, zipped_xml_file::read_zipped_xml_file};
+use crate::{kanjidic::{Kanjidic, Header, Character, ReadingMeaningGroup, Codepoint, Radical, Misc, DicRef, QueryCode, Reading, Meaning, ReadingType, OnType, QueryCodeType, SkipMisclass, Variant, VariantType}, util::read_zipped_xml_file};
 
 impl Kanjidic {
     pub fn parse(path: &Path) -> Self {

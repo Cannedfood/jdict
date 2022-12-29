@@ -1,29 +1,49 @@
-use std::{collections::HashMap, time::Duration, path::Path};
-
+use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
+use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::measure_time};
+use figment::{Figment, providers::{Toml, Format, Env}};
+use serde::Deserialize;
 
-use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match};
+#[derive(Debug, Clone, Deserialize)]
+pub struct Config {
+    pub public_path: String,
+    pub jmdict_file: String,
+    pub kanjidic_file: String,
+}
+impl Config {
+    pub fn figment() -> Figment {
+        Figment::new()
+            .merge(Toml::file("JDict.toml"))
+            .merge(Env::prefixed("JDICT_").global())
+    }
+}
+impl From<Figment> for Config {
+    fn from(figment: Figment) -> Self {
+        figment.extract().unwrap()
+    }
+}
 
 pub struct ServerState {
+    pub config: Config,
     pub dict: JMdict,
     pub dict_index: FullTextIndex,
     pub kanjidic: Kanjidic,
     pub kanjidic_index: HashMap<char, u32>,
 }
-
 impl ServerState {
-    pub fn new() -> Self {
-        let (kanjidic, kanjidic_time) = measure_time(|| Kanjidic::parse(Path::new("../../res/kanjidic2.xml.gz")));
+    pub fn new(config: Config) -> Self {
+        let (kanjidic, kanjidic_time) = measure_time(|| Kanjidic::parse(Path::new(config.kanjidic_file.as_str())));
         println!("Parsed kanjidic in {:?}", kanjidic_time);
         let (kanjidic_index, kanjidic_index_time) = measure_time(|| build_kanjidic_index(&kanjidic));
         println!("Built kanjidic index in {:?}", kanjidic_index_time);
 
-        let (dict, dict_time) = measure_time(|| JMdict::parse(Path::new("../../res/JMdict_e.gz")));
+        let (dict, dict_time) = measure_time(|| JMdict::parse(Path::new(config.jmdict_file.as_str())));
         println!("Parsed JMdict in {:?}", dict_time);
         let (index, index_time) = measure_time(|| build_jmdict_index(&dict));
         println!("Built JMdict index in {:?}", index_time);
 
         Self {
+            config,
             dict,
             dict_index: index,
             kanjidic,
@@ -76,10 +96,4 @@ fn build_kanjidic_index(kanjidic: &Kanjidic) -> HashMap<char, u32> {
     kanjidic.characters.iter().enumerate()
     .map(|(idx, entry)| (entry.literal.chars().next().unwrap(), idx as u32))
     .collect()
-}
-
-fn measure_time<T>(f: impl FnOnce() -> T) -> (T, Duration) {
-    let start = std::time::Instant::now();
-    let result = f();
-    (result, start.elapsed())
 }

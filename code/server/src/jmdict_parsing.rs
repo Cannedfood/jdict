@@ -2,7 +2,7 @@ use std::path::Path;
 
 use roxmltree::{Node, ParsingOptions};
 
-use crate::{jmdict::{self, Gender}, kana::to_romaji, zipped_xml_file::read_zipped_xml_file};
+use crate::{jmdict::{self, Gender}, kana::to_romaji, util::read_zipped_xml_file};
 
 impl jmdict::JMdict {
     pub fn parse(path: &Path) -> Self {
