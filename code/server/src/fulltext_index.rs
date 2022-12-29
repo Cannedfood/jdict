@@ -16,15 +16,6 @@ impl FullTextIndex {
         }
     }
 
-    // pub fn insert_many<'a, I>(&mut self, texts: I, id: u32)
-    //     where I: Iterator<Item = &'a str>
-    // {
-    //     let tuples = texts.flat_map(|s| s.chars().tuple_windows::<Syllable>());
-    //     for (a, b, c) in tuples {
-    //         self.entries.entry([a, b, c]).or_insert(vec![]).push(id);
-    //     }
-    // }
-
     pub fn insert(&mut self, text: &str, id: u32) {
         for syllable in syllables(text) {
             self.entries.entry(syllable).or_insert(vec![]).push(id);
