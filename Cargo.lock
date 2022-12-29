@@ -675,6 +675,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fad582f4b9e86b6caa621cabeb0963332d92eea04729ab12892c2533951e6440"
 
 [[package]]
+name = "jdict-server"
+version = "0.1.0"
+dependencies = [
+ "figment",
+ "flate2",
+ "itertools",
+ "rocket",
+ "rocket_async_compression",
+ "roxmltree",
+ "serde",
+ "serde_cbor",
+ "unicode-blocks",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1192,21 +1207,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "figment",
- "flate2",
- "itertools",
- "rocket",
- "rocket_async_compression",
- "roxmltree",
- "serde",
- "serde_cbor",
- "unicode-blocks",
 ]
 
 [[package]]
