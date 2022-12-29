@@ -2,3 +2,6 @@
 members = [
     "./code/server/"
 ]
+
+[profile.dev.package."*"]
+opt-level = 3
