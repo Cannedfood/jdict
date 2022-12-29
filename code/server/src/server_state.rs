@@ -1,26 +1,13 @@
 use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
 use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::measure_time};
-use figment::{Figment, providers::{Toml, Format, Env}};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub public_path: String,
     pub jmdict_file: String,
     pub kanjidic_file: String,
-}
-impl Config {
-    pub fn figment() -> Figment {
-        Figment::new()
-            .merge(Toml::file("JDict.toml"))
-            .merge(Env::prefixed("JDICT_").global())
-    }
-}
-impl From<Figment> for Config {
-    fn from(figment: Figment) -> Self {
-        figment.extract().unwrap()
-    }
 }
 
 pub struct ServerState {

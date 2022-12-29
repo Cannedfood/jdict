@@ -1,7 +1,9 @@
 #![feature(generators, generator_trait)]
 
+use figment::{Figment, providers::{Toml, Format, Serialized}};
 use rocket_async_compression::CachedCompression;
-use server_state::{ServerState, Config};
+use serde::{Deserialize, Serialize};
+use server_state::ServerState;
 
 mod util;
 mod server_state;
@@ -14,12 +16,24 @@ mod kanjidic_parsing;
 mod fulltext_index;
 mod kana;
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct ConfigSections {
+    pub rocket: rocket::Config,
+    pub jdict: server_state::Config,
+}
+
 #[rocket::launch]
 fn rocket() -> _ {
-    let state = ServerState::new(Config::figment().into());
+    let cfg: ConfigSections = 
+        Figment::from(Serialized::defaults(ConfigSections::default()))
+        .merge(Toml::file("Config.toml"))
+        .extract()
+        .unwrap();
+
+    let state = ServerState::new(cfg.jdict);
 
     let server = rocket::build()
-        .configure(rocket::Config::figment().merge(("port", 8000)))
+        .configure(cfg.rocket)
         .mount("/", rocket::routes![api::search, api::search_kanji_in])
         .mount("/", rocket::fs::FileServer::new(state.config.public_path.clone(), rocket::fs::Options::Index))
         .manage(state);
