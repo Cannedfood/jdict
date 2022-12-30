@@ -24,10 +24,14 @@ fn rocket() -> _ {
     let state = Database::new(cfg.jdict);
 
     let server = rocket::build()
-        .configure(cfg.rocket)
+        .configure(&cfg.rocket)
         .mount("/", rocket::routes![api::search, api::search_kanji_in])
         .mount("/", rocket::fs::FileServer::new(state.config.public_path.clone(), rocket::fs::Options::Index))
         .manage(state);
+
+    if let Err(e) = opener::open_browser(format!("http://localhost:{}", cfg.rocket.port)) {
+        println!("Failed to open browser: {}", e);
+    }
 
     if cfg!(debug_assertions) {
         server
