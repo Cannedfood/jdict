@@ -1502,7 +1502,6 @@ dependencies = [
 name = "jdict-db"
 version = "0.1.0"
 dependencies = [
- "figment",
  "flate2",
  "itertools",
  "roxmltree",

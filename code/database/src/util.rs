@@ -19,3 +19,12 @@ pub fn measure_time<T>(f: impl FnOnce() -> T) -> (T, Duration) {
     let result = f();
     (result, start.elapsed())
 }
+
+pub fn print_time<T>(
+    f: impl FnOnce() -> T,
+    print: impl FnOnce(Duration),
+) -> T {
+    let (result, time) = measure_time(f);
+    print(time);
+    result
+}

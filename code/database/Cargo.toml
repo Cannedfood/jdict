@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-figment = { version = "0.10.8", features = ["toml"] }
 flate2 = "1.0.25"
 itertools = "0.10.5"
 roxmltree = "0.16.0"

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
-use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::measure_time};
+use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::print_time};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -19,20 +19,28 @@ pub struct Database {
 }
 impl Database {
     pub fn new(config: Config) -> Self {
-        let (kanjidic, kanjidic_time) = measure_time(|| Kanjidic::parse(Path::new(config.kanjidic_file.as_str())));
-        println!("Parsed kanjidic in {:?}", kanjidic_time);
-        let (kanjidic_index, kanjidic_index_time) = measure_time(|| build_kanjidic_index(&kanjidic));
-        println!("Built kanjidic index in {:?}", kanjidic_index_time);
+        let kanjidic = print_time(
+            || Kanjidic::parse(Path::new(config.kanjidic_file.as_str())),
+            |time| println!("Parsed kanjidic in {:?}", time)
+        );
+        let kanjidic_index = print_time(
+            || build_kanjidic_index(&kanjidic),
+            |time| println!("Built kanjidic index in {:?}", time)
+        );
 
-        let (dict, dict_time) = measure_time(|| JMdict::parse(Path::new(config.jmdict_file.as_str())));
-        println!("Parsed JMdict in {:?}", dict_time);
-        let (index, index_time) = measure_time(|| build_jmdict_index(&dict));
-        println!("Built JMdict index in {:?}", index_time);
+        let dict = print_time(
+            || JMdict::parse(Path::new(config.jmdict_file.as_str())),
+            |time| println!("Parsed JMdict in {:?}", time)
+        );
+        let dict_index = print_time(
+            || build_jmdict_index(&dict),
+            |time| println!("Built JMdict index in {:?}", time)
+        );
 
         Self {
             config,
             dict,
-            dict_index: index,
+            dict_index,
             kanjidic,
             kanjidic_index,
         }

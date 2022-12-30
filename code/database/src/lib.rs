@@ -9,3 +9,5 @@ pub mod kanjidic_parsing;
 pub mod fulltext_index;
 pub mod kana;
 pub mod database;
+
+pub use fulltext_index::FullTextIndex;
