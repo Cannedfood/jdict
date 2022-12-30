@@ -10,14 +10,14 @@ pub struct Config {
     pub kanjidic_file: String,
 }
 
-pub struct ServerState {
+pub struct Database {
     pub config: Config,
     pub dict: JMdict,
     pub dict_index: FullTextIndex,
     pub kanjidic: Kanjidic,
     pub kanjidic_index: HashMap<char, u32>,
 }
-impl ServerState {
+impl Database {
     pub fn new(config: Config) -> Self {
         let (kanjidic, kanjidic_time) = measure_time(|| Kanjidic::parse(Path::new(config.kanjidic_file.as_str())));
         println!("Parsed kanjidic in {:?}", kanjidic_time);

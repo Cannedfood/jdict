@@ -1499,24 +1499,34 @@ dependencies = [
 ]
 
 [[package]]
-name = "jdict-server"
+name = "jdict-db"
 version = "0.1.0"
 dependencies = [
  "figment",
  "flate2",
  "itertools",
- "rocket",
- "rocket_async_compression",
  "roxmltree",
  "serde",
  "unicode-blocks",
 ]
 
 [[package]]
+name = "jdict-server"
+version = "0.1.0"
+dependencies = [
+ "figment",
+ "itertools",
+ "jdict-db",
+ "rocket",
+ "rocket_async_compression",
+ "serde",
+]
+
+[[package]]
 name = "jdict-tauri"
 version = "0.0.0"
 dependencies = [
- "jdict-server",
+ "jdict-db",
  "serde",
  "serde_json",
  "tauri",

@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "./code/database/",
     "./code/server/",
     "./code/tauri/",
 ]

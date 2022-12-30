@@ -1,8 +1,7 @@
 #![allow(non_snake_case, unused_variables)]
 
+use jdict_db::{kanjidic::Character, jmdict::Entry, database::Database};
 use rocket::{serde::json::Json, State};
-
-use crate::{jmdict::Entry, server_state::ServerState, kanjidic::Character};
 
 #[derive(serde::Serialize)]
 pub struct SearchResult {
@@ -13,10 +12,10 @@ pub struct SearchResult {
 }
 
 #[rocket::get("/api/search?<searchTerm>&<take>&<skip>")]
-pub fn search<'a>(searchTerm: &str, take: Option<u32>, skip: Option<u32>, state: &State<ServerState>) -> Json<SearchResult> {
+pub fn search<'a>(searchTerm: &str, take: Option<u32>, skip: Option<u32>, db: &State<Database>) -> Json<SearchResult> {
     let startTime = std::time::Instant::now();
 
-    let all_results = state.search(searchTerm);
+    let all_results = db.search(searchTerm);
 
     let paged_results =
         all_results.iter()
@@ -26,7 +25,7 @@ pub fn search<'a>(searchTerm: &str, take: Option<u32>, skip: Option<u32>, state:
         .collect::<Vec<Entry>>();
 
     Json(SearchResult {
-        kanji: state.contained_kanji_chars(&searchTerm),
+        kanji: db.contained_kanji_chars(&searchTerm),
         results: paged_results,
         resultsTotal: all_results.len(),
         time: format!("{:?}", startTime.elapsed()),
@@ -34,6 +33,6 @@ pub fn search<'a>(searchTerm: &str, take: Option<u32>, skip: Option<u32>, state:
 }
 
 #[rocket::get("/api/kanji_in?<searchTerm>")]
-pub fn search_kanji_in<'a>(searchTerm: &str, state: &State<ServerState>) -> Json<Vec<Character>> {
-    Json(state.contained_kanji_chars(searchTerm))
+pub fn search_kanji_in<'a>(searchTerm: &str, db: &State<Database>) -> Json<Vec<Character>> {
+    Json(db.contained_kanji_chars(searchTerm))
 }

@@ -1,25 +1,16 @@
 #![feature(generators, generator_trait)]
 
+mod api;
+
 use figment::{Figment, providers::{Toml, Format, Serialized}};
+use jdict_db::database::Database;
 use rocket_async_compression::CachedCompression;
 use serde::{Deserialize, Serialize};
-use server_state::ServerState;
-
-mod util;
-mod server_state;
-mod api;
-mod jmdict;
-mod jmdict_parsing;
-mod jmdict_result_rating;
-mod kanjidic;
-mod kanjidic_parsing;
-mod fulltext_index;
-mod kana;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 struct ConfigSections {
     pub rocket: rocket::Config,
-    pub jdict: server_state::Config,
+    pub jdict: jdict_db::database::Config,
 }
 
 #[rocket::launch]
@@ -30,7 +21,7 @@ fn rocket() -> _ {
         .extract()
         .unwrap();
 
-    let state = ServerState::new(cfg.jdict);
+    let state = Database::new(cfg.jdict);
 
     let server = rocket::build()
         .configure(cfg.rocket)
