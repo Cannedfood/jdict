@@ -25,7 +25,7 @@ fn rocket() -> _ {
 
     let server = rocket::build()
         .configure(&cfg.rocket)
-        .mount("/", rocket::routes![api::search, api::search_kanji_in])
+        .mount("/", rocket::routes![api::search])
         .mount("/", rocket::fs::FileServer::new(state.config.public_path.clone(), rocket::fs::Options::Index))
         .manage(state);
 

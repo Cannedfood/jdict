@@ -25,7 +25,8 @@ impl Kanjidic {
             match child.tag_name().name() {
                 "header"    => result.header = parse_header(&child),
                 "character" => result.characters.push(parse_character(&child)),
-                _ => (),
+                "" => (), // Ignore text nodes (whitespace)
+                name => panic!("Unknown element <{}> in <kanjidic2> {:?}", name, child.tag_name()),
             }
         }
 

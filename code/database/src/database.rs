@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
-use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::print_time};
+use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::print_time, kanjivg::{KanjiVG, Kanji}};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -8,6 +8,7 @@ pub struct Config {
     pub public_path: String,
     pub jmdict_file: String,
     pub kanjidic_file: String,
+    pub kanjivg_file: String,
 }
 
 pub struct Database {
@@ -16,9 +17,20 @@ pub struct Database {
     pub dict_index: FullTextIndex,
     pub kanjidic: Kanjidic,
     pub kanjidic_index: HashMap<char, u32>,
+    pub kanjivg: KanjiVG,
+    pub kanjivg_index: HashMap<char, u32>,
 }
 impl Database {
     pub fn new(config: Config) -> Self {
+        let kanjivg = print_time(
+            || KanjiVG::parse(Path::new(config.kanjivg_file.as_str())),
+            |time| println!("Parsed KanjiVG in {:?}", time)
+        );
+        let kanjivg_index = print_time(
+            || build_kanjivg_index(&kanjivg),
+            |time| println!("Built KanjiVG index in {:?}", time)
+        );
+
         let kanjidic = print_time(
             || Kanjidic::parse(Path::new(config.kanjidic_file.as_str())),
             |time| println!("Parsed kanjidic in {:?}", time)
@@ -43,6 +55,8 @@ impl Database {
             dict_index,
             kanjidic,
             kanjidic_index,
+            kanjivg,
+            kanjivg_index,
         }
     }
 
@@ -56,12 +70,24 @@ impl Database {
         .collect()
     }
 
-    pub fn contained_kanji_chars(&self, text: &str) -> Vec<Character> {
-        text.chars()
-        .unique()
-        .filter_map(|c| self.kanjidic_index.get(&c))
-        .map(|idx| self.kanjidic.characters[*idx as usize].clone())
-        .collect()
+    pub fn contained_kanji_chars(&self, text: &str) -> (Vec<Character>, Vec<Kanji>) {
+        let uniq_chars = 
+            text.chars()
+            .unique();
+
+        let chars = 
+            uniq_chars.clone()
+            .filter_map(|c| self.kanjidic_index.get(&c))
+            .map(|idx| self.kanjidic.characters[*idx as usize].clone())
+            .collect();
+
+        let kanjivg =
+            uniq_chars
+            .filter_map(|c| self.kanjivg_index.get(&c))
+            .map(|idx| self.kanjivg.kanji[*idx as usize].clone())
+            .collect();
+
+        (chars, kanjivg)
     }
 }
 
@@ -90,5 +116,17 @@ fn build_jmdict_index(dict: &JMdict) -> FullTextIndex {
 fn build_kanjidic_index(kanjidic: &Kanjidic) -> HashMap<char, u32> {
     kanjidic.characters.iter().enumerate()
     .map(|(idx, entry)| (entry.literal.chars().next().unwrap(), idx as u32))
+    .collect()
+}
+
+fn build_kanjivg_index(kanjidic: &KanjiVG) -> HashMap<char, u32> {
+    for kanji in kanjidic.kanji.iter() {
+        if kanji.kanji == "" {
+            println!("{:?}", kanji);
+        }
+    }
+
+    kanjidic.kanji.iter().enumerate()
+    .map(|(idx, entry)| (entry.kanji.chars().next().unwrap(), idx as u32))
     .collect()
 }
