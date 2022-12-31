@@ -2,6 +2,8 @@
 
 use std::str::FromStr;
 
+use crate::util::is_default;
+
 #[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Priority {
@@ -133,24 +135,24 @@ impl Default for GlossType {
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Translation {
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     highlight: bool,
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     gloss: String,
 }
 
 // <gloss>
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Gloss {
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub value: String,    // Content
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub lang: String,    // attribute: xml:lang
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub typ: GlossType,     // attribute: g_type
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub gender: Gender,     // attribute: g_gend
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub highlight: bool, // contains: <pri>
 }
 
@@ -171,11 +173,11 @@ pub struct Example {
 // <k_ele>
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Kanji {
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub value: String,        // <keb>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub infos: Vec<String>,    // <ke_inf>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub priorities: Priorities, // <ke_pri>
 }
 
@@ -183,44 +185,44 @@ pub struct Kanji {
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Reading {
     pub value:    String,      // <reb>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub romaji:   Option<String>, // (generated, not part of the thing)
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub info:     Vec<String>, // <re_inf>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub restrict: Vec<String>, // <re_restr> Which kanji this reading is restricted to
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub priority: Priorities,  // <re_pri>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub no_kanji: bool,        // <re_nokanji>
 }
 
 // <sense>
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Sense {
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub restrict_to_kanji:   Vec<String>, // <stagk>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub restrict_to_reading: Vec<String>, // <stagr>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub part_of_speech:  Vec<String>,         // <pos>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub xrefs:           Vec<String>,         // <xref> Cross-reference to another entry; "See also"
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub antonyms:        Vec<String>,         // <ant>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub fields:          Vec<String>,         // <field> Field of application
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub misc:            Vec<String>,         // <misc>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub info:            Vec<String>,         // <s_inf>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub origin:          Vec<LanguageOrigin>, // <lsource>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub dialect:         Dialects,            // <dial>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub glosses:         Vec<Gloss>,          // <gloss>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub examples:        Vec<Example>,        // <example>
 }
 
@@ -228,22 +230,17 @@ pub struct Sense {
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Entry {
     pub id: u32,                // <ent_seq>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub kanji:    Vec<Kanji>,   // <k_ele>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub readings: Vec<Reading>, // <r_ele>
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub senses:   Vec<Sense>,   // <sense>
 }
 
 // <JMdict>
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct JMdict {
-    #[serde(default, skip_serializing_if = "default")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub entries: Vec<Entry>, // <entry>
-}
-
-
-fn default<T: Default + PartialEq>(t: &T) -> bool {
-    *t == Default::default()
 }

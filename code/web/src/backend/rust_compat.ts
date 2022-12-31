@@ -1,6 +1,6 @@
 export type Option<T> = T | undefined;
-export type Vec<T> = T[];
-export type bool = boolean;
+export type Vec<T> = T[] | undefined;
+export type bool = boolean | undefined;
 export type u8 = number;
 export type u16 = number;
 export type u32 = number;

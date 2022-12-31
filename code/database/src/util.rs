@@ -28,3 +28,7 @@ pub fn print_time<T>(
     print(time);
     result
 }
+
+pub fn is_default<T: Default + PartialEq>(t: &T) -> bool {
+    *t == Default::default()
+}

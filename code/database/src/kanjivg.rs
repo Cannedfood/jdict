@@ -2,35 +2,50 @@ use std::str::FromStr;
 
 use serde::{Serialize, Deserialize};
 
+use crate::util::is_default;
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct KanjiVG {
     pub kanji: Vec<Kanji>,
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Stroke {
     pub path: String,
     pub typ: String,
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Kanji {
     pub kanji: String,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub original: Option<String>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub phon: Option<String>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub position: Option<Position>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub partial: bool,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub number: Option<u8>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub part: Option<u8>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub radical_form: bool,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub radical: Option<Radical>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub strokes: Vec<Stroke>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub parts: Vec<Kanji>,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub trad_form: bool,
+    #[serde(default, skip_serializing_if = "is_default")]
     pub variant: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Position {
     Bottom,
     Kamae,
@@ -43,7 +58,8 @@ pub enum Position {
     Top,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Radical {
     General,
     Jis,
