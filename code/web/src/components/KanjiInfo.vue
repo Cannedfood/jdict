@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Character, ReadingMeaningGroup, ReadingType } from '@/backend/kanjidic';
+import type { Kanji } from '@/backend/kanjivg';
 import { ref } from 'vue';
+import KanjiCompositionNode from './kanji_info/KanjiCompositionNode.vue';
 
 const props = defineProps<{
-	kanji: Character
+	kanji: Character,
+	kanjivg?: Kanji,
 }>();
 
 const hidden = [ 'korean_h', 'korean_r', 'vietnam' ];
@@ -47,6 +50,9 @@ const expanded = ref(false);
 			.reading-vietnam(v-if="readings(g, 'vietnam')") Vietnamese: {{readings(g, 'vietnam')?.join(', ')}}
 			.reading-pinyin(v-if="expanded && readings(g, 'pinyin')") Pinyin: {{readings(g, 'pinyin')?.join(', ')}}
 		.radical(v-if="kanji.misc.rad_name?.length") Radical: {{kanji.misc.rad_name.join(', ')}}
+		.decomposition(v-if="expanded && kanjivg")
+			| Decomposition:
+			KanjiCompositionNode(:kanjivg="kanjivg")
 	.bonus-info(v-if="expanded")
 		.codepoint(
 			v-if="kanji.codepoint"

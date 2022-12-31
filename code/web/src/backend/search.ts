@@ -3,9 +3,11 @@ import { inject } from 'vue';
 import type { Entry } from "./jmdict";
 import { Character } from './kanjidic';
 import { Cache } from './cache'
+import { Kanji } from './kanjivg';
 
 interface BasicSearchResult {
 	kanji: Character[],
+	kanjivg: Kanji[],
 	results: Entry[],
 	resultsTotal: number,
 	time: string,
