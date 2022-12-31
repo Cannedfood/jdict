@@ -5,9 +5,9 @@ export interface KanjiVG {
 }
 
 export interface Kanji {
-    kanji: String,
-    original: Option<String>,
-    phon: Option<String>,
+    kanji: string,
+    original: Option<string>,
+    phon: Option<string>,
     position: Option<Position>,
     partial: bool,
     number: Option<u8>,
@@ -21,9 +21,16 @@ export interface Kanji {
 }
 
 export interface Stroke {
-    path: String,
-    typ: String,
+    path: string,
+    typ: string,
 }
 
 export type Position = string;
 export type Radical = string;
+
+export function allPaths(kanji: Kanji): Stroke[] {
+    return [
+        ...(kanji.strokes ?? []),
+        ...(kanji.parts?.flatMap(p => allPaths(p)) ?? []),
+    ];
+}

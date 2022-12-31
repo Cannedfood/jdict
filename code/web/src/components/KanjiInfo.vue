@@ -3,6 +3,7 @@ import type { Character, ReadingMeaningGroup, ReadingType } from '@/backend/kanj
 import type { Kanji } from '@/backend/kanjivg';
 import { ref } from 'vue';
 import KanjiCompositionNode from './kanji_info/KanjiCompositionNode.vue';
+import StrokeOrder from './kanji_info/StrokeOrder.vue';
 
 const props = defineProps<{
 	kanji: Character,
@@ -51,8 +52,11 @@ const expanded = ref(false);
 			.reading-pinyin(v-if="expanded && readings(g, 'pinyin')") Pinyin: {{readings(g, 'pinyin')?.join(', ')}}
 		.radical(v-if="kanji.misc.rad_name?.length") Radical: {{kanji.misc.rad_name.join(', ')}}
 		.decomposition(v-if="expanded && kanjivg")
-			| Decomposition:
+			h5 Decomposition:
 			KanjiCompositionNode(:kanjivg="kanjivg")
+		.strokes(v-if="expanded && kanjivg")
+			h5 Stroke Order:
+			StrokeOrder(:kanjivg="kanjivg")
 	.bonus-info(v-if="expanded")
 		.codepoint(
 			v-if="kanji.codepoint"
