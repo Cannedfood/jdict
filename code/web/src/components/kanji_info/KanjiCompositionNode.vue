@@ -8,7 +8,7 @@ const prop = defineProps<{
 </script>
 
 <template lang="pug">
-.node(:class="{ hasChildren: kanjivg.parts.length > 0 }")
+.node(:class="{ hasChildren: !!kanjivg.parts?.length }")
     router-link(role="button" :to="'/search/' + kanjivg.kanji") {{kanjivg.kanji}}
     ul
         li(v-for="part of kanjivg.parts")
