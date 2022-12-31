@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Character, ReadingMeaningGroup, ReadingType } from '@/backend/kanjidic';
+import { ref } from 'vue';
 
 const props = defineProps<{
 	kanji: Character
@@ -21,6 +22,8 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 	return hangul.map((h, i) => `${h} (${reading[i]})`)
 }
 
+const expanded = ref(false);
+
 </script>
 
 <template lang="pug">
@@ -39,16 +42,18 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 			.meaning {{g.meanings?.filter(m => m.lang == 'en').map(m => m.value).join(', ')}}
 			.reading-kun(v-if="readings(g, 'ja_kun')") On: {{readings(g, 'ja_kun')?.join(', ')}}
 			.reading-on(v-if="readings(g, 'ja_on')") Kun: {{readings(g, 'ja_on')?.join(', ')}}
+			.nanori(v-if="g.nanori?.length") Nanori: {{g.nanori?.join(', ')}}
 			.reading-korean(v-if="zipKoreanReadings(g)") Korean: {{zipKoreanReadings(g)?.join(', ')}}
 			.reading-vietnam(v-if="readings(g, 'vietnam')") Vietnamese: {{readings(g, 'vietnam')?.join(', ')}}
-			.reading-pinyin(v-if="readings(g, 'pinyin')") Pinyin: {{readings(g, 'pinyin')?.join(', ')}}
-			.nanori(v-if="g.nanori?.length") Nanori: {{g.nanori?.join(', ')}}
+			.reading-pinyin(v-if="expanded && readings(g, 'pinyin')") Pinyin: {{readings(g, 'pinyin')?.join(', ')}}
 		.radical(v-if="kanji.misc.rad_name?.length") Radical: {{kanji.misc.rad_name.join(', ')}}
-	.bonus-info
+	.bonus-info(v-if="expanded")
 		.codepoint(
 			v-if="kanji.codepoint"
 			v-for="value, key of kanji.codepoint"
 		) {{key}}: {{value}}
+	.expand-btn(role="button" @click="expanded = !expanded") 
+		| {{expanded? 'Less' : 'More'}}
 </template>
 
 <style lang="scss" scoped>
@@ -56,25 +61,12 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 	display: grid;
 	grid-template-columns: min-content;
 	grid-template-rows: min-content;
-	// grid-template-areas:
-	// 	"kanji info"
-	// 	"kanji info"
-	// 	"tags  info"
-	// 	"bonus bonus";
 	grid-template-areas:
 		"kanji info"
 		"kanji info"
 		"tags  info"
 		"tags  bonus"
 		"more  more";
-	&.expanded {
-		grid-template-areas:
-			"kanji info"
-			"kanji info"
-			"tags  info"
-			"tags  bonus"
-			"more  more";
-	}
 
 	border: 1px solid #888;
 	border-radius: .5em;
@@ -94,11 +86,11 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 	}
 	.tags {
 		grid-area: tags;
+		font-size: .8em;
 	}
 	.info {
 		grid-area: info;
 		.mr_group {
-			margin-bottom: 2em;
 			.meaning {
 				margin-block: 1em;
 				font-size: 1.3em;
@@ -115,6 +107,10 @@ function zipKoreanReadings(g: ReadingMeaningGroup) {
 			padding-inline: .2em;
 			margin-inline: .2em;
 		}
+	}
+
+	.expand-button {
+		grid-area: more;
 	}
 }
 </style>
