@@ -39,29 +39,20 @@ useInterval(250, () => stroke.value = (stroke.value + 1) % strokes.value.length)
 </script>
 
 <template lang="pug">
-//- p {{ strokes }}
-//- p {{ strokePoints }}
 svg(view-box="0 0 109 109")
     path(
         v-for="s in strokes" 
         :d="s.path"
-        stroke="white"
+        stroke="gray"
         fill="none"
         stroke-width="1.5"
     )
-    //- text(
-    //-     v-for="p, i in strokeTextPositions"
-    //-     :x="p[0]"
-    //-     :y="p[1]"
-    //-     font-size="10"
-    //-     fill="white"
-    //- ) {{ i + 1 }}
-svg(view-box="0 0 109 109")
-    path.appear(
-        v-for="s in strokes.slice(0, stroke + 1)" 
-        :d="s.path" 
+    path(
+        v-for="s, i in strokes.slice(0, stroke + 1)"
+        :class="{ 'animate-dashed': i == stroke }"
+        :d="s.path"
         stroke="white"
-        fill="none" 
+        fill="none"
         stroke-width="1.5"
     )
     circle(
@@ -71,3 +62,14 @@ svg(view-box="0 0 109 109")
         fill="red"
     )
 </template>
+
+<style lang="scss" scoped>
+.animate-dashed {
+    stroke-dasharray: 100;
+    animation: dash .1s linear forwards;
+}
+@keyframes dash {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+}
+</style>
