@@ -1,9 +1,10 @@
-import { uniq } from 'lodash';
+import { invoke, uniq } from 'lodash';
 import { inject } from 'vue';
 import type { Entry } from "./jmdict";
 import { Character } from './kanjidic';
 import { Cache } from './cache'
 import { Kanji } from './kanjivg';
+import { tauri } from '@tauri-apps/api';
 
 interface BasicSearchResult {
 	kanji: Character[],
@@ -23,13 +24,13 @@ export interface SearchResult extends BasicSearchResult {
 export class SearchService {
 	private readonly cache = new Cache();
 
-	constructor(public baseUrl = '/api') {
+	constructor(public baseUrl: string) {
 		this.cache.disabled = true;
 	}
 
 	async search(searchTerm: string, params = {} as { skip?: number, take?: number }) {
 		const start = performance.now();
-		const result = await this.get<BasicSearchResult>('/search', { searchTerm: searchTerm.trim(), ...params })
+		const result = await this.get<BasicSearchResult>('search', { searchTerm: searchTerm.trim(), ...params })
 		const end = performance.now();
 
 		return {
@@ -64,18 +65,24 @@ export class SearchService {
 	}
 
 	private get<T>(url: string, params: { [key: string]: string|number }) {
-		let completeURL = `${this.baseUrl}${url}`;
-		if(params && Object.keys(params).length > 0) {
-			completeURL += '?' + Object.entries(params)
-				.filter(x => x[1] !== undefined && x[1] !== null)
-				.map(x => `${encodeURIComponent(x[0])}=${encodeURIComponent(x[1])}`)
-				.join('&')
+		if(window.__TAURI_IPC__ as any) {
+			return tauri.invoke(url, params) as Promise<T>;
 		}
-
-		return this.cache.getOrCreate(
-			completeURL,
-			() => fetch(completeURL).then(r => r.json() as Promise<T>)
-		);
+		else {
+			console.log("Base URL: " + this.baseUrl);
+			let completeURL = `${this.baseUrl}${url}`;
+			if(params && Object.keys(params).length > 0) {
+				completeURL += '?' + Object.entries(params)
+					.filter(x => x[1] !== undefined && x[1] !== null)
+					.map(x => `${encodeURIComponent(x[0])}=${encodeURIComponent(x[1])}`)
+					.join('&')
+			}
+	
+			return this.cache.getOrCreate(
+				completeURL,
+				() => fetch(completeURL).then(r => r.json() as Promise<T>)
+			);
+		}
 	}
 }
 

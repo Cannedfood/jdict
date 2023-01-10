@@ -11,7 +11,7 @@ import KanjiSearch from './routes/KanjiSearch.vue'
 import { SearchService } from './backend/search'
 
 createApp(App)
-.provide('search-service', new SearchService('/api'))
+.provide('search-service', new SearchService('/api/'))
 .use(createRouter({
 	history: createWebHashHistory(),
 	routes: [

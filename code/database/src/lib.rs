@@ -11,5 +11,6 @@ pub mod kanjivg_parsing;
 pub mod fulltext_index;
 pub mod kana;
 pub mod database;
+pub mod shared_api;
 
 pub use fulltext_index::FullTextIndex;

@@ -1,11 +1,24 @@
 #![feature(generators, generator_trait)]
 
-mod api;
-
 use figment::{Figment, providers::{Toml, Format, Serialized}};
 use jdict_db::database::Database;
+use rocket::serde::json::Json;
 use rocket_async_compression::CachedCompression;
 use serde::{Deserialize, Serialize};
+
+
+// Api
+#[allow(non_snake_case)]
+
+#[rocket::get("/api/search?<searchTerm>&<take>&<skip>")]
+pub fn search<'a>(searchTerm: &str, take: Option<u32>, skip: Option<u32>, db: &rocket::State<Database>) -> Json<jdict_db::shared_api::SearchResult> {
+    Json(jdict_db::shared_api::search(&db, searchTerm, take, skip))
+}
+
+
+
+
+// Rocket server
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 struct JdictServerConfig {
@@ -31,7 +44,7 @@ fn rocket() -> _ {
 
     let server = rocket::build()
         .configure(&cfg.rocket)
-        .mount("/", rocket::routes![api::search])
+        .mount("/", rocket::routes![search])
         .mount("/", rocket::fs::FileServer::new(cfg.jdict_server.public_path, rocket::fs::Options::Index))
         .manage(state);
 

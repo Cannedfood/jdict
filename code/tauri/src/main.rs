@@ -3,15 +3,26 @@
     windows_subsystem = "windows"
 )]
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+use jdict_db::database::Config;
+use jdict_db::database::Database;
+
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn search<'a>(search_term: &str, take: Option<u32>, skip: Option<u32>, db: tauri::State<Database>) -> jdict_db::shared_api::SearchResult {
+    jdict_db::shared_api::search(&db, search_term, take, skip)
 }
 
 fn main() {
+    let database = Database::new(
+        Config {
+            jmdict_file: "res/JMdict_e.gz".to_string(),
+            kanjidic_file: "res/kanjidic2.xml.gz".to_string(),
+            kanjivg_file: "res/kanjivg.xml.gz".to_string(),
+        }
+    );
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .manage(database)
+        .invoke_handler(tauri::generate_handler![search])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

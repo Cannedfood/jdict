@@ -2,11 +2,11 @@ use std::{path::Path, iter};
 
 use roxmltree::{Node, ParsingOptions};
 
-use crate::{kanjivg::{KanjiVG, Kanji, Stroke}, util::read_zipped_xml_file};
+use crate::{kanjivg::{KanjiVG, Kanji, Stroke}, util::read_file};
 
 impl KanjiVG {
     pub fn parse(path: &Path) -> Self {
-        let file_content = read_zipped_xml_file(path).unwrap();
+        let file_content = read_file(path).unwrap();
         let document = roxmltree::Document::parse_with_options(
             &file_content,
             ParsingOptions {

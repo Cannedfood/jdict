@@ -42,7 +42,9 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "../../res/*.gz"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {

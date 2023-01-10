@@ -2,11 +2,11 @@ use std::path::Path;
 
 use roxmltree::{Node, ParsingOptions};
 
-use crate::{kanjidic::{Kanjidic, Header, Character, ReadingMeaningGroup, Codepoint, Radical, Misc, DicRef, QueryCode, Reading, Meaning, ReadingType, OnType, QueryCodeType, SkipMisclass, Variant, VariantType}, util::read_zipped_xml_file};
+use crate::{kanjidic::{Kanjidic, Header, Character, ReadingMeaningGroup, Codepoint, Radical, Misc, DicRef, QueryCode, Reading, Meaning, ReadingType, OnType, QueryCodeType, SkipMisclass, Variant, VariantType}, util::read_file};
 
 impl Kanjidic {
     pub fn parse(path: &Path) -> Self {
-        let file_content = read_zipped_xml_file(path).unwrap();
+        let file_content = read_file(path).unwrap();
         let document = roxmltree::Document::parse_with_options(
             &file_content,
             ParsingOptions {

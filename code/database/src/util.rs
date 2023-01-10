@@ -1,16 +1,26 @@
 use std::{path::Path, fs::File, io::{Read, BufReader, self}, time::Duration};
 
-pub fn read_zipped_xml_file(path: &Path) -> io::Result<String> {
+pub fn load_gzip_file(file: File) -> io::Result<String> {
+    let mut file_content = String::new();
+    let decoder = flate2::read::GzDecoder::new(file);
+    BufReader::new(decoder).read_to_string(&mut file_content)?;
+    Ok(file_content)
+}
+
+pub fn load_file(mut file: File) -> io::Result<String> {
+    let mut file_content = String::new();
+    file.read_to_string(&mut file_content)?;
+    Ok(file_content)
+}
+
+pub fn read_file(path: &Path) -> io::Result<String> {
+    let file = File::open(path)?;
+
     if path.ends_with(".xml") {
-        let mut file_content: String = String::new();
-        File::open(path)?.read_to_string(&mut file_content)?;
-        Ok(file_content)
-    }   
+        load_file(file)
+    }
     else { // .xml.gz file
-        let mut file_content: String = String::new();
-        let decoder = flate2::read::GzDecoder::new(File::open(path)?);
-        BufReader::new(decoder).read_to_string(&mut file_content)?;
-        Ok(file_content)
+        load_gzip_file(file)
     }
 }
 
