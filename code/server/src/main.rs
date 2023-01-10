@@ -8,9 +8,15 @@ use rocket_async_compression::CachedCompression;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct JdictServerConfig {
+    pub public_path: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 struct ConfigSections {
     pub rocket: rocket::Config,
     pub jdict: jdict_db::database::Config,
+    pub jdict_server: JdictServerConfig,
 }
 
 #[rocket::launch]
@@ -26,7 +32,7 @@ fn rocket() -> _ {
     let server = rocket::build()
         .configure(&cfg.rocket)
         .mount("/", rocket::routes![api::search])
-        .mount("/", rocket::fs::FileServer::new(state.config.public_path.clone(), rocket::fs::Options::Index))
+        .mount("/", rocket::fs::FileServer::new(cfg.jdict_server.public_path, rocket::fs::Options::Index))
         .manage(state);
 
     if let Err(e) = opener::open_browser(format!("http://localhost:{}", cfg.rocket.port)) {

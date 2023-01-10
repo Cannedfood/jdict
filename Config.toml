@@ -1,8 +1,10 @@
 [jdict]
-public_path="code/web/dist/"
 jmdict_file="res/JMdict_e.gz"
 kanjidic_file="res/kanjidic2.xml.gz"
 kanjivg_file="res/kanjivg.xml.gz"
+
+[jdict_server]
+public_path="code/web/dist/"
 
 [rocket]
 address = "0.0.0.0"

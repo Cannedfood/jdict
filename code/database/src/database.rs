@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    pub public_path: String,
     pub jmdict_file: String,
     pub kanjidic_file: String,
     pub kanjivg_file: String,
@@ -26,23 +25,27 @@ impl Database {
             || KanjiVG::parse(Path::new(config.kanjivg_file.as_str())),
             |time| println!("Parsed KanjiVG in {:?}", time)
         );
-        let kanjivg_index = print_time(
-            || build_kanjivg_index(&kanjivg),
-            |time| println!("Built KanjiVG index in {:?}", time)
-        );
 
         let kanjidic = print_time(
             || Kanjidic::parse(Path::new(config.kanjidic_file.as_str())),
             |time| println!("Parsed kanjidic in {:?}", time)
         );
-        let kanjidic_index = print_time(
-            || build_kanjidic_index(&kanjidic),
-            |time| println!("Built kanjidic index in {:?}", time)
-        );
-
         let dict = print_time(
             || JMdict::parse(Path::new(config.jmdict_file.as_str())),
             |time| println!("Parsed JMdict in {:?}", time)
+        );
+
+        Self::from_dicts(kanjivg, kanjidic, dict)
+    }
+
+    pub fn from_dicts(kanjivg: KanjiVG, kanjidic: Kanjidic, dict: JMdict) -> Self {
+        let kanjivg_index = print_time(
+            || build_kanjivg_index(&kanjivg),
+            |time| println!("Built KanjiVG index in {:?}", time)
+        );
+        let kanjidic_index = print_time(
+            || build_kanjidic_index(&kanjidic),
+            |time| println!("Built kanjidic index in {:?}", time)
         );
         let dict_index = print_time(
             || build_jmdict_index(&dict),
@@ -50,7 +53,7 @@ impl Database {
         );
 
         Self {
-            config,
+            config: Config::default(),
             dict,
             dict_index,
             kanjidic,
