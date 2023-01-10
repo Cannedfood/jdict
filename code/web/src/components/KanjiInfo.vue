@@ -2,29 +2,14 @@
 import type { Character, ReadingMeaningGroup, ReadingType } from '@/backend/kanjidic';
 import type { Kanji } from '@/backend/kanjivg';
 import { ref } from 'vue';
-import KanjiCompositionNode from './kanji_info/KanjiCompositionNode.vue';
+import KanjiDecomposition from './kanji_info/KanjiDecomposition.vue';
+import KanjiReadings from './kanji_info/KanjiReadings.vue';
 import StrokeOrder from './kanji_info/StrokeOrder.vue';
 
 const props = defineProps<{
 	kanji: Character,
 	kanjivg?: Kanji,
 }>();
-
-const hidden = [ 'korean_h', 'korean_r', 'vietnam' ];
-function readings(g: ReadingMeaningGroup, type: ReadingType) {
-	if(!g.readings) return undefined;
-	if(hidden.includes(type)) return undefined;
-
-	const result = g.readings.filter(r => r.typ == type).map(r => r.value);
-	return result.length? result : undefined;
-}
-
-function zipKoreanReadings(g: ReadingMeaningGroup) {
-	const hangul   = readings(g, 'korean_h');
-	const reading  = readings(g, 'korean_r');
-	if(!hangul || !reading) return undefined;
-	return hangul.map((h, i) => `${h} (${reading[i]})`)
-}
 
 const expanded = ref(false);
 
@@ -34,6 +19,8 @@ const expanded = ref(false);
 .kanji-info
 	.kanji {{kanji.literal}}
 	.tags
+		.strokes(v-if="expanded && kanjivg")
+			StrokeOrder(:kanjivg="kanjivg")
 		.pill(v-if="kanji.misc.jlpt") JLPT {{kanji.misc.jlpt}}
 		.pill(v-if="kanji.misc.grade") Grade {{kanji.misc.grade}}
 		.pill(v-if="kanji.misc.freq") Freq: {{kanji.misc.freq}}
@@ -42,21 +29,11 @@ const expanded = ref(false);
 			//- span(v-if="kanji.stroke_count.length > 1")
 			//- 	| ({{kanji.stroke_count.slice(1).join(', ')}})
 	.info
-		.mr_group(v-for="g of kanji.reading_meaning_groups")
-			.meaning {{g.meanings?.filter(m => m.lang == 'en').map(m => m.value).join(', ')}}
-			.reading-kun(v-if="readings(g, 'ja_kun')") On: {{readings(g, 'ja_kun')?.join(', ')}}
-			.reading-on(v-if="readings(g, 'ja_on')") Kun: {{readings(g, 'ja_on')?.join(', ')}}
-			.nanori(v-if="g.nanori?.length") Nanori: {{g.nanori?.join(', ')}}
-			.reading-korean(v-if="zipKoreanReadings(g)") Korean: {{zipKoreanReadings(g)?.join(', ')}}
-			.reading-vietnam(v-if="readings(g, 'vietnam')") Vietnamese: {{readings(g, 'vietnam')?.join(', ')}}
-			.reading-pinyin(v-if="expanded && readings(g, 'pinyin')") Pinyin: {{readings(g, 'pinyin')?.join(', ')}}
+		KanjiReadings(:kanji="kanji" :expanded="expanded")
 		.radical(v-if="kanji.misc.rad_name?.length") Radical: {{kanji.misc.rad_name.join(', ')}}
 		.decomposition(v-if="expanded && kanjivg")
 			h5 Decomposition:
-			KanjiCompositionNode(:kanjivg="kanjivg")
-		.strokes(v-if="expanded && kanjivg")
-			h5 Stroke Order:
-			StrokeOrder(:kanjivg="kanjivg")
+			KanjiDecomposition(:kanjivg="kanjivg")
 	.bonus-info(v-if="expanded")
 		.codepoint(
 			v-if="kanji.codepoint"
@@ -100,13 +77,6 @@ const expanded = ref(false);
 	}
 	.info {
 		grid-area: info;
-		.mr_group {
-			.meaning {
-				margin-block: 1em;
-				font-size: 1.3em;
-				// font-weight: bold;
-			}
-		}
 	}
 	.bonus-info {
 		grid-area: bonus;
