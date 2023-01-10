@@ -72,8 +72,8 @@ onScrolledToBottom(
 @media (min-width: 1600px) {
 	.kanji-infos {
 		position: absolute;
-		left: 0;
-		max-width: 20em;
+		left: .4em;
+		width: 25vw;
 	}
 }
 
