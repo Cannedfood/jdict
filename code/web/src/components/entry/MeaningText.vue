@@ -51,3 +51,17 @@ function generateGlossText(g: Gloss) {
 						| Antonyms:
 						a(v-for="ant in sense.antonyms" :href="`#/search/${ant.split('・')[0]}`") {{ant}}
 </template>
+
+<style lang="scss" scoped>
+.extra-info {
+	display: inline;
+	color: var(--text-muted2);
+	&> * {
+		display: inline-block;
+		margin-inline: .5em;
+	}
+	.fields, .crossref {
+		display: block;
+	}
+}
+</style>

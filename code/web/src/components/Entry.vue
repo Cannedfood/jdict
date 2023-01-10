@@ -27,45 +27,32 @@ function kanjiClasses(kanji: Kanji) {
 
 <template lang="pug">
 .entry
-	.word
-		.reading(v-if="!highlightReading")
-			.reading-entry(v-for="reading, i of entry.readings")
-				.romaji {{reading.romaji}}
-				.kana   {{reading.value + (i + 1 != entry.readings.length? ', ' : '')}}
-		.kanji
-			span(v-if="highlightReading" v-for="reading, i in entry.readings")
-				span(:class="kanjiClasses(reading)")
-					span {{reading.value}}
-					span(v-if="(entry.kanji?.length ?? 0) > 0") ,&nbsp;
-			span(v-for="kanji, i in entry.kanji")
-				KanjiText(:kanji="kanji" :class="kanjiClasses(kanji)")
-				span(v-if="i + 1 != entry.kanji?.length") ,&nbsp;
+	.reading(v-if="!highlightReading")
+		.reading-entry(v-for="reading, i of entry.readings")
+			.romaji {{reading.romaji}}
+			.kana   {{reading.value + (i + 1 != entry.readings.length? ', ' : '')}}
+	.kanji
+		span(v-if="highlightReading" v-for="reading, i in entry.readings")
+			span(:class="kanjiClasses(reading)")
+				span {{reading.value}}
+				span(v-if="(entry.kanji?.length ?? 0) > 0") ,&nbsp;
+		span(v-for="kanji, i in entry.kanji")
+			KanjiText(:kanji="kanji" :class="kanjiClasses(kanji)")
+			span(v-if="i + 1 != entry.kanji?.length") ,&nbsp;
 	MeaningText(:senses="senses")
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .entry {
-	.word {
-		// Used to allow floating the romaji text. See .romaji
-		position: relative;
+	position: relative;
+
+	.reading {
+		width: fit-content;
+		font-size: .7rem;
+		color: var(--text-muted);
+		top: 0;
 	}
-	.debug-info {
-		display: none;
-		color: var(--text-muted1);
-	}
-	&:hover {
-		.debug-info {
-			display: block;
-		}
-	}
-	.floating-container {
-		position: absolute;
-		background: var(--background1);
-		width: 100%;
-		max-width: 20cm;
-		border: 2px solid white;
-		z-index: 1;
-	}
+
 	.reading-entry {
 		display: inline-block;
 		.romaji {
@@ -75,34 +62,16 @@ function kanjiClasses(kanji: Kanji) {
 			opacity: 0;
 			transition: opacity 100ms;
 		}
-		&:hover .romaji {
+		&:hover >.romaji {
 			opacity: 1;
 		}
 	}
 
-	.reading {
-		width: fit-content;
-		font-size: .7rem;
-		color: var(--text-muted);
-		top: 0;
-	}
 	.kanji {
 		font-size: 1.2rem;
 		.phoneticReading { font-weight: bold; }
 		.irregularUsage { color: var(--text-muted1); }
 		.rarelyUsed { color: var(--text-muted2); }
 	}
-	.extra-info {
-		display: inline;
-		color: var(--text-muted2);
-		&> * {
-			display: inline-block;
-			margin-inline: .5em;
-		}
-		.fields, .crossref {
-			display: block;
-		}
-	}
-
 }
 </style>

@@ -60,6 +60,7 @@ onScrolledToBottom(
 			v-for="kanji of search.kanji"
 			:kanji="kanji"
 			:kanjivg="search.kanjivg.find(k => k.kanji == kanji.literal)"
+			:start-expanded="search.kanji.length == 1"
 		)
 	.results(:class="{ visible: search?.results?.length }")
 		Entry(v-for="entry of search?.results" :entry="entry")

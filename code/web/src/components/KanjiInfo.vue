@@ -9,14 +9,15 @@ import StrokeOrder from './kanji_info/StrokeOrder.vue';
 const props = defineProps<{
 	kanji: Character,
 	kanjivg?: Kanji,
+	startExpanded?: boolean,
 }>();
 
-const expanded = ref(false);
+const expanded = ref(props.startExpanded ?? false);
 
 </script>
 
 <template lang="pug">
-.kanji-info
+.kanji-info(:class="{expanded}" @click="!expanded && (expanded = true)")
 	.kanji {{kanji.literal}}
 	.tags
 		.strokes(v-if="expanded && kanjivg")
@@ -34,12 +35,7 @@ const expanded = ref(false);
 		.decomposition(v-if="expanded && kanjivg")
 			h5 Decomposition:
 			KanjiDecomposition(:kanjivg="kanjivg")
-	.bonus-info(v-if="expanded")
-		.codepoint(
-			v-if="kanji.codepoint"
-			v-for="value, key of kanji.codepoint"
-		) {{key}}: {{value}}
-	.expand-btn(role="button" @click="expanded = !expanded") 
+	.expand-btn(role="button" @click.stop="expanded = !expanded")
 		| {{expanded? 'Less' : 'More'}}
 </template>
 
@@ -60,6 +56,10 @@ const expanded = ref(false);
 	margin-block: .5em;
 	padding: .5em;
 	&>* { margin: .5rem; }
+
+	cursor: pointer;
+	&.expanded { cursor: unset; }
+
 	.kanji {
 		grid-area: kanji;
 
@@ -77,16 +77,6 @@ const expanded = ref(false);
 	}
 	.info {
 		grid-area: info;
-	}
-	.bonus-info {
-		grid-area: bonus;
-		display: flex;
-		flex-flow: wrap row;
-		&>* {
-			border: 1px solid #888;
-			padding-inline: .2em;
-			margin-inline: .2em;
-		}
 	}
 
 	.expand-button {
