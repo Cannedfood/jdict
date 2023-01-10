@@ -114,6 +114,21 @@ button, .btn, [role="button"] {
 	border: 1.5px solid var(--text-muted1);
 }
 
+.w100 {
+	width: 100%;
+}
+
+.chevron {
+	display: inline-block;
+	margin-inline: .5em;
+	transform: rotate(90deg);
+	font-size: 1.5em;
+	color: var(--text-muted2);
+}
+.chevron.up {
+	transform: rotate(-90deg);
+}
+
 // Platform specific fixes
 
 //// Remove x from input elements
