@@ -1,4 +1,4 @@
-import { invoke, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { inject } from 'vue';
 import type { Entry } from "./jmdict";
 import { Character } from './kanjidic';
