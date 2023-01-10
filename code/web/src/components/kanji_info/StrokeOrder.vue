@@ -39,7 +39,7 @@ useInterval(250, () => stroke.value = (stroke.value + 1) % strokes.value.length)
 </script>
 
 <template lang="pug">
-svg(view-box="0 0 109 109")
+svg(viewBox="0 0 109 109")
     path(
         v-for="s in strokes"
         :d="s.path"
