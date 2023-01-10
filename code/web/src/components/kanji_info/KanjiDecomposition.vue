@@ -9,15 +9,17 @@ const props = defineProps<{
 </script>
 
 <template lang="pug">
-.decomposition
-    KanjiDecompositionNode(:kanjivg="kanjivg")
+.decomposition.text-center
+  | Decomposition:
+  KanjiDecompositionNode(:kanjivg="kanjivg")
 </template>
 
 <style lang="scss" scoped>
 .decomposition {
-    border: 1px solid white;
-    border-radius: .2em;
-    width: fit-content;
-    padding: 1em;
+  border: 1px solid white;
+  border-radius: .2em;
+  width: fit-content;
+  padding: .4em 1em;
+  margin-block: 1em;
 }
 </style>

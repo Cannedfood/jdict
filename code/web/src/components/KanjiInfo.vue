@@ -34,7 +34,6 @@ const expanded = ref(props.startExpanded ?? false);
 		KanjiReadings(:kanji="kanji" :expanded="expanded")
 		.radical(v-if="kanji.misc.rad_name?.length") Radical: {{kanji.misc.rad_name.join(', ')}}
 		.decomposition(v-if="expanded && kanjivg")
-			h5 Decomposition:
 			KanjiDecomposition(:kanjivg="kanjivg")
 	.more(@click.stop="expanded = !expanded")
 		.chevron(:class="{ up: expanded }") ❯

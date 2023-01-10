@@ -19,6 +19,9 @@ router-link.node(:to="'/search/' + kanjivg.kanji")
 
 <style lang="scss" scoped>
 .node {
+    text-decoration: none;
+
+
     width: fit-content;
     margin: 0 .3em;
     &:first-child { margin-left: 0; }
