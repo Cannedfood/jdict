@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import { defineAsyncComponent, inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { SearchService, SearchResult } from '../backend/search'
 import Entry from '../components/Entry.vue';
@@ -7,7 +7,7 @@ import Spinner from '../components/Spinner.vue';
 import { throttle } from 'lodash'
 import { onScrolledToBottom } from '../util/OnScrolledToBottom';
 import { computed } from '@vue/reactivity';
-import KanjiInfo from '@/components/KanjiInfo.vue';
+const KanjiInfo = defineAsyncComponent(() => import('@/components/KanjiInfo.vue'));
 
 const searchService = inject<SearchService>('search-service')!;
 const route = useRoute();
