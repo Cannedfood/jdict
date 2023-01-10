@@ -40,7 +40,7 @@ router-link.node(:to="'/search/' + kanjivg.kanji")
     .child-groups {
         display: flex;
         flex-flow: wrap row;
-        border-top: 1px solid white;
+        border-top: 1px solid #888;
         border-radius: .1em;
     }
 }

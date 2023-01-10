@@ -16,7 +16,7 @@ const props = defineProps<{
 
 <style lang="scss" scoped>
 .decomposition {
-  border: 1px solid white;
+  border: 1px solid #888;
   border-radius: .2em;
   width: fit-content;
   padding: .4em 1em;
