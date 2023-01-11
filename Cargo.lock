@@ -1501,7 +1501,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "jdict-db"
+name = "jdict-server"
+version = "0.1.0"
+dependencies = [
+ "figment",
+ "futures",
+ "itertools",
+ "jdict-shared",
+ "opener",
+ "rocket",
+ "rocket_async_compression",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "jdict-shared"
 version = "0.1.0"
 dependencies = [
  "flate2",
@@ -1512,27 +1527,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "jdict-server"
-version = "0.1.0"
-dependencies = [
- "figment",
- "itertools",
- "jdict-db",
- "opener",
- "rocket",
- "rocket_async_compression",
- "serde",
-]
-
-[[package]]
 name = "jdict-tauri"
 version = "0.0.0"
 dependencies = [
- "jdict-db",
+ "futures",
+ "jdict-shared",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
+ "tokio",
 ]
 
 [[package]]
@@ -3247,9 +3251,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.23.0"
+version = "1.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eab6d665857cc6ca78d6e80303a02cea7a7851e85dfbd77cbdc09bd129f1ef46"
+checksum = "1d9f76183f91ecfb55e1d7d5602bd1d979e38a3a522fe900241cf195624d67ae"
 dependencies = [
  "autocfg",
  "bytes",

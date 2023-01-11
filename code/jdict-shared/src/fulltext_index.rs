@@ -5,6 +5,7 @@ use unicode_blocks::{find_unicode_block, is_cjk_block};
 
 pub type Syllable = [char; 3];
 
+#[derive(Default)]
 pub struct FullTextIndex {
     pub entries: HashMap<Syllable, Vec<u32>>,
 }

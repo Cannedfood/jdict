@@ -1,5 +1,5 @@
 [package]
-name = "jdict-db"
+name = "jdict-shared"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,5 +9,5 @@ edition = "2021"
 flate2 = "1.0.25"
 itertools = "0.10.5"
 roxmltree = "0.16.0"
-serde = "1.0.147"
+serde = { version = "1.0.147", features = ["derive"] }
 unicode-blocks = "0.1.5"

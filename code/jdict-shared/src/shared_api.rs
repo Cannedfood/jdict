@@ -1,10 +1,12 @@
+use serde::Serialize;
+
 use crate::database::Database;
 
 use crate::kanjidic::Character;
 use crate::kanjivg::Kanji;
 use crate::jmdict::Entry;
 
-#[derive(serde::Serialize)]
+#[derive(Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchResult {
     pub kanji: Vec<Character>,

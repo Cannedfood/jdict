@@ -3,17 +3,16 @@
     windows_subsystem = "windows"
 )]
 
-use jdict_db::database::Config;
-use jdict_db::database::Database;
+use jdict_shared::database::Config;
+use jdict_shared::database::Database;
 use tauri::Manager;
 
 #[tauri::command]
-fn search<'a>(search_term: &str, take: Option<u32>, skip: Option<u32>, db: tauri::State<Database>) -> jdict_db::shared_api::SearchResult {
-    jdict_db::shared_api::search(&db, search_term, take, skip)
+fn search<'a>(search_term: &str, take: Option<u32>, skip: Option<u32>, db: tauri::State<Database>) -> jdict_shared::shared_api::SearchResult {
+    jdict_shared::shared_api::search(&db, search_term, take, skip)
 }
 
 fn main() {
-
     tauri::Builder::default()
         .setup(|app| {
             let resolve = |path: &str| {
@@ -23,7 +22,7 @@ fn main() {
                 .to_string()
             };
 
-            app.manage(Database::new(
+            app.manage(Database::load(
                 Config {
                     jmdict_file: resolve("../../res/JMdict_e.gz"),
                     kanjidic_file: resolve("../../res/kanjidic2.xml.gz"),

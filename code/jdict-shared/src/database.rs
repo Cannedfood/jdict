@@ -10,6 +10,7 @@ pub struct Config {
     pub kanjivg_file: String,
 }
 
+#[derive(Default)]
 pub struct Database {
     pub config: Config,
     pub dict: JMdict,
@@ -20,7 +21,7 @@ pub struct Database {
     pub kanjivg_index: HashMap<char, u32>,
 }
 impl Database {
-    pub fn new(config: Config) -> Self {
+    pub fn load(config: Config) -> Self {
         let kanjivg = print_time(
             || KanjiVG::parse(Path::new(config.kanjivg_file.as_str())),
             |time| println!("Parsed KanjiVG in {:?}", time)

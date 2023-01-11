@@ -1,8 +1,8 @@
 [workspace]
 members = [
-    "./code/database/",
-    "./code/server/",
-    "./code/tauri/",
+    "./code/jdict-shared/",
+    "./code/jdict-server/",
+    "./code/jdict-tauri/",
 ]
 
 [profile.dev.package."*"]
