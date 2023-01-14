@@ -5,18 +5,18 @@
 
 use std::sync::RwLock;
 
-use jdict_shared::database::Config;
-use jdict_shared::database::Database;
+use jdict_shared::database::{Config, Database};
+use tokio::time::sleep;
 
 static DB: RwLock::<Option<Database>> = RwLock::<Option<Database>>::new(None);
 
 #[tauri::command]
-fn search<'a>(search_term: &str, take: Option<u32>, skip: Option<u32>) -> jdict_shared::shared_api::SearchResult {
+async fn search<'a>(search_term: String, take: Option<u32>, skip: Option<u32>) -> jdict_shared::shared_api::SearchResult {
     for _ in 0..100 {
         if let Some(db) = DB.read().expect("Cannot read the database because it failed to load.").as_ref() {
-            return jdict_shared::shared_api::search(&db, search_term, take, skip);
+            return jdict_shared::shared_api::search(&db, search_term.as_str(), take, skip);
         }
-        std::thread::sleep(std::time::Duration::from_millis(100));
+        sleep(std::time::Duration::from_millis(100)).await;
     }
     panic!("Database wasn't loaded after 10 seconds.")
 }
