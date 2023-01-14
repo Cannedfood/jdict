@@ -26,7 +26,6 @@ impl Database {
             || KanjiVG::parse(Path::new(config.kanjivg_file.as_str())),
             |time| println!("Parsed KanjiVG in {:?}", time)
         );
-
         let kanjidic = print_time(
             || Kanjidic::parse(Path::new(config.kanjidic_file.as_str())),
             |time| println!("Parsed kanjidic in {:?}", time)
@@ -36,10 +35,6 @@ impl Database {
             |time| println!("Parsed JMdict in {:?}", time)
         );
 
-        Self::from_dicts(kanjivg, kanjidic, dict)
-    }
-
-    pub fn from_dicts(kanjivg: KanjiVG, kanjidic: Kanjidic, dict: JMdict) -> Self {
         let kanjivg_index = print_time(
             || build_kanjivg_index(&kanjivg),
             |time| println!("Built KanjiVG index in {:?}", time)
@@ -54,7 +49,7 @@ impl Database {
         );
 
         Self {
-            config: Config::default(),
+            config,
             dict,
             dict_index,
             kanjidic,
@@ -75,11 +70,11 @@ impl Database {
     }
 
     pub fn contained_kanji_chars(&self, text: &str) -> (Vec<Character>, Vec<Kanji>) {
-        let uniq_chars = 
+        let uniq_chars =
             text.chars()
             .unique();
 
-        let chars = 
+        let chars =
             uniq_chars.clone()
             .filter_map(|c| self.kanjidic_index.get(&c))
             .map(|idx| self.kanjidic.characters[*idx as usize].clone())

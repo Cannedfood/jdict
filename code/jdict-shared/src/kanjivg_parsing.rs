@@ -39,7 +39,7 @@ fn parse_kanji(node: Node) -> Kanji {
     let id = node.attribute("id").unwrap();
     let c = char::from_u32(
         u32::from_str_radix(
-            &id[id.len() - 5..], 
+            &id[id.len() - 5..],
             16
         ).unwrap()
     ).unwrap();

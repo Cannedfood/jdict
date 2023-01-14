@@ -49,9 +49,9 @@ fn first_syllable(s: &str) -> Syllable {
     let b_codeblock = find_unicode_block(b).unwrap();
     let c_codeblock = find_unicode_block(c).unwrap();
 
-    let codeblock_max_len = 
+    let codeblock_max_len =
         if is_kana_block(a_codeblock) { 2 }
-        else if is_cjk_block(a_codeblock) { 1 } 
+        else if is_cjk_block(a_codeblock) { 1 }
         else { 3 };
 
     if a_codeblock != b_codeblock || codeblock_max_len == 1 {
@@ -73,7 +73,7 @@ fn syllables<'a>(s: &'a str) -> impl Iterator<Item = Syllable> + 'a {
 }
 
 fn is_kana_block(block: unicode_blocks::UnicodeBlock) -> bool {
-    block == unicode_blocks::HIRAGANA || 
-    block == unicode_blocks::KATAKANA || 
+    block == unicode_blocks::HIRAGANA ||
+    block == unicode_blocks::KATAKANA ||
     block == unicode_blocks::KATAKANA_PHONETIC_EXTENSIONS
 }
