@@ -7,6 +7,7 @@ use jdict_shared::database::Database;
 use rocket::serde::json::Json;
 use rocket_async_compression::CachedCompression;
 use serde::{Deserialize, Serialize};
+use tokio::time::sleep;
 
 static DB: RwLock::<Option<Database>> = RwLock::<Option<Database>>::new(None);
 
@@ -14,7 +15,7 @@ static DB: RwLock::<Option<Database>> = RwLock::<Option<Database>>::new(None);
 #[allow(non_snake_case)]
 
 #[rocket::get("/api/search?<searchTerm>&<take>&<skip>")]
-pub fn search<'a>(
+pub async fn search<'a>(
     searchTerm: &str,
     take: Option<u32>,
     skip: Option<u32>
@@ -24,7 +25,7 @@ pub fn search<'a>(
         if let Some(db) = DB.read().expect("Cannot read the database because it failed to load.").as_ref() {
             return Json(jdict_shared::shared_api::search(db, searchTerm, take, skip));
         }
-        std::thread::sleep(std::time::Duration::from_millis(100));
+        sleep(std::time::Duration::from_millis(100)).await;
     }
     panic!("Database wasn't loaded after 10 seconds.")
 }
