@@ -5,9 +5,12 @@ use roxmltree::{Node, ParsingOptions};
 use crate::{jmdict::{self, Gender}, kana::to_romaji, util::read_file};
 
 impl jmdict::JMdict {
-    pub fn parse(path: &Path) -> Self {
+    pub fn load(path: &Path) -> Self {
         let file_content = read_file(&path).unwrap();
+        Self::parse(&file_content)
+    }
 
+    pub fn parse(file_content: &str) -> Self {
         let document = roxmltree::Document::parse_with_options(
             &file_content,
             ParsingOptions {

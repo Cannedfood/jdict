@@ -5,10 +5,14 @@ use roxmltree::{Node, ParsingOptions};
 use crate::{kanjivg::{KanjiVG, Kanji, Stroke}, util::read_file};
 
 impl KanjiVG {
-    pub fn parse(path: &Path) -> Self {
+    pub fn load(path: &Path) -> Self {
         let file_content = read_file(path).unwrap();
+        Self::parse(&file_content)
+    }
+
+    pub fn parse(file_content: &str) -> Self {
         let document = roxmltree::Document::parse_with_options(
-            &file_content,
+            file_content,
             ParsingOptions {
                 allow_dtd: true,
                 ..Default::default()
