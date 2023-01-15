@@ -8,8 +8,9 @@ const props = defineProps<{
 </script>
 
 <template lang="pug">
-router-link.node(:to="'/search/' + kanjivg.kanji")
-    .kanji {{ kanjivg.kanji }}
+.node
+    RouterLink.kanji(:to="'/search/' + kanjivg.kanji")
+        | {{ kanjivg.kanji }}
     .child-groups(v-if="kanjivg.parts && kanjivg.parts.length > 0")
         KanjiDecompositionNode(
             v-for="child in kanjivg.parts"
@@ -19,23 +20,25 @@ router-link.node(:to="'/search/' + kanjivg.kanji")
 
 <style lang="scss" scoped>
 .node {
-    text-decoration: none;
-
-
     width: fit-content;
     margin: 0 .3em;
     &:first-child { margin-left: 0; }
     &:last-child { margin-right: 0; }
 
     .kanji {
-        width: 1.5em;
-        height: 1.5em;
-        text-align: center;
+        padding: .3em;
+        font-size: 1.5em;
         border-radius: .2em;
-
         margin-inline: auto;
 
+        text-align: center;
+        text-decoration: none;
+
         background: rgba(136, 136, 136, 0.2);
+
+        &:hover {
+            background: rgba(136, 136, 136, 0.4);
+        }
     }
     .child-groups {
         display: flex;
