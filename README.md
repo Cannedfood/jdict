@@ -1,16 +1,18 @@
-# Vue 3 + TypeScript + Vite
+# JDict
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This is a japanese dictionary application I wrote, because I couldn't find a dictionary that was
+1. Fast
+2. Has a good UX (esp. for my use case)
 
-## Recommended IDE Setup
+My usual steps are:
+1. Look up a word
+2. Look up one of the kanji of that word
+3. Look up in which words this kanji appears
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+And this dictionary is optimized for that.
 
-## Type Support For `.vue` Imports in TS
-
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
-
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
-
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+## Data sources
+This dictionary uses the following data sources UNDER THEIR RESPECTIVE LICENSES:
+- [JMdict](http://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project) (particularily [JMdict_e.gz](http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz)) for word meanings
+- [KANJIDIC2](http://www.edrdg.org/wiki/index.php/KANJIDIC_Project) for kanji information (meanings, num strokes etc.)
+- [KanjiVG](https://kanjivg.tagaini.net/) for the stroke order animations and kanji decomposition

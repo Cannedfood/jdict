@@ -1,9 +1,11 @@
 # Stuff
 package-lock.json
-res/
-*.jpg
-*.webp
 target/
+
+# Generated images (by tools/generate-sizes.mjs)
+code/web/public/images
+
+# Common stuff
 
 # Logs
 logs
