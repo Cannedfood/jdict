@@ -18,7 +18,7 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.2", features = ["shell-open"] }
 jdict-shared = { version = "0.1.0", path = "../jdict-shared" }
-tokio = "1.24.1"
+tokio = { version = "1.24.1", features = ["time"] }
 futures = "0.3.25"
 
 [features]
