@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 flate2 = "1.0.25"
 itertools = "0.10.5"
-roxmltree = "0.16.0"
-serde = { version = "1.0.147", features = ["derive"] }
+roxmltree = "0.18.0"
+serde = { version = "1.0.152", features = ["derive"] }
 unicode-blocks = "0.1.5"
