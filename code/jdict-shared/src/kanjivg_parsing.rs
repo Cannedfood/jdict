@@ -49,7 +49,7 @@ fn parse_kanji(node: Node) -> Kanji {
     ).unwrap();
 
     let mut kanji = parse_kanji_group(
-        node.children().filter(|c| c.has_tag_name("g")).next().unwrap()
+        node.children().find(|c| c.has_tag_name("g")).unwrap()
     );
 
     kanji.kanji = String::from_iter(iter::once(c));

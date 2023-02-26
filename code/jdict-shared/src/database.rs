@@ -62,7 +62,7 @@ impl Database {
     pub fn search(&self, query: &str) -> Vec<Entry> {
         self.dict_index.broadphase_search(query).iter()
         .map(|entry_idx| &self.dict.entries[*entry_idx as usize])
-        .map(|entry| (entry, rate_entry_match(&entry, query)))
+        .map(|entry| (entry, rate_entry_match(entry, query)))
         .filter(|(_, rating)| rating > &0)
         .sorted_by(|(_, rating1), (_, rating2)| rating2.cmp(rating1))
         .map(|(entry, _)| entry.clone())
@@ -99,7 +99,7 @@ fn build_jmdict_index(dict: &JMdict) -> FullTextIndex {
         for reading in &entry.readings {
             dict_index.insert(&reading.value, idx as u32);
             if let Some(romaji) = &reading.romaji {
-                dict_index.insert(&romaji, idx as u32);
+                dict_index.insert(romaji, idx as u32);
             }
         }
         for sense in &entry.senses {
@@ -120,7 +120,7 @@ fn build_kanjidic_index(kanjidic: &Kanjidic) -> HashMap<char, u32> {
 
 fn build_kanjivg_index(kanjidic: &KanjiVG) -> HashMap<char, u32> {
     for kanji in kanjidic.kanji.iter() {
-        if kanji.kanji == "" {
+        if kanji.kanji.is_empty() {
             println!("{:?}", kanji);
         }
     }

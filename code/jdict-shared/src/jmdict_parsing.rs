@@ -6,13 +6,13 @@ use crate::{jmdict::{self, Gender}, kana::to_romaji, util::read_file};
 
 impl jmdict::JMdict {
     pub fn load(path: &Path) -> Self {
-        let file_content = read_file(&path).unwrap();
+        let file_content = read_file(path).unwrap();
         Self::parse(&file_content)
     }
 
     pub fn parse(file_content: &str) -> Self {
         let document = roxmltree::Document::parse_with_options(
-            &file_content,
+            file_content,
             ParsingOptions {
                 allow_dtd: true,
                 ..Default::default()
@@ -41,7 +41,7 @@ fn parse_entry(entry: Node) -> jmdict::Entry {
             _ => panic!("Unexpected child of <entry>: {}", child.tag_name().name())
         }
     }
-    return result
+    result
 }
 
 fn parse_kanji(kanji: &Node) -> jmdict::Kanji {
@@ -116,7 +116,7 @@ fn parse_gloss(gloss: &Node) -> jmdict::Gloss {
             gloss.attribute("g_type")
             .map_or_else(
                 || jmdict::GlossType::None,
-                |s| match &s[..] {
+                |s| match s {
                     "literal" => jmdict::GlossType::Literal,
                     "figurative" => jmdict::GlossType::Figurative,
                     _ => jmdict::GlossType::None,

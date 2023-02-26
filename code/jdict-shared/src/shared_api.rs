@@ -16,7 +16,7 @@ pub struct SearchResult {
     pub time: String,
 }
 
-pub fn search<'a>(db: &Database, search_term: &str, take: Option<u32>, skip: Option<u32>) -> SearchResult {
+pub fn search(db: &Database, search_term: &str, take: Option<u32>, skip: Option<u32>) -> SearchResult {
     let start_time = std::time::Instant::now();
 
     let all_results = db.search(search_term);
@@ -25,10 +25,10 @@ pub fn search<'a>(db: &Database, search_term: &str, take: Option<u32>, skip: Opt
         all_results.iter()
         .skip(skip.unwrap_or(0) as usize)
         .take(take.unwrap_or(128) as usize)
-        .map(|entry| entry.clone())
+        .cloned() // TODO: PERFORMANCE: Use references instead of cloning
         .collect::<Vec<Entry>>();
 
-    let (kanji, kanjivg) = db.contained_kanji_chars(&search_term);
+    let (kanji, kanjivg) = db.contained_kanji_chars(search_term);
 
     SearchResult {
         kanji,

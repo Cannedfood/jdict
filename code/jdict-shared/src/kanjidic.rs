@@ -126,18 +126,14 @@ pub enum QueryCodeType {
     misclass, // A possible misclassification of the kanji according to one of the code types. (See the "Z" codes in the KANJIDIC documentation for more details.)
 }
 
-#[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Default, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum SkipMisclass {
-    none,
+    #[default] none,
     posn,
     stroke_count,
     stroke_and_posn,
     stroke_diff
 }
-impl Default for SkipMisclass {
-    fn default() -> Self { SkipMisclass::none }
-}
-
 /// <!ELEMENT query_code (q_code+)> These codes contain information relating to the glyph, and can be used for finding a required kanji. The type of code is defined by the qc_type attribute.
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct QueryCode {
@@ -169,17 +165,15 @@ impl FromStr for ReadingType {
     }
 }
 
-#[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Default, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum OnType {
-    none,
+    #[default] none,
     kan,
     go,
     tou,
     kanyou,
 }
-impl Default for OnType {
-    fn default() -> Self { OnType::none }
-}
+
 impl FromStr for OnType {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {

@@ -34,30 +34,25 @@ impl FromStr for Priority {
             "gai1" => Ok(Priority::Gai1),
             "gai2" => Ok(Priority::Gai2),
             x => {
-                if x.starts_with("nf") {
-                    if let Ok(n) = x[2..].parse() {
-                        Ok(Priority::NF(n))
-                    } else {
-                        Err(FromStrErr::UnknownValue(x.to_string()))
-                    }
-                } else {
-                    Err(FromStrErr::UnknownValue(x.to_string()))
+                match x.strip_prefix("nf") {
+                    Some(n) => match n.parse() {
+                        Ok(n) => Ok(Priority::NF(n)),
+                        Err(_) => Err(FromStrErr::UnknownValue(x.to_string())),
+                    },
+                    None => Err(FromStrErr::UnknownValue(x.to_string())),
                 }
             }
         }
     }
 }
 
-#[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Default, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Gender {
-    None,
+    #[default] None,
     Male,
     Female,
     Neutral,
-}
-impl Default for Gender {
-    fn default() -> Self { Gender::None }
 }
 
 #[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
@@ -121,15 +116,12 @@ pub struct LanguageOrigin {
     pub wasei: bool,   // attribute: ls_wasei="y"
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum GlossType {
-    None,
+    #[default] None,
     Literal,
     Figurative,
     Explanatory,
-}
-impl Default for GlossType {
-    fn default() -> Self { GlossType::None }
 }
 
 

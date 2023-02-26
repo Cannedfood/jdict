@@ -12,7 +12,7 @@ impl Kanjidic {
 
     pub fn parse(file_content: &str) -> Self {
         let document = roxmltree::Document::parse_with_options(
-            &file_content,
+            file_content,
             ParsingOptions {
                 allow_dtd: true,
                 ..Default::default()
@@ -125,7 +125,7 @@ fn parse_reading(element: &Node) -> Reading {
 fn parse_meaning(element: &Node) -> Meaning {
     Meaning {
         value: element.text().unwrap().to_string(),
-        lang: element.attribute("m_lang").unwrap_or_else(|| "en").to_string(),
+        lang: element.attribute("m_lang").unwrap_or("en").to_string(),
     }
 }
 fn parse_codepoint(element: &Node) -> Codepoint {

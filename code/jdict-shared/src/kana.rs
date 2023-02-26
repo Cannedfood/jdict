@@ -41,6 +41,7 @@ pub fn to_romaji(text: &str) -> String {
 }
 
 fn snip_and_translate_prefix_to_romaji(text: &mut &str) -> Option<&'static str> {
+    #[allow(clippy::if_same_then_else)]
     if      snip_prefix("きゃ", text) { Some("kya") }
     else if snip_prefix("きゅ", text) { Some("kyu") }
     else if snip_prefix("きょ", text) { Some("kyo") }

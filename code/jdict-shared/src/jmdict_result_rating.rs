@@ -42,9 +42,10 @@ fn rate_text_match(text: &str, query: &str) -> i32 {
     else { 0 }
 }
 
-fn simplify_sense_word<'a>(text: &'a str) -> &'a str {
-    if text.starts_with("to ") { &text[3..] }
-    else { text }
+fn simplify_sense_word(text: &str) -> &str {
+    let text = text.strip_prefix("to ").unwrap_or(text);
+
+    text
 }
 
 fn rate_text_match_sense(text: &str, query: &str) -> i32 {
@@ -72,7 +73,7 @@ pub fn rate_entry_match(entry: &jmdict::Entry, query: &str) -> i32 {
         let mut reading_score = 0;
         reading_score = reading_score.max(rate_text_match(&reading.value, query) * READING_KANA);
         if let Some(romaji) = &reading.romaji {
-            reading_score = reading_score.max(rate_text_match(&romaji, query) * READING_ROMAJI);
+            reading_score = reading_score.max(rate_text_match(romaji, query) * READING_ROMAJI);
         }
         if reading_score != 0 {
             reading_score += prio_rating(&reading.priority);
