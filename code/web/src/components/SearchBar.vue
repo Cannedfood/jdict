@@ -42,10 +42,12 @@ onTabFocusChange(hasFocus => {
 		blur();
 });
 
+const hasSuggestions = ref(false);
+
 </script>
 
 <template lang="pug">
-.search-bar
+.search-bar(:class="{ 'has-suggestions': hasSuggestions }")
 	input(type="search" ref="searchInput"
 		placeholder="Search..."
 
@@ -58,11 +60,15 @@ onTabFocusChange(hasFocus => {
 		autocomplete="off"
 		autocapitalize="none"
 	)
-	slot
+	.buttons
+		slot
+	.suggestions(v-if="hasSuggestions")
+		div
+			| Hello
+			kbd.float-right tab
 </template>
 
-<style lang="scss">
-
+<style lang="scss" scoped>
 .search-bar {
 	display: flex;
 	flex-flow: nowrap row;
@@ -87,38 +93,53 @@ onTabFocusChange(hasFocus => {
 	&:focus-within {
 		border-color: var(--accent1);
 	}
+	&.has-suggestions {
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
 
-	* {
+	input[type="search"] {
 		font-size: inherit;
 		margin: 0;
 		padding-block: .1em;
 		padding-inline: .1em;
 		border-radius: 0;
-	}
-	input, button, select, a {
-		background: none;
-		border: none;
-		outline: none;
-	}
-	button, a, select {
-		height: 100%;
-		width: 1.5em;
-		border-radius: inherit;
-		text-decoration: none;
-		cursor: pointer;
-		color: var(--text-muted2);
-		transition: color 200ms;
-		&:hover {
-			color: var(--text1);
-		}
-	}
-	select {
-		appearance: none;
-		width: 2em;
-	}
-	input[type="search"] {
 		flex-grow: 1;
 		width: 0;
+	}
+	.buttons {
+		input, button, select, a {
+			background: none;
+			border: none;
+			outline: none;
+		}
+		button, a, select {
+			height: 100%;
+			width: 1.5em;
+			border-radius: inherit;
+			text-decoration: none;
+			cursor: pointer;
+			color: var(--text-muted2);
+			transition: color 200ms;
+			&:hover {
+				color: var(--text1);
+			}
+		}
+	}
+
+	.suggestions {
+		position: absolute;
+		top: 100%;
+		left: calc(-1 * var(--outline-width));
+		right: calc(-1 * var(--outline-width));
+		z-index: 1;
+
+		background: var(--background2);
+		border-bottom-left-radius: .5em;
+		border-bottom-right-radius: .5em;
+		padding-block: .2em;
+		border: var(--outline-width) solid var(--neutral1);
+		border-top: calc(0.5 * var(--outline-width)) solid var(--neutral2);
 	}
 }
 </style>

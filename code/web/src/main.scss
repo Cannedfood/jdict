@@ -12,6 +12,7 @@
 	--accent1: #A000A0;
 	--accent2: #ff00ff;
 	--neutral1: rgba(0, 0, 0, .8);
+	--neutral2: rgba(0, 0, 0, .4);
 	--text1: rgba(0, 0, 0, 1);
 	--text-muted1: #666;
 	--text-muted2: #888;
@@ -30,6 +31,7 @@
 		--accent1: #800080;
 		--accent2: #ff00ff;
 		--neutral1: rgba(255, 255, 255, 0.2);
+		--neutral2: rgba(255, 255, 255, 0.1);
 		--text-muted1: #AAA;
 		--text-muted2: #888;
 		--text1: rgba(255, 255, 255, 0.87);
@@ -115,6 +117,19 @@ button, .btn, [role="button"] {
 }
 .chevron.up {
 	transform: rotate(-90deg);
+}
+
+.float-right {
+	float: right;
+}
+
+kbd {
+	display: inline-block;
+	padding: .2em .4em;
+	color: #FFF;
+	font-size: .8em;
+	border-radius: .2em;
+	border: 1px solid var(--neutral1);
 }
 
 // Platform specific fixes
