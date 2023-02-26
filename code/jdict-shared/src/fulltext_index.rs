@@ -18,7 +18,7 @@ impl FullTextIndex {
     }
 
     pub fn insert(&mut self, text: &str, id: u32) {
-        for syllable in syllables(text) {
+        for syllable in syllables(text, false) {
             self.entries.entry(syllable).or_insert(vec![]).push(id);
         }
     }
@@ -34,7 +34,7 @@ impl FullTextIndex {
     pub fn broadphase_search(&self, text: &str) -> Vec<u32> {
         // Get all entries that contain any of the syllables
         let mut syllable_sets =
-            syllables(text).unique()
+            syllables(text, true).unique()
             .filter_map(|syllable| self.entries.get(&syllable))
             .collect_vec();
 
@@ -67,13 +67,19 @@ fn is_word_separator(c: char) -> bool {
     c.is_whitespace() || c.is_ascii_punctuation()
 }
 
-fn first_syllable(s: &str) -> Option<Syllable> {
+fn first_syllable(s: &str, minimal: bool) -> Option<Syllable> {
     let mut chars = s.chars();
     let a = chars.next().unwrap_or('\0');
     let b = chars.next().unwrap_or('\0');
     let c = chars.next().unwrap_or('\0');
 
-    if is_word_separator(a) || is_word_separator(b) || is_word_separator(c) || a == '\0' || b == '\0' || c == '\0' {
+    let starts_with_word_separator = is_word_separator(a);
+    let contains_word_separator = is_word_separator(a) || is_word_separator(b) || is_word_separator(c) || a == '\0' || b == '\0' || c == '\0';
+
+    if starts_with_word_separator {
+        return None;
+    }
+    if minimal && contains_word_separator {
         return None;
     }
 
@@ -99,10 +105,10 @@ fn first_syllable(s: &str) -> Option<Syllable> {
     )
 }
 
-fn syllables(s: &str) -> impl Iterator<Item = Syllable> + '_ {
+fn syllables(s: &str, minimal: bool) -> impl Iterator<Item = Syllable> + '_ {
     s.char_indices()
     .filter_map(
-        |(char_position, _char)| first_syllable(&s[char_position..])
+        move|(char_position, _char)| first_syllable(&s[char_position..], minimal)
     )
 }
 
@@ -119,7 +125,7 @@ mod tests {
     #[test]
     fn test_syllables() {
         let text = "Hello world! こんにちは";
-        let syllables = super::syllables(text).collect_vec();
+        let syllables = super::syllables(text, false).collect_vec();
         assert_eq!(syllables, [
             ['H', 'e', 'l'],
             ['e', 'l', 'l'],
@@ -136,6 +142,24 @@ mod tests {
             ['に', 'ち', '\0'],
             ['ち', 'は', '\0'],
             ['は', '\0', '\0'],
+        ]);
+    }
+
+    #[test]
+    fn test_syllables_minimal() {
+        let text = "Hello world! こんにちは";
+        let syllables = super::syllables(text, true).collect_vec();
+        assert_eq!(syllables, [
+            ['H', 'e', 'l'],
+            ['e', 'l', 'l'],
+            ['l', 'l', 'o'],
+            ['w', 'o', 'r'],
+            ['o', 'r', 'l'],
+            ['r', 'l', 'd'],
+            ['こ', 'ん', '\0'],
+            ['ん', 'に', '\0'],
+            ['に', 'ち', '\0'],
+            ['ち', 'は', '\0'],
         ]);
     }
 }
