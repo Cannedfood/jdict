@@ -74,7 +74,7 @@ fn first_syllable(s: &str, minimal: bool) -> Option<Syllable> {
     let c = chars.next().unwrap_or('\0');
 
     let starts_with_word_separator = is_word_separator(a);
-    let contains_word_separator = is_word_separator(a) || is_word_separator(b) || is_word_separator(c) || a == '\0' || b == '\0' || c == '\0';
+    let contains_word_separator = is_word_separator(a) || is_word_separator(b) || is_word_separator(c);
 
     if starts_with_word_separator {
         return None;
@@ -93,10 +93,10 @@ fn first_syllable(s: &str, minimal: bool) -> Option<Syllable> {
         else { 3 };
 
     Some(
-        if a_codeblock != b_codeblock || is_word_separator(b) || codeblock_max_len <= 1 {
+        if a_codeblock != b_codeblock || codeblock_max_len <= 1 {
             [a, '\0', '\0']
         }
-        else if a_codeblock != c_codeblock || is_word_separator(c) || codeblock_max_len <= 2 {
+        else if a_codeblock != c_codeblock || codeblock_max_len <= 2 {
             [a, b, '\0']
         }
         else {
@@ -106,10 +106,15 @@ fn first_syllable(s: &str, minimal: bool) -> Option<Syllable> {
 }
 
 fn syllables(s: &str, minimal: bool) -> impl Iterator<Item = Syllable> + '_ {
-    s.char_indices()
-    .filter_map(
-        move|(char_position, _char)| first_syllable(&s[char_position..], minimal)
-    )
+    s
+    .split(is_word_separator)
+    .flat_map(move |word| {
+        word
+        .char_indices()
+        .filter_map(
+            move|(char_position, _char)| first_syllable(&word[char_position..], minimal)
+        )
+    })
 }
 
 fn is_kana_block(block: unicode_blocks::UnicodeBlock) -> bool {
