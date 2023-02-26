@@ -73,7 +73,7 @@ fn first_syllable(s: &str) -> Option<Syllable> {
     let b = chars.next().unwrap_or('\0');
     let c = chars.next().unwrap_or('\0');
 
-    if is_word_separator(a) {
+    if is_word_separator(a) || is_word_separator(b) || is_word_separator(c) || a == '\0' || b == '\0' || c == '\0' {
         return None;
     }
 
