@@ -1,5 +1,3 @@
-#![feature(generators, generator_trait)]
-
 pub mod util;
 pub mod jmdict;
 pub mod jmdict_parsing;

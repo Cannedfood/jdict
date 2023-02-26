@@ -1,24 +1,82 @@
 {
-	// Use IntelliSense to learn about possible attributes.
-	// Hover to view descriptions of existing attributes.
-	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-	"version": "0.2.0",
-	"configurations": [
-		{
-			"type": "lldb",
-			"request": "launch",
-			"name": "Debug Server",
-			"program": "${workspaceFolder}/server/bin/debug/server",
-			"args": [],
-			"cwd": "${workspaceFolder}/server"
-		},
-		{
-			"type": "lldb",
-			"request": "launch",
-			"name": "Debug Tests",
-			"program": "${workspaceFolder}/server/bin/debug/server-test",
-			"args": [],
-			"cwd": "${workspaceFolder}/server"
-		}
-	]
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'jdict-server'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=jdict-server",
+                    "--package=jdict-server"
+                ],
+                "filter": {
+                    "name": "jdict-server",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'jdict-server'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=jdict-server",
+                    "--package=jdict-server"
+                ],
+                "filter": {
+                    "name": "jdict-server",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'jdict-tauri'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=jdict-tauri",
+                    "--package=jdict-tauri"
+                ],
+                "filter": {
+                    "name": "jdict-tauri",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'jdict-tauri'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=jdict-tauri",
+                    "--package=jdict-tauri"
+                ],
+                "filter": {
+                    "name": "jdict-tauri",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
 }

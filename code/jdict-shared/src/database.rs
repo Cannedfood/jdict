@@ -60,7 +60,7 @@ impl Database {
     }
 
     pub fn search(&self, query: &str) -> Vec<Entry> {
-        self.dict_index.broadphase_search(query).unwrap_or_default().iter()
+        self.dict_index.broadphase_search(query).iter()
         .map(|entry_idx| &self.dict.entries[*entry_idx as usize])
         .map(|entry| (entry, rate_entry_match(&entry, query)))
         .filter(|(_, rating)| rating > &0)

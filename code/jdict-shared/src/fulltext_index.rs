@@ -30,12 +30,36 @@ impl FullTextIndex {
         }
     }
 
-    pub fn broadphase_search(&self, text: &str) -> Option<Vec<u32>> {
-        syllables(text)
-        .unique()
-        .filter_map(|syllable| self.entries.get(&syllable))
-        .min_by_key(|ids| ids.len())
-        .cloned()
+    // Returns a set of IDs that match all syllables in the text; May contain false positives
+    pub fn broadphase_search(&self, text: &str) -> Vec<u32> {
+        // Get all entries that contain any of the syllables
+        let mut syllable_entries =
+            syllables(text).unique()
+            .filter_map(|syllable| self.entries.get(&syllable))
+            .collect_vec();
+
+        // If no syllables were found, return an empty set
+        if syllable_entries.is_empty() {
+            return Vec::new();
+        }
+
+        // Return entries that contain all syllables
+        // For that we start with the "rarest" syllables, and then check if all other syllables contain it
+
+        // Sort by rarity, so that we scan over the smallest sets first
+        syllable_entries.sort_by_key(|entries| entries.len());
+
+        let first_entry = &syllable_entries[0];
+        first_entry.iter()
+        .filter_map(|id| {
+            if syllable_entries.iter().skip(1).all(|entries| entries.contains(id)) {
+                Some(*id)
+            }
+            else {
+                None
+            }
+        })
+        .collect()
     }
 }
 
@@ -65,7 +89,7 @@ fn first_syllable(s: &str) -> Syllable {
     }
 }
 
-fn syllables<'a>(s: &'a str) -> impl Iterator<Item = Syllable> + 'a {
+fn syllables(s: &str) -> impl Iterator<Item = Syllable> + '_ {
     s.char_indices()
     .map(
         |(char_position, _char)| first_syllable(&s[char_position..])

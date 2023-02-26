@@ -1,5 +1,3 @@
-#![feature(generators, generator_trait)]
-
 use std::sync::RwLock;
 
 use figment::{Figment, providers::{Toml, Format, Serialized}};
