@@ -3,22 +3,11 @@
     windows_subsystem = "windows"
 )]
 
-use std::sync::RwLock;
-
-use jdict_shared::database::{Config, Database};
-use tokio::time::sleep;
-
-static DB: RwLock::<Option<Database>> = RwLock::<Option<Database>>::new(None);
+use jdict_shared::database::Config;
 
 #[tauri::command]
 async fn search(search_term: String, take: Option<u32>, skip: Option<u32>) -> jdict_shared::shared_api::SearchResult {
-    for _ in 0..100 {
-        if let Some(db) = DB.read().expect("Cannot read the database because it failed to load.").as_ref() {
-            return jdict_shared::shared_api::search(db, search_term.as_str(), take, skip);
-        }
-        sleep(std::time::Duration::from_millis(100)).await;
-    }
-    panic!("Database wasn't loaded after 10 seconds.")
+	return jdict_shared::shared_api::search(search_term.as_str(), take, skip);
 }
 
 fn main() {
@@ -31,13 +20,10 @@ fn main() {
                 .to_string()
             };
 
-            let cfg = Config {
+            jdict_shared::shared_api::load_db_async(Config {
                 jmdict_file: resolve("../../res/JMdict_e.gz"),
                 kanjidic_file: resolve("../../res/kanjidic2.xml.gz"),
                 kanjivg_file: resolve("../../res/kanjivg.xml.gz"),
-            };
-            std::thread::spawn(|| {
-                *DB.write().unwrap() = Some(Database::load(cfg));
             });
 
             Ok(())

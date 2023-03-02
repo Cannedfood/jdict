@@ -1,23 +1,24 @@
 use std::{path::Path, iter};
 
+use anyhow::Context;
 use roxmltree::{Node, ParsingOptions};
 
 use crate::{kanjivg::{KanjiVG, Kanji, Stroke}, util::read_file};
 
 impl KanjiVG {
-    pub fn load(path: &Path) -> Self {
-        let file_content = read_file(path).unwrap();
+    pub fn load(path: &Path) -> anyhow::Result<Self> {
+        let file_content = read_file(path).with_context(|| format!("Failed to read file {:?}", path))?;
         Self::parse(&file_content)
     }
 
-    pub fn parse(file_content: &str) -> Self {
+    pub fn parse(file_content: &str) -> anyhow::Result<Self> {
         let document = roxmltree::Document::parse_with_options(
             file_content,
             ParsingOptions {
                 allow_dtd: true,
                 ..Default::default()
             }
-        ).unwrap();
+        )?;
 
         let kanjivg = document.root_element();
         if kanjivg.tag_name().name() != "kanjivg" {
@@ -34,7 +35,7 @@ impl KanjiVG {
             }
         }
 
-        result
+        Ok(result)
     }
 
 }

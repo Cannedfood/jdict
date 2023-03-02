@@ -23,15 +23,15 @@ pub struct Database {
 impl Database {
     pub fn load(config: Config) -> Self {
         let kanjivg = print_time(
-            || KanjiVG::load(Path::new(config.kanjivg_file.as_str())),
+            || KanjiVG::load(Path::new(config.kanjivg_file.as_str())).unwrap(),
             |time| println!("Parsed KanjiVG in {:?}", time)
         );
         let kanjidic = print_time(
-            || Kanjidic::load(Path::new(config.kanjidic_file.as_str())),
+            || Kanjidic::load(Path::new(config.kanjidic_file.as_str())).unwrap(),
             |time| println!("Parsed kanjidic in {:?}", time)
         );
         let dict = print_time(
-            || JMdict::load(Path::new(config.jmdict_file.as_str())),
+            || JMdict::load(Path::new(config.jmdict_file.as_str())).unwrap(),
             |time| println!("Parsed JMdict in {:?}", time)
         );
 

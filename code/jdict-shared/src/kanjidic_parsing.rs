@@ -1,23 +1,24 @@
 use std::path::Path;
 
+use anyhow::Context;
 use roxmltree::{Node, ParsingOptions};
 
 use crate::{kanjidic::{Kanjidic, Header, Character, ReadingMeaningGroup, Codepoint, Radical, Misc, DicRef, QueryCode, Reading, Meaning, ReadingType, OnType, QueryCodeType, SkipMisclass, Variant, VariantType}, util::read_file};
 
 impl Kanjidic {
-    pub fn load(path: &Path) -> Self {
-        let file_content = read_file(path).unwrap();
+    pub fn load(path: &Path) -> anyhow::Result<Self> {
+        let file_content = read_file(path).with_context(|| format!("Failed to read file {:?}", path))?;
         Self::parse(file_content.as_str())
     }
 
-    pub fn parse(file_content: &str) -> Self {
+    pub fn parse(file_content: &str) -> anyhow::Result<Self> {
         let document = roxmltree::Document::parse_with_options(
             file_content,
             ParsingOptions {
                 allow_dtd: true,
                 ..Default::default()
             }
-        ).unwrap();
+        )?;
 
         let root = document.root_element();
         if root.tag_name().name() != "kanjidic2" {
@@ -34,7 +35,7 @@ impl Kanjidic {
             }
         }
 
-        result
+        Ok(result)
     }
 }
 

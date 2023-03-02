@@ -1,16 +1,17 @@
 use std::path::Path;
 
+use anyhow::Context;
 use roxmltree::{Node, ParsingOptions};
 
 use crate::{jmdict::{self, Gender}, kana::to_romaji, util::read_file};
 
 impl jmdict::JMdict {
-    pub fn load(path: &Path) -> Self {
-        let file_content = read_file(path).unwrap();
+    pub fn load(path: &Path) -> anyhow::Result<Self> {
+        let file_content = read_file(path).with_context(|| format!("Failed to read file {:?}", path))?;
         Self::parse(&file_content)
     }
 
-    pub fn parse(file_content: &str) -> Self {
+    pub fn parse(file_content: &str) -> anyhow::Result<Self> {
         let document = roxmltree::Document::parse_with_options(
             file_content,
             ParsingOptions {
@@ -22,9 +23,9 @@ impl jmdict::JMdict {
 
         assert!(root.tag_name().name() == "JMdict");
 
-        Self {
+        Ok(Self {
             entries: root.children().filter(|e| e.is_element()).map(parse_entry).collect()
-        }
+        })
     }
 }
 

@@ -1,17 +1,10 @@
-use std::sync::RwLock;
-
 use figment::{Figment, providers::{Toml, Format, Serialized}};
-use jdict_shared::database::Database;
 use rocket::serde::json::Json;
 use rocket_async_compression::CachedCompression;
 use serde::{Deserialize, Serialize};
-use tokio::time::sleep;
-
-static DB: RwLock::<Option<Database>> = RwLock::<Option<Database>>::new(None);
 
 // Api
 #[allow(non_snake_case)]
-
 #[rocket::get("/api/search?<searchTerm>&<take>&<skip>")]
 pub async fn search<'a>(
     searchTerm: &str,
@@ -19,13 +12,7 @@ pub async fn search<'a>(
     skip: Option<u32>
 ) -> Json<jdict_shared::shared_api::SearchResult>
 {
-    for _ in 0..100 {
-        if let Some(db) = DB.read().expect("Cannot read the database because it failed to load.").as_ref() {
-            return Json(jdict_shared::shared_api::search(db, searchTerm, take, skip));
-        }
-        sleep(std::time::Duration::from_millis(100)).await;
-    }
-    panic!("Database wasn't loaded after 10 seconds.")
+    Json(jdict_shared::shared_api::search(searchTerm, take, skip))
 }
 
 // Rocket server
@@ -50,9 +37,7 @@ fn rocket() -> _ {
         .extract()
         .unwrap();
 
-    std::thread::spawn(|| {
-        *DB.write().unwrap() = Some(Database::load(cfg.jdict));
-    });
+    jdict_shared::shared_api::load_db_async(cfg.jdict);
 
     let server = rocket::build()
         .configure(&cfg.rocket)
