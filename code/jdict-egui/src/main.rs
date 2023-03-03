@@ -1,7 +1,7 @@
 use std::sync::mpsc;
 
 use egui::ScrollArea;
-use jdict_shared::{shared_api::{SearchResult, self, DB_LOADING}, database::Config, kanjidic::ReadingType};
+use jdict_shared::{shared_api::{SearchResult, self, DB_LOADING}, kanjidic::ReadingType, database::DictData};
 use itertools::Itertools;
 
 struct JDictApp {
@@ -167,10 +167,10 @@ impl eframe::App for JDictApp {
 }
 
 fn main() {
-	shared_api::load_db_async(Config {
-		jmdict_file:   "res/JMdict_e.gz".into(),
-		kanjidic_file: "res/kanjidic2.xml.gz".into(),
-		kanjivg_file:  "res/kanjivg.xml.gz".into(),
+	shared_api::parse_db_async(DictData::<'static> {
+		dict:     include_bytes!("../../../res/JMdict_e.gz"),
+		kanjidic: include_bytes!("../../../res/kanjidic2.xml.gz"),
+		kanjivg:  include_bytes!("../../../res/kanjivg.xml.gz"),
 	});
 
 	eframe::run_native(

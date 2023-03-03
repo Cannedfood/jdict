@@ -13,6 +13,13 @@ pub fn load_file(mut file: File) -> io::Result<String> {
     Ok(file_content)
 }
 
+pub fn decompress(data: &[u8]) -> io::Result<String> {
+	let decoder = flate2::read::GzDecoder::new(data);
+	let mut file_content = String::new();
+    BufReader::new(decoder).read_to_string(&mut file_content)?;
+    Ok(file_content)
+}
+
 pub fn read_file(path: &Path) -> io::Result<String> {
     let file = File::open(path)?;
 

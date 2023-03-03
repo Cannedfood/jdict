@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
-use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::print_time, kanjivg::{KanjiVG, Kanji}};
+use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::{print_time, decompress}, kanjivg::{KanjiVG, Kanji}};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -14,6 +14,12 @@ pub struct Dicts {
 	pub dict: JMdict,
 	pub kanjidic: Kanjidic,
 	pub kanjivg: KanjiVG,
+}
+
+pub struct DictData<'a> {
+	pub dict: &'a [u8],
+	pub kanjidic: &'a [u8],
+	pub kanjivg: &'a [u8],
 }
 
 #[derive(Default)]
@@ -48,6 +54,14 @@ impl Database {
             kanjidic_index,
             kanjivg_index,
 		}
+	}
+
+	pub fn from_bytes(data: DictData) -> Self {
+		Self::build(Dicts {
+			dict:     JMdict::  parse(&decompress(data.dict).unwrap()).unwrap(),
+			kanjidic: Kanjidic::parse(&decompress(data.kanjidic).unwrap()).unwrap(),
+			kanjivg:  KanjiVG:: parse(&decompress(data.kanjivg).unwrap()).unwrap(),
+		})
 	}
 
     pub fn load(config: &Config) -> Self {

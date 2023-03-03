@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use serde::Serialize;
 
-use crate::database::Database;
+use crate::database::{Database, DictData};
 
 use crate::kanjidic::Character;
 use crate::kanjivg::Kanji;
@@ -28,8 +28,16 @@ pub fn load_db(config: &crate::database::Config) {
 	*DB.write().unwrap() = Some(Arc::new(Database::load(config)));
 	DB_LOADING.store(false, std::sync::atomic::Ordering::SeqCst);
 }
+pub fn parse_db(data: DictData) {
+	DB_LOADING.store(true, std::sync::atomic::Ordering::SeqCst);
+	*DB.write().unwrap() = Some(Arc::new(Database::from_bytes(data)));
+	DB_LOADING.store(false, std::sync::atomic::Ordering::SeqCst);
+}
 pub fn load_db_async(config: crate::database::Config) {
 	std::thread::spawn(move || load_db(&config));
+}
+pub fn parse_db_async(data: DictData<'static>) {
+	std::thread::spawn(move || parse_db(data));
 }
 pub fn get_db_sync(total_timeout: Duration, subdivisions: u32) -> Arc<Database> {
 	let timeout_per_subdivision = total_timeout / subdivisions;
