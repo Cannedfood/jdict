@@ -10,9 +10,14 @@ pub struct Config {
     pub kanjivg_file: String,
 }
 
+pub struct Dicts {
+	pub dict: JMdict,
+	pub kanjidic: Kanjidic,
+	pub kanjivg: KanjiVG,
+}
+
 #[derive(Default)]
 pub struct Database {
-    pub config: Config,
     pub dict: JMdict,
     pub dict_index: FullTextIndex,
     pub kanjidic: Kanjidic,
@@ -21,42 +26,45 @@ pub struct Database {
     pub kanjivg_index: HashMap<char, u32>,
 }
 impl Database {
-    pub fn load(config: Config) -> Self {
-        let kanjivg = print_time(
-            || KanjiVG::load(Path::new(config.kanjivg_file.as_str())).unwrap(),
-            |time| println!("Parsed KanjiVG in {:?}", time)
-        );
-        let kanjidic = print_time(
-            || Kanjidic::load(Path::new(config.kanjidic_file.as_str())).unwrap(),
-            |time| println!("Parsed kanjidic in {:?}", time)
-        );
-        let dict = print_time(
-            || JMdict::load(Path::new(config.jmdict_file.as_str())).unwrap(),
-            |time| println!("Parsed JMdict in {:?}", time)
-        );
-
+	pub fn build(data: Dicts) -> Self {
         let kanjivg_index = print_time(
-            || build_kanjivg_index(&kanjivg),
+            || build_kanjivg_index(&data.kanjivg),
             |time| println!("Built KanjiVG index in {:?}", time)
         );
         let kanjidic_index = print_time(
-            || build_kanjidic_index(&kanjidic),
+            || build_kanjidic_index(&data.kanjidic),
             |time| println!("Built kanjidic index in {:?}", time)
         );
         let dict_index = print_time(
-            || build_jmdict_index(&dict),
+            || build_jmdict_index(&data.dict),
             |time| println!("Built JMdict index in {:?}", time)
         );
 
-        Self {
-            config,
-            dict,
+		Self {
+			dict: data.dict,
+            kanjidic: data.kanjidic,
+            kanjivg: data.kanjivg,
             dict_index,
-            kanjidic,
             kanjidic_index,
-            kanjivg,
             kanjivg_index,
-        }
+		}
+	}
+
+    pub fn load(config: &Config) -> Self {
+        Self::build(Dicts {
+			kanjidic: print_time(
+				|| Kanjidic::load(Path::new(config.kanjidic_file.as_str())).unwrap(),
+				|time| println!("Parsed kanjidic in {:?}", time)
+			),
+			kanjivg: print_time(
+				|| KanjiVG::load(Path::new(config.kanjivg_file.as_str())).unwrap(),
+				|time| println!("Parsed KanjiVG in {:?}", time)
+			),
+			dict: print_time(
+				|| JMdict::load(Path::new(config.jmdict_file.as_str())).unwrap(),
+				|time| println!("Parsed JMdict in {:?}", time)
+			),
+		})
     }
 
     pub fn search(&self, query: &str) -> Vec<Entry> {

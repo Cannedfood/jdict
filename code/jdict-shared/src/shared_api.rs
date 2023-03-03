@@ -23,13 +23,13 @@ pub struct SearchResult {
 pub static DB_LOADING: AtomicBool = AtomicBool::new(false);
 pub static DB: RwLock<Option<Arc<Database>>> = RwLock::<Option<Arc<Database>>>::new(None);
 
-pub fn load_db(config: crate::database::Config) {
+pub fn load_db(config: &crate::database::Config) {
 	DB_LOADING.store(true, std::sync::atomic::Ordering::SeqCst);
 	*DB.write().unwrap() = Some(Arc::new(Database::load(config)));
 	DB_LOADING.store(false, std::sync::atomic::Ordering::SeqCst);
 }
 pub fn load_db_async(config: crate::database::Config) {
-	std::thread::spawn(move || load_db(config));
+	std::thread::spawn(move || load_db(&config));
 }
 pub fn get_db_sync(total_timeout: Duration, subdivisions: u32) -> Arc<Database> {
 	let timeout_per_subdivision = total_timeout / subdivisions;
