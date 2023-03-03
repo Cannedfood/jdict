@@ -1,11 +1,12 @@
 use std::sync::mpsc;
 
 use egui::ScrollArea;
-use jdict_shared::{shared_api::{SearchResult, self}, database::Config};
+use jdict_shared::{shared_api::{SearchResult, self, DB_LOADING}, database::Config, kanjidic::ReadingType};
 use itertools::Itertools;
 
 struct JDictApp {
 	search: String,
+	history: Vec<String>,
 	should_refresh: bool,
 	results: Option<SearchResult>,
 	inbox: mpsc::Receiver<SearchResult>,
@@ -16,6 +17,7 @@ impl JDictApp {
 		let (tx, rx) = mpsc::channel();
 		Self {
 			search: String::new(),
+			history: Vec::new(),
 			should_refresh: false,
 			results: None,
 			inbox: rx,
@@ -24,10 +26,14 @@ impl JDictApp {
 	}
 
 	fn refresh_search(&mut self, ctx: egui::Context) {
-		println!("search: {}", self.search);
+		self.results = None;
+
 		if self.search.is_empty() {
-			self.results = None;
 			return;
+		}
+
+		if self.history.last() != Some(&self.search) {
+			self.history.push(self.search.clone());
 		}
 
 		let query_copy = self.search.clone();
@@ -48,14 +54,18 @@ impl JDictApp {
 			);
 
 			let sent = re.lost_focus() && re.ctx.input(|input| input.key_pressed(egui::Key::Enter));
+			self.should_refresh |= sent;
 
-			if sent {
+			// if sent {
 				ui.memory_mut(|mem| mem.request_focus(re.id));
-				self.should_refresh = true;
-			}
+			// }
 
 			if let Some(results) = &self.results {
 				ui.label(format!("{} results in {}", results.results_total, results.time));
+			}
+
+			if DB_LOADING.load(std::sync::atomic::Ordering::Relaxed) {
+				ui.spinner();
 			}
 		});
 	}
@@ -66,7 +76,6 @@ impl JDictApp {
 			.min_scrolled_width(ui.available_width())
 			.show(ui, |ui| {
 				for entry in &results.results {
-					ui.separator();
 					ui.horizontal(|ui| {
 						for reading in &entry.readings {
 							ui.small(format!("{}, ", reading.value));
@@ -83,6 +92,7 @@ impl JDictApp {
 					for sense in &entry.senses {
 						ui.label(sense.glosses.iter().map(|p| &p.value).join(", "));
 					}
+					ui.separator();
 				}
 			});
 		}
@@ -91,12 +101,59 @@ impl JDictApp {
 
 impl eframe::App for JDictApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+		ctx.set_pixels_per_point(3.0);
+
 		if let Ok(results) = self.inbox.try_recv() {
 			self.results = Some(results);
 		}
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-			self.draw_searchbar(ui);
+		ctx.input_mut(|input| {
+			if input.pointer.button_pressed(egui::PointerButton::Middle) {
+				self.history.pop();
+				self.search = match self.history.last() {
+					Some(s) => s.clone(),
+					None => String::new(),
+				};
+				self.should_refresh = true;
+			}
+		});
+
+		egui::TopBottomPanel::top("search_bar").show(ctx, |ui| self.draw_searchbar(ui));
+
+		if let Some(result) = &self.results {
+			if !result.kanji.is_empty() {
+				egui::SidePanel::right("kanji_panel").show(ctx, |ui| {
+					ui.heading("Kanji");
+					if let Some(result) = &self.results {
+						for kanji in &result.kanji {
+							ui.separator();
+							// let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
+
+							if ui.button(&kanji.literal).clicked() {
+								self.search = kanji.literal.clone();
+								self.should_refresh = true;
+							}
+							for rm in &kanji.reading_meaning_groups {
+								let kun = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_kun).map(|r| &r.value).join(", ");
+								let on  = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_on).map(|r| &r.value).join(", ");
+
+								if !kun.is_empty() {
+									ui.label(format!("kun: {}", kun));
+								}
+								if !on.is_empty() {
+									ui.label(format!("on: {}", on));
+								}
+								ui.label(
+									rm.meanings.iter().filter(|m| m.lang == "en").map(|m| &m.value).join(", ")
+								);
+							}
+						}
+					}
+				});
+			}
+		}
+
+		egui::CentralPanel::default().show(ctx, |ui| {
 			if self.results.is_some() {
 				self.draw_results(ui);
 			}
@@ -121,6 +178,16 @@ fn main() {
 		eframe::NativeOptions {
 			..Default::default()
 		},
-		Box::new(|_ctxt| Box::new(JDictApp::new()))
+		Box::new(|ctx| {
+			let mut fonts = egui::FontDefinitions::default();
+			fonts.font_data.insert("Japanese".into(), egui::FontData::from_static(include_bytes!("/usr/share/fonts/adobe-source-han-sans/SourceHanSansJP-Regular.otf")));
+
+			fonts.families.entry(egui::FontFamily::Proportional).or_default().push("Japanese".into());
+			fonts.families.entry(egui::FontFamily::Monospace).or_default().push("Japanese".into());
+
+			ctx.egui_ctx.set_fonts(fonts);
+
+			Box::new(JDictApp::new())
+		})
 	).unwrap();
 }
