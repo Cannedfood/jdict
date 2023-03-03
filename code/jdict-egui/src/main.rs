@@ -90,7 +90,7 @@ impl JDictApp {
 						}
 					});
 					for sense in &entry.senses {
-						ui.label(sense.glosses.iter().map(|p| &p.value).join(", "));
+						ui.label(format!(" - {}", sense.glosses.iter().map(|p| &p.value).join(", ")));
 					}
 					ui.separator();
 				}
