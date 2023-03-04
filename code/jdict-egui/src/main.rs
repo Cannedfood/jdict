@@ -76,11 +76,7 @@ impl JDictApp {
 			.min_scrolled_width(ui.available_width())
 			.show(ui, |ui| {
 				for entry in &results.results {
-					ui.horizontal(|ui| {
-						for reading in &entry.readings {
-							ui.small(format!("{}, ", reading.value));
-						}
-					});
+					ui.small(entry.readings.iter().map(|r| &r.value).join(", "));
 					ui.horizontal(|ui| {
 						for kanji in &entry.kanji {
 							if ui.small_button(&kanji.value).clicked() {
@@ -90,7 +86,7 @@ impl JDictApp {
 						}
 					});
 					for sense in &entry.senses {
-						ui.label(format!(" - {}", sense.glosses.iter().map(|p| &p.value).join(", ")));
+						ui.label(format!(" - {}", sense.glosses.iter().map(|g| &g.value).join(", ")));
 					}
 					ui.separator();
 				}
@@ -137,15 +133,16 @@ impl eframe::App for JDictApp {
 								let kun = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_kun).map(|r| &r.value).join(", ");
 								let on  = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_on).map(|r| &r.value).join(", ");
 
-								if !kun.is_empty() {
-									ui.label(format!("kun: {}", kun));
-								}
-								if !on.is_empty() {
-									ui.label(format!("on: {}", on));
-								}
 								ui.label(
 									rm.meanings.iter().filter(|m| m.lang == "en").map(|m| &m.value).join(", ")
 								);
+
+								if !kun.is_empty() {
+									ui.small(format!("kun: {}", kun));
+								}
+								if !on.is_empty() {
+									ui.small(format!("on: {}", on));
+								}
 							}
 						}
 					}
@@ -180,10 +177,15 @@ fn main() {
 		},
 		Box::new(|ctx| {
 			let mut fonts = egui::FontDefinitions::default();
-			fonts.font_data.insert("Japanese".into(), egui::FontData::from_static(include_bytes!("/usr/share/fonts/adobe-source-han-sans/SourceHanSansJP-Regular.otf")));
+			fonts.font_data.insert(
+				"JP".into(),
+				egui::FontData::from_static(
+					include_bytes!("../../../res/NotoSansCJKjp-Regular.otf")
+				)
+			);
 
-			fonts.families.entry(egui::FontFamily::Proportional).or_default().push("Japanese".into());
-			fonts.families.entry(egui::FontFamily::Monospace).or_default().push("Japanese".into());
+			fonts.families.entry(egui::FontFamily::Proportional).or_default().push("JP".into());
+			fonts.families.entry(egui::FontFamily::Monospace).or_default().push("JP".into());
 
 			ctx.egui_ctx.set_fonts(fonts);
 
