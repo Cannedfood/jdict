@@ -36,6 +36,8 @@ Prerequisites / required programs:
 Building
 - `jdict-tauri`:
   ```bash
+  # Build frontend
+  ./tools/generate-sizes.mjs # Generate resized version of the fancy background images
   (cd code/web && npm run build) # Build frontend
 
   # Set up rust
@@ -48,6 +50,8 @@ Building
 
 - `jdict-server`:
   ```bash
+  # Build frontend
+  ./tools/generate-sizes.mjs # Generate resized version of the fancy background images
   (cd code/web && npm run build) # Build frontend
 
   # Set up rust
