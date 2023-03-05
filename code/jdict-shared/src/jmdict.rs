@@ -124,15 +124,6 @@ pub enum GlossType {
     Explanatory,
 }
 
-
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
-pub struct Translation {
-    #[serde(default, skip_serializing_if = "is_default")]
-    highlight: bool,
-    #[serde(default, skip_serializing_if = "is_default")]
-    gloss: String,
-}
-
 // <gloss>
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub struct Gloss {
