@@ -77,15 +77,15 @@ impl Database {
         Self::build(Dicts {
 			kanjidic: print_time(
 				|| Kanjidic::load(Path::new(config.kanjidic_file.as_str())).unwrap(),
-				|time| println!("Parsed kanjidic in {:?}", time)
+				|time| println!("Loaded kanjidic in {:?}", time)
 			),
 			kanjivg: print_time(
 				|| KanjiVG::load(Path::new(config.kanjivg_file.as_str())).unwrap(),
-				|time| println!("Parsed KanjiVG in {:?}", time)
+				|time| println!("Loaded KanjiVG in {:?}", time)
 			),
 			dict: print_time(
 				|| JMdict::load(Path::new(config.jmdict_file.as_str())).unwrap(),
-				|time| println!("Parsed JMdict in {:?}", time)
+				|time| println!("Loaded JMdict in {:?}", time)
 			),
 		})
     }
