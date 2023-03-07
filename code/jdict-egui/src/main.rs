@@ -56,9 +56,9 @@ impl JDictApp {
 			let sent = re.lost_focus() && re.ctx.input(|input| input.key_pressed(egui::Key::Enter));
 			self.should_refresh |= sent;
 
-			// if sent {
+			if re.lost_focus() {
 				ui.memory_mut(|mem| mem.request_focus(re.id));
-			// }
+			}
 
 			if let Some(results) = &self.results {
 				ui.label(format!("{} results in {}", results.results_total, results.time));
