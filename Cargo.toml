@@ -2,6 +2,7 @@
 members = [
     "./code/jdict-shared/",
     "./code/jdict-server/",
+    "./code/jdict-search/",
     "./code/jdict-tauri/",
 	"./code/jdict-egui/",
 ]
