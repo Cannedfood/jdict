@@ -1,7 +1,8 @@
 use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
-use crate::{fulltext_index::FullTextIndex, jmdict::{JMdict, Entry}, kanjidic::{Kanjidic, Character}, jmdict_result_rating::rate_entry_match, util::{print_time, decompress}, kanjivg::{KanjiVG, Kanji}};
 use serde::{Deserialize, Serialize};
+
+use crate::{jmdict::{JMdict, Entry, Priorities, Priority}, kanjidic::{Kanjidic, Character}, kanjivg::{KanjiVG, Kanji}, FullTextIndex, util::{print_time, decompress}};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -91,14 +92,11 @@ impl Database {
     }
 
     pub fn search(&self, query: &str) -> Vec<Entry> {
-        let broadphase = self.dict_index.broadphase_search(query);
+        let broadphase = self.dict_index.search(query);
 
         broadphase.iter()
-        .map(|entry_idx| &self.dict.entries[*entry_idx as usize])
-        .map(|entry| (entry, rate_entry_match(entry, query)))
-        .filter(|(_, rating)| rating > &0)
-        .sorted_by(|(_, rating1), (_, rating2)| rating2.cmp(rating1))
-        .map(|(entry, _)| entry.clone())
+        .map(|entry_idx| &self.dict.entries[entry_idx.0 as usize])
+		.cloned()
         .collect()
     }
 
@@ -126,22 +124,38 @@ impl Database {
 fn build_jmdict_index(dict: &JMdict) -> FullTextIndex {
     let mut dict_index = FullTextIndex::new();
     for (idx, entry) in dict.entries.iter().enumerate() {
-        for kanji in &entry.kanji {
-            dict_index.insert(&kanji.value, idx as u32);
+        for (i, kanji) in entry.kanji.iter().enumerate() {
+            dict_index.insert_weighted(
+				&kanji.value,
+				idx as u32,
+				WEIGHTING_KANJI.rate(&kanji.priorities, [i, i])
+			);
         }
-        for reading in &entry.readings {
-            dict_index.insert(&reading.value, idx as u32);
+        for (i, reading) in entry.readings.iter().enumerate() {
+            dict_index.insert_weighted(
+				&reading.value,
+				idx as u32,
+				WEIGHTING_READING.rate(&reading.priority, [i, i])
+			);
             if let Some(romaji) = &reading.romaji {
-                dict_index.insert(romaji, idx as u32);
+                dict_index.insert_weighted(
+					romaji,
+					idx as u32,
+					WEIGHTING_READING.rate(&reading.priority, [i, i])
+				);
             }
         }
-        for sense in &entry.senses {
-            for gloss in &sense.glosses {
-                dict_index.insert(&gloss.value, idx as u32);
+        for (p1, sense) in entry.senses.iter().enumerate() {
+            for (p2, gloss) in sense.glosses.iter().enumerate() {
+                dict_index.insert_weighted(
+					&gloss.value,
+					idx as u32,
+					WEIGHTING_MEANING.rate(&Vec::default(), [p1, p2])
+				);
             }
         }
     }
-    dict_index.remove_duplicates();
+    dict_index.optimize();
     dict_index
 }
 
@@ -161,4 +175,36 @@ fn build_kanjivg_index(kanjidic: &KanjiVG) -> HashMap<char, u32> {
     kanjidic.kanji.iter().enumerate()
     .map(|(idx, entry)| (entry.kanji.chars().next().unwrap(), idx as u32))
     .collect()
+}
+
+
+pub struct Weighting {
+	base: i32,
+	position_penalties: [i32; 2],
+}
+impl Weighting {
+	pub fn rate(&self, priorities: &Priorities, position: [usize; 2]) -> i32 {
+		self.base
+		+ prio_rating(priorities)
+		- self.position_penalties[0] * position[0] as i32
+		- self.position_penalties[1] * position[1] as i32
+	}
+}
+pub const WEIGHTING_KANJI:   Weighting = Weighting { base: 30, position_penalties: [400, 400] };
+pub const WEIGHTING_READING: Weighting = Weighting { base: 20, position_penalties: [400, 400] };
+pub const WEIGHTING_MEANING: Weighting = Weighting { base: 1, position_penalties: [200, 200] };
+
+pub fn prio_rating(priorities: &Priorities) -> i32 {
+    priorities.iter().map(|p| match p {
+        Priority::News1 => 2000,
+        Priority::News2 => 1000,
+        Priority::Ichi1 => 2000,
+        Priority::Ichi2 => 1000,
+        Priority::Spec1 => 2000,
+        Priority::Spec2 => 1000,
+        Priority::Gai1 => 2000,
+        Priority::Gai2 => 1000,
+        Priority::NF(_) => 0,
+    })
+    .sum::<i32>()
 }

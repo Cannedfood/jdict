@@ -1,3 +1,6 @@
+#![feature(btree_cursors)]
+#![feature(let_chains)]
+
 pub mod util;
 pub mod jmdict;
 pub mod jmdict_parsing;

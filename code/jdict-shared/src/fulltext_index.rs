@@ -1,158 +1,104 @@
-use std::collections::HashMap;
+use std::{collections::BTreeMap, ops::Bound};
 
-use itertools::Itertools;
-use unicode_blocks::{find_unicode_block, is_cjk_block};
-
-pub type Syllable = [char; 3];
-
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct FullTextIndex {
-    pub entries: HashMap<Syllable, Vec<u32>>,
+	pub entries: BTreeMap<String, Vec<(u32, i32)>>,
 }
-
 impl FullTextIndex {
-    pub fn new() -> Self {
-        Self {
-            entries: HashMap::new(),
-        }
+	pub fn new() -> Self { Self::default() }
+
+	pub fn insert(&mut self, text: &str, id: u32) {
+		self.insert_weighted(text, id, 0);
+	}
+	pub fn insert_weighted(&mut self, text: &str, id: u32, weight: i32) {
+		for word in split_words(text) {
+			self.entries.entry(word.to_lowercase()).or_insert(vec![]).push((id, weight));
+		}
+	}
+
+	pub fn optimize(&mut self) {
+		for (_key, ids) in self.entries.iter_mut() {
+			ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
+			ids.dedup_by_key(|id| id.0);
+		}
+
+		// self.write_stats("fulltext_index_stats.txt");
+	}
+
+	pub fn search(&self, text: &str) -> Vec<(u32, i32)> {
+        let mut ids = Vec::new();
+
+		for word in split_words(text) {
+			let lowercase = word.to_lowercase();
+			let mut cursor = self.entries.lower_bound(Bound::Included(&lowercase));
+			while let Some((key, value)) = cursor.key_value() && key.starts_with(&lowercase) {
+				let exact_match = key == &lowercase;
+				let length_penalty = (key.len() as i32 - word.len() as i32) * 2000;
+
+				for (id, weight) in value {
+					ids.push((
+						*id,
+						if exact_match { *weight + i32::MAX / 2 }
+						else { *weight - length_penalty }
+					));
+				}
+
+				cursor.move_next();
+			}
+		}
+
+		ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
+		ids.dedup_by_key(|id| id.0);
+		ids.sort_by_key(|(_, weight)| std::cmp::Reverse(*weight));
+
+		ids
     }
 
-    pub fn insert(&mut self, text: &str, id: u32) {
-        for syllable in syllables(text) {
-            self.entries.entry(syllable).or_insert(vec![]).push(id);
-        }
-    }
+	// pub fn write_stats(&self, path: &str) {
+	// 	let mut line_writer = std::io::LineWriter::new(std::fs::File::create(path).unwrap());
+	// 	writeln!(line_writer, "Totals: {} words, {} entries", self.entries.len(), self.entries.values().map(|v| v.len()).sum::<usize>()).unwrap();
 
-    pub fn remove_duplicates(&mut self) {
-        for (_, ids) in self.entries.iter_mut() {
-            ids.sort();
-            ids.dedup();
-        }
-    }
-
-    // Returns a set of IDs that match all syllables in the text; May contain false positives
-    pub fn broadphase_search(&self, text: &str) -> Vec<u32> {
-        // Get all entries that contain any of the syllables
-        let mut syllable_sets =
-            syllables(text).unique()
-            .filter_map(|syllable| self.entries.get(&syllable))
-            .collect_vec();
-
-        // If no syllables were found, return an empty set
-        if syllable_sets.is_empty() {
-            return Vec::new();
-        }
-
-        // Return entries that contain all syllables
-        // For that we start with the "rarest" syllables, and then check if all other syllables contain it
-
-        // Sort by rarity, so that we scan over the smallest sets first
-        syllable_sets.sort_by_key(|entries| entries.len());
-
-        let first_entry = &syllable_sets[0];
-        first_entry.iter()
-        .filter_map(|id| {
-            if syllable_sets.iter().skip(1).all(|entries| entries.binary_search(id).is_ok()) {
-                Some(*id)
-            }
-            else {
-                None
-            }
-        })
-        .collect()
-    }
+	// 	let mut entries_by_count = self.entries.iter().map(|(k, v)| (k.as_str(), v.len())).collect::<Vec<_>>();
+	// 	entries_by_count.sort_by_key(|(_, count)| std::cmp::Reverse(*count));
+	// 	for (k, v) in entries_by_count {
+	// 		writeln!(line_writer, "{k} {v}").unwrap();
+	// 	}
+	// }
 }
 
-fn first_syllable(s: &str) -> Option<Syllable> {
-    let mut chars = s.chars();
-    let a = chars.next().unwrap_or('\0');
-    let b = chars.next().unwrap_or('\0');
-    let c = chars.next().unwrap_or('\0');
+fn split_words(text: &str) -> impl Iterator<Item = &str> + '_ {
+	const STOP_WORDS: &[&str] = &[
+		"out",
+		"as",
+		"esp",
+		"up",
+		"person",
+		"from",
+		"at",
+		"an",
+		"by",
+		"be",
+		"g",
+		"or",
+		"on",
+		"with",
+		"for",
+		"e",
+		"etc",
+		"one",
+		"and",
+		"s",
+		"in",
+		"the",
+		"a",
+		"of",
+		"to",
+	];
 
-    let a_codeblock = find_unicode_block(a).unwrap();
-    let b_codeblock = find_unicode_block(b).unwrap();
-    let c_codeblock = find_unicode_block(c).unwrap();
-
-    let codeblock_max_len =
-        if is_kana_block(a_codeblock) { 2 }
-        else if is_cjk_block(a_codeblock) { 1 }
-        else { 3 };
-
-    Some(
-        if a_codeblock != b_codeblock || codeblock_max_len <= 1 {
-            [a, '\0', '\0']
-        }
-        else if a_codeblock != c_codeblock || codeblock_max_len <= 2 {
-            [a, b, '\0']
-        }
-        else {
-            [a, b, c]
-        }
-    )
+	text
+	.split(|c: char| c.is_whitespace() || c.is_ascii_punctuation() || c.is_ascii_digit())
+	.filter(|word|
+		!word.is_empty() &&
+		!STOP_WORDS.contains(word)
+	)
 }
-
-fn words(text: &str) -> impl Iterator<Item = &str> + '_ {
-    text.split(|c: char| c.is_whitespace() || c.is_ascii_punctuation())
-}
-
-fn syllables(s: &str) -> impl Iterator<Item = Syllable> + '_ {
-    words(s).flat_map(move |word| {
-        word
-        .char_indices()
-        .filter_map(
-            move|(char_position, _char)| first_syllable(&word[char_position..])
-        )
-    })
-}
-
-fn is_kana_block(block: unicode_blocks::UnicodeBlock) -> bool {
-    block == unicode_blocks::HIRAGANA ||
-    block == unicode_blocks::KATAKANA ||
-    block == unicode_blocks::KATAKANA_PHONETIC_EXTENSIONS
-}
-
-// #[cfg(test)]
-// mod tests {
-//     use itertools::Itertools;
-
-//     #[test]
-//     fn test_syllables() {
-//         let text = "Hello world! こんにちは";
-//         let syllables = super::syllables(text, false).collect_vec();
-//         assert_eq!(syllables, [
-//             ['H', 'e', 'l'],
-//             ['e', 'l', 'l'],
-//             ['l', 'l', 'o'],
-//             ['l', 'o', '\0'],
-//             ['o', '\0', '\0'],
-//             ['w', 'o', 'r'],
-//             ['o', 'r', 'l'],
-//             ['r', 'l', 'd'],
-//             ['l', 'd', '\0'],
-//             ['d', '\0', '\0'],
-//             ['こ', 'ん', '\0'],
-//             ['ん', 'に', '\0'],
-//             ['に', 'ち', '\0'],
-//             ['ち', 'は', '\0'],
-//             ['は', '\0', '\0'],
-//         ]);
-//     }
-
-//     #[test]
-//     fn test_syllables_minimal() {
-//         let text = "Hello world! こんにちは";
-//         let syllables = super::syllables(text, true).collect_vec();
-//         assert_eq!(syllables, [
-//             ['H', 'e', 'l'],
-//             ['e', 'l', 'l'],
-//             ['l', 'l', 'o'],
-//             ['w', 'o', 'r'],
-//             ['o', 'r', 'l'],
-//             ['r', 'l', 'd'],
-//             ['こ', 'ん', '\0'],
-//             ['ん', 'に', '\0'],
-//             ['に', 'ち', '\0'],
-//             ['ち', 'は', '\0'],
-//         ]);
-//     }
-// }

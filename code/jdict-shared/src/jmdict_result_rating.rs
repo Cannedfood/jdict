@@ -2,37 +2,58 @@
 
 use crate::jmdict::{self, Priorities, Priority};
 
-const MATCH_EXACT: i32         = 400000;
-const MATCH_STARTS_WITH: i32   = 300000;
-const MATCH_ENDS_WITH: i32     = 200000;
-const MATCH_CONTAINS: i32      = 100000;
-const MATCH_FUZZY_PENALTY: i32 =   1000;
+pub const MATCH_EXACT: i32         = 400000;
+pub const MATCH_STARTS_WITH: i32   = 300000;
+pub const MATCH_ENDS_WITH: i32     = 200000;
+pub const MATCH_CONTAINS: i32      = 100000;
+pub const MATCH_FUZZY_PENALTY: i32 =   1000;
 
-const HAS_NEWS1: i32 = 2000;
-const HAS_NEWS2: i32 = 1000;
-const HAS_ICHI1: i32 = 2000;
-const HAS_ICHI2: i32 = 1000;
-const HAS_SPEC1: i32 = 2000;
-const HAS_SPEC2: i32 = 1000;
-const HAS_GAI1: i32  = 2000;
-const HAS_GAI2: i32  = 1000;
+pub const HAS_NEWS1: i32 = 2000;
+pub const HAS_NEWS2: i32 = 1000;
+pub const HAS_ICHI1: i32 = 2000;
+pub const HAS_ICHI2: i32 = 1000;
+pub const HAS_SPEC1: i32 = 2000;
+pub const HAS_SPEC2: i32 = 1000;
+pub const HAS_GAI1: i32  = 2000;
+pub const HAS_GAI2: i32  = 1000;
 // static_assert(has_news1 + has_news2 + has_ichi1 + has_ichi2 + has_spec1 + has_spec2 + has_gai1 + has_gai2 < match_contains);
 
-const WORD_LENGTH: i32 = 2000;
-const MAX_WORD_LENGTH: i32 = 100;
+pub const WORD_LENGTH: i32 = 2000;
+pub const MAX_WORD_LENGTH: i32 = 100;
 
-const KANJI: i32           = 30;
-const READING_KANA: i32    = 20;
-const READING_ROMAJI: i32  = 20;
-const MEANING: i32         = 1;
-const SEQUENCE_NUMBER: i32 = 1000000;
+pub const KANJI: i32           = 30;
+pub const READING_KANA: i32    = 20;
+pub const READING_ROMAJI: i32  = 20;
+pub const MEANING: i32         = 1;
+pub const SEQUENCE_NUMBER: i32 = 1000000;
 
-const POSITION_PENALTY_KANJI: i32   = 400;
-const POSITION_PENALTY_READING: i32 = 400;
-const POSITION_PENALTY_SENSE: i32   = 200;
-const POSITION_PENALTY_GLOSS: i32   = 400;
+pub const POSITION_PENALTY_KANJI: i32   = 400;
+pub const POSITION_PENALTY_READING: i32 = 400;
+pub const POSITION_PENALTY_SENSE: i32   = 200;
+pub const POSITION_PENALTY_GLOSS: i32   = 400;
 
-const HIGHLIGHTED_GLOSS: i32 = 10;
+pub const HIGHLIGHTED_GLOSS: i32 = 10;
+
+pub struct Weighting {
+	base: i32,
+	position_penalties: [i32; 2],
+}
+impl Weighting {
+	pub fn rate(&self,
+		priorities: &Priorities,
+		position: [usize; 2],
+		length: usize) -> i32
+	{
+		self.base
+		+ prio_rating(priorities)
+		- self.position_penalties[0] * position[0] as i32
+		- self.position_penalties[1] * position[1] as i32
+		- 100 * (length as i32 - MAX_WORD_LENGTH)
+	}
+}
+pub const WEIGHTING_KANJI:   Weighting = Weighting { base: 30, position_penalties: [400, 400] };
+pub const WEIGHTING_READING: Weighting = Weighting { base: 20, position_penalties: [400, 400] };
+pub const WEIGHTING_MEANING: Weighting = Weighting { base: 1, position_penalties: [200, 200] };
 
 fn rate_text_match(text: &str, query: &str) -> i32 {
     if text == query { MATCH_EXACT }
@@ -92,7 +113,7 @@ pub fn rate_entry_match(entry: &jmdict::Entry, query: &str) -> i32 {
     match_score
 }
 
-fn prio_rating(priorities: &Priorities) -> i32 {
+pub fn prio_rating(priorities: &Priorities) -> i32 {
     priorities.iter().map(|p| match p {
         Priority::News1 => HAS_NEWS1,
         Priority::News2 => HAS_NEWS2,
