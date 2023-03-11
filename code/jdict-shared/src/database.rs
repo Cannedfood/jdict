@@ -92,9 +92,7 @@ impl Database {
     }
 
     pub fn search(&self, query: &str) -> Vec<Entry> {
-        let broadphase = self.dict_index.search(query);
-
-        broadphase.iter()
+        self.dict_index.search(query).iter()
         .map(|entry_idx| &self.dict.entries[entry_idx.0 as usize])
 		.cloned()
         .collect()

@@ -1,4 +1,16 @@
-use std::{collections::BTreeMap, ops::Bound};
+use std::collections::BTreeMap;
+
+#[derive(Debug)]
+pub enum Query {
+	StartsWith(String),
+	Contains(String),
+	EndsWith(String),
+}
+impl Query {
+	pub fn starts_with(s: &str) -> Self { Self::StartsWith(s.to_lowercase()) }
+	pub fn contains(s: &str) -> Self { Self::Contains(s.to_lowercase()) }
+	pub fn ends_with(s: &str) -> Self { Self::EndsWith(s.to_lowercase()) }
+}
 
 #[derive(Default, Clone)]
 pub struct FullTextIndex {
@@ -17,39 +29,73 @@ impl FullTextIndex {
 	}
 
 	pub fn optimize(&mut self) {
-		for (_key, ids) in self.entries.iter_mut() {
-			ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
-			ids.dedup_by_key(|id| id.0);
-		}
+		self.entries.values_mut().for_each(dedup_weighted);
+	}
 
-		// self.write_stats("fulltext_index_stats.txt");
+	pub fn query(&self, result: &mut Vec<(u32, i32)>, query: &Query) {
+		const EXACT_MATCH_BONUS: i32 = i32::MAX / 2;
+		const LENGTH_PENALTY: i32 = 2000;
+
+		match query {
+			Query::StartsWith(s) => {
+				result.extend(
+					self.entries.range(s.clone()..)
+					.take_while(|(key, _)| key.starts_with(s))
+					.flat_map(|(key, value)| {
+						let match_quality =
+							EXACT_MATCH_BONUS * (key == s) as i32
+							-LENGTH_PENALTY   * (key.len() as i32 - s.len() as i32);
+
+						value.iter().map(move|(id, weight)| (*id, *weight + match_quality))
+					})
+				);
+			},
+			Query::EndsWith(s) => {
+				result.extend(
+					self.entries.iter()
+					.filter(|(key, _)| key.ends_with(s))
+					.flat_map(|(key, value)| {
+						let match_quality =
+							EXACT_MATCH_BONUS * (key == s) as i32
+							-LENGTH_PENALTY   * (key.len() as i32 - s.len() as i32);
+
+						value.iter().map(move|(id, weight)| (*id, *weight + match_quality))
+					})
+				);
+			},
+			Query::Contains(s) => {
+				result.extend(
+					self.entries.iter()
+					.filter(|(key, _)| key.contains(s))
+					.flat_map(|(key, value)| {
+						let match_quality =
+							EXACT_MATCH_BONUS * (key == s) as i32
+							-LENGTH_PENALTY   * (key.len() as i32 - s.len() as i32);
+
+						value.iter().map(move|(id, weight)| (*id, *weight + match_quality))
+					})
+				);
+			}
+		}
 	}
 
 	pub fn search(&self, text: &str) -> Vec<(u32, i32)> {
         let mut ids = Vec::new();
 
 		for word in split_words(text) {
-			let lowercase = word.to_lowercase();
-			let mut cursor = self.entries.lower_bound(Bound::Included(&lowercase));
-			while let Some((key, value)) = cursor.key_value() && key.starts_with(&lowercase) {
-				let exact_match = key == &lowercase;
-				let length_penalty = (key.len() as i32 - word.len() as i32) * 2000;
-
-				for (id, weight) in value {
-					ids.push((
-						*id,
-						if exact_match { *weight + i32::MAX / 2 }
-						else { *weight - length_penalty }
-					));
+			self.query(
+				&mut ids,
+				&match word {
+					word if word.starts_with('*') && word.ends_with('*') => Query::contains(&word[1..word.len() - 1]),
+					word if word.starts_with('*') => Query::ends_with(&word[1..]),
+					word if word.ends_with('*') => Query::starts_with(&word[..word.len() - 1]),
+					word => Query::starts_with(word),
 				}
-
-				cursor.move_next();
-			}
+			);
 		}
 
-		ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
-		ids.dedup_by_key(|id| id.0);
-		ids.sort_by_key(|(_, weight)| std::cmp::Reverse(*weight));
+		dedup_weighted(&mut ids);
+		ids.sort_unstable_by_key(|(_, weight)| std::cmp::Reverse(*weight));
 
 		ids
     }
@@ -64,6 +110,11 @@ impl FullTextIndex {
 	// 		writeln!(line_writer, "{k} {v}").unwrap();
 	// 	}
 	// }
+}
+
+fn dedup_weighted(ids: &mut Vec<(u32, i32)>) {
+	ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
+	ids.dedup_by_key(|id| id.0);
 }
 
 fn split_words(text: &str) -> impl Iterator<Item = &str> + '_ {
@@ -96,7 +147,11 @@ fn split_words(text: &str) -> impl Iterator<Item = &str> + '_ {
 	];
 
 	text
-	.split(|c: char| c.is_whitespace() || c.is_ascii_punctuation() || c.is_ascii_digit())
+	.split(|c: char| {
+		c.is_whitespace() ||
+		(c.is_ascii_punctuation() && c != '*') ||
+		c.is_ascii_digit()
+	})
 	.filter(|word|
 		!word.is_empty() &&
 		!STOP_WORDS.contains(word)
