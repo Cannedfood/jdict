@@ -58,8 +58,8 @@ impl JDictApp {
 			let sent = re.lost_focus() && re.ctx.input(|input| input.key_pressed(egui::Key::Enter));
 			self.should_refresh |= sent;
 
-			if re.lost_focus() {
-				ui.memory_mut(|mem| mem.request_focus(re.id));
+			if !ui.ctx().memory(|m| m.has_focus(re.id)) {
+				re.request_focus();
 			}
 
 			if let Some(results) = &self.results {
