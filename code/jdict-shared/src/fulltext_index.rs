@@ -7,9 +7,9 @@ pub enum Query {
 	EndsWith(String),
 }
 impl Query {
-	pub fn starts_with(s: &str) -> Self { Self::StartsWith(s.to_lowercase()) }
-	pub fn contains(s: &str) -> Self { Self::Contains(s.to_lowercase()) }
-	pub fn ends_with(s: &str) -> Self { Self::EndsWith(s.to_lowercase()) }
+	pub fn starts_with(s: &str) -> Self { Self::StartsWith(normalize_string(s)) }
+	pub fn contains(s: &str)    -> Self { Self::Contains(normalize_string(s)) }
+	pub fn ends_with(s: &str)   -> Self { Self::EndsWith(normalize_string(s)) }
 }
 
 #[derive(Default, Clone)]
@@ -24,12 +24,13 @@ impl FullTextIndex {
 	}
 	pub fn insert_weighted(&mut self, text: &str, id: u32, weight: i32) {
 		for word in split_words(text) {
-			self.entries.entry(word.to_lowercase()).or_insert(vec![]).push((id, weight));
+			self.entries.entry(normalize_string(word)).or_insert(vec![]).push((id, weight));
 		}
 	}
 
 	pub fn optimize(&mut self) {
 		self.entries.values_mut().for_each(dedup_weighted);
+		// self.write_stats("./fulltext-stats.txt");
 	}
 
 	pub fn query(&self, result: &mut Vec<(u32, i32)>, query: &Query) {
@@ -104,12 +105,26 @@ impl FullTextIndex {
 	// 	let mut line_writer = std::io::LineWriter::new(std::fs::File::create(path).unwrap());
 	// 	writeln!(line_writer, "Totals: {} words, {} entries", self.entries.len(), self.entries.values().map(|v| v.len()).sum::<usize>()).unwrap();
 
+	// 	let words   = (self.entries.keys().map(|k| k.bytes().len()).sum::<usize>()) as f32 / (1024.0*1024.0);
+	// 	let entries = (self.entries.values().map(|v| v.len()).sum::<usize>() * 4) as f32   / (1024.0*1024.0);
+	// 	writeln!(line_writer, "Memory usage: words: {words:.2}MiB, entries: {entries:.2}MiB, total: {:.2}MiB", words + entries).unwrap();
+
 	// 	let mut entries_by_count = self.entries.iter().map(|(k, v)| (k.as_str(), v.len())).collect::<Vec<_>>();
 	// 	entries_by_count.sort_by_key(|(_, count)| std::cmp::Reverse(*count));
 	// 	for (k, v) in entries_by_count {
 	// 		writeln!(line_writer, "{k} {v}").unwrap();
 	// 	}
 	// }
+}
+
+fn normalize_string(s: &str) -> String {
+	s.chars().map(|c| match c {
+		'０'..='９' => char::from_u32(c as u32 - '０' as u32 + '0' as u32).unwrap(),
+		'Ａ'..='Ｚ' => char::from_u32(c as u32 - 'Ａ' as u32 + 'a' as u32).unwrap(),
+		'ａ'..='ｚ' => char::from_u32(c as u32 - 'ａ' as u32 + 'a' as u32).unwrap(),
+		'A'..='Z' => char::from_u32(c as u32 - 'A' as u32 + 'a' as u32).unwrap(),
+		c => c,
+	}).collect()
 }
 
 fn dedup_weighted(ids: &mut Vec<(u32, i32)>) {
@@ -144,13 +159,17 @@ fn split_words(text: &str) -> impl Iterator<Item = &str> + '_ {
 		"a",
 		"of",
 		"to",
+		"not",
+		"it",
+		"is"
 	];
 
 	text
 	.split(|c: char| {
 		c.is_whitespace() ||
 		(c.is_ascii_punctuation() && c != '*') ||
-		c.is_ascii_digit()
+		c.is_ascii_digit() ||
+		c == '・'
 	})
 	.filter(|word|
 		!word.is_empty() &&
