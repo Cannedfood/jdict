@@ -1,6 +1,8 @@
 pub struct History<T: Default + Clone + Eq> {
 	pub history: Vec<T>,
 	pub index: usize,
+	pub past_depth: usize,
+	pub future_depth: usize,
 	has_changed: bool,
 }
 impl<T: Default + Clone + Eq> Default for History<T> {
@@ -8,6 +10,8 @@ impl<T: Default + Clone + Eq> Default for History<T> {
 		Self {
 			history: vec![Default::default()],
 			index: 0,
+			past_depth: 20,
+			future_depth: 20,
 			has_changed: false,
 		}
 	}
@@ -20,13 +24,20 @@ impl<T: Default + Clone + Eq> History<T> {
 
 	// Updating
 	pub fn push(&mut self, item: T) -> bool {
-		println!("Hello");
 		if &item == self.current() {
 			return false;
 		}
 		self.index += 1;
 		self.history.insert(self.index, item);
 		self.mark_changed();
+
+		while self.index > self.past_depth {
+			self.history.remove(0);
+			self.index -= 1;
+		}
+		while self.history.len() > self.index + self.future_depth {
+			self.history.pop();
+		}
 
 		true
 	}
@@ -57,9 +68,6 @@ impl<T: Default + Clone + Eq> History<T> {
 	}
 
 	// Internal
-	fn clear_future(&mut self) {
-		self.history.truncate(self.index + 1);
-	}
 	fn mark_changed(&mut self) {
 		self.has_changed = true;
 	}
