@@ -97,31 +97,35 @@ impl JDictApp {
 	}
 
 	fn draw_kanji_infos(&mut self, ui: &mut egui::Ui) {
-		ui.heading("Kanji");
 		if let Some(result) = &self.results {
-			for kanji in &result.kanji {
-				ui.separator();
-				// let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
+			ScrollArea::vertical()
+			.min_scrolled_width(ui.available_width())
+			.show(ui, |ui| {
+				ui.heading("Kanji");
+				for kanji in &result.kanji {
+					ui.separator();
+					// let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
 
-				if ui.button(&kanji.literal).clicked() {
-					self.search_history.push(kanji.literal.clone());
-				}
-				for rm in &kanji.reading_meaning_groups {
-					let kun = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_kun).map(|r| &r.value).join(", ");
-					let on  = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_on).map(|r| &r.value).join(", ");
-
-					ui.label(
-						rm.meanings.iter().filter(|m| m.lang == "en").map(|m| &m.value).join(", ")
-					);
-
-					if !kun.is_empty() {
-						ui.small(format!("kun: {}", kun));
+					if ui.button(&kanji.literal).clicked() {
+						self.search_history.push(kanji.literal.clone());
 					}
-					if !on.is_empty() {
-						ui.small(format!("on: {}", on));
+					for rm in &kanji.reading_meaning_groups {
+						let kun = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_kun).map(|r| &r.value).join(", ");
+						let on  = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_on).map(|r| &r.value).join(", ");
+
+						ui.label(
+							rm.meanings.iter().filter(|m| m.lang == "en").map(|m| &m.value).join(", ")
+						);
+
+						if !kun.is_empty() {
+							ui.small(format!("kun: {}", kun));
+						}
+						if !on.is_empty() {
+							ui.small(format!("on: {}", on));
+						}
 					}
 				}
-			}
+			});
 		}
 	}
 }
