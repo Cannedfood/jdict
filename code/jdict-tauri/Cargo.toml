@@ -19,7 +19,7 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.2", features = ["shell-open"] }
 jdict-shared = { version = "0.1.0", path = "../jdict-shared" }
 tokio = { version = "1.26.0", features = ["time"] }
-futures = "0.3.26"
+futures = "0.3.27"
 
 [features]
 # by default Tauri runs in production mode
