@@ -4,7 +4,7 @@ use std::str::FromStr;
 
 use crate::util::is_default;
 
-#[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Priority {
     News1, News2,
@@ -46,16 +46,15 @@ impl FromStr for Priority {
     }
 }
 
-#[derive(Default, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Gender {
-    #[default] None,
     Male,
     Female,
     Neutral,
 }
 
-#[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Dialect {
     bra, // "Brazilian"
@@ -116,9 +115,8 @@ pub struct LanguageOrigin {
     pub wasei: bool,   // attribute: ls_wasei="y"
 }
 
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum GlossType {
-    #[default] None,
     Literal,
     Figurative,
     Explanatory,
@@ -132,9 +130,9 @@ pub struct Gloss {
     #[serde(default, skip_serializing_if = "is_default")]
     pub lang: String,    // attribute: xml:lang
     #[serde(default, skip_serializing_if = "is_default")]
-    pub typ: GlossType,     // attribute: g_type
+    pub typ: Option<GlossType>,     // attribute: g_type
     #[serde(default, skip_serializing_if = "is_default")]
-    pub gender: Gender,     // attribute: g_gend
+    pub gender: Option<Gender>,     // attribute: g_gend
     #[serde(default, skip_serializing_if = "is_default")]
     pub highlight: bool, // contains: <pri>
 }

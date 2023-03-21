@@ -104,25 +104,18 @@ fn parse_gloss(gloss: &Node) -> jmdict::Gloss {
     jmdict::Gloss {
         value: gloss.text().unwrap().to_string(),
         lang: gloss.attribute("xml:lang").unwrap_or("eng").to_string(),
-        gender: gloss.attribute("g_gend").map_or(
-            Gender::None,
-            |g_gend| match g_gend {
-                "male" => Gender::Male,
-                "female" => Gender::Female,
-                "neutral" => Gender::Neutral,
-                _ => panic!("Failed parsing gender: {}", g_gend),
-            }
-        ),
-        typ:
-            gloss.attribute("g_type")
-            .map_or_else(
-                || jmdict::GlossType::None,
-                |s| match s {
-                    "literal" => jmdict::GlossType::Literal,
-                    "figurative" => jmdict::GlossType::Figurative,
-                    _ => jmdict::GlossType::None,
-                }
-            ),
+        gender: gloss.attribute("g_gend").and_then(|g_gend| match g_gend {
+			"male"    => Some(Gender::Male),
+			"female"  => Some(Gender::Female),
+			"neutral" => Some(Gender::Neutral),
+			_         => panic!("Failed parsing gender: {}", g_gend),
+		}),
+        typ: gloss.attribute("g_type").and_then(|s| match s {
+			"literal"    => Some(jmdict::GlossType::Literal),
+			"figurative" => Some(jmdict::GlossType::Figurative),
+			// "figurative" => Some(jmdict::GlossType::Explanatory),
+			_            => None,
+		}),
         highlight: gloss.children().any(|c| c.tag_name().name() == "pri"),
     }
 }
