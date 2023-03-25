@@ -1,5 +1,7 @@
 #![feature(btree_cursors)]
 #![feature(let_chains)]
+#![feature(const_swap)]
+#![feature(const_mut_refs)]
 
 pub mod util;
 pub mod jmdict;

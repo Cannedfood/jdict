@@ -117,7 +117,7 @@ impl Kana {
 	}
 }
 
-pub const KANA_TABLE: [Kana; 399] = [
+pub const KANA_TABLE: [Kana; 399] = sort_by_kana_length([
 	Kana::hiragana("きゃ", "kya"),
     Kana::hiragana("きゅ", "kyu"),
     Kana::hiragana("きょ", "kyo"),
@@ -517,4 +517,21 @@ pub const KANA_TABLE: [Kana; 399] = [
     Kana::symbol("！", "!"),
     Kana::symbol("？", "?"),
     Kana::symbol("　", " "),
-];
+]);
+
+const fn sort_by_kana_length<const N: usize>(kana: [Kana; N]) -> [Kana; N] {
+    let mut kana = kana;
+
+    // Insertion sort by descending kana length; Can't use for loop because of const
+    let mut i = 1;
+    while i < N {
+        let mut j = i;
+        while j > 0 && kana[j - 1].kana.len() < kana[j].kana.len() {
+            kana.swap(j - 1, j);
+            j -= 1;
+        }
+        i += 1;
+    }
+
+    kana
+}
