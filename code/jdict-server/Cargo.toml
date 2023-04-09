@@ -9,11 +9,11 @@ opt-level = 3
 
 [dependencies]
 figment = { version = "0.10.8", features = ["toml"] }
-futures = "0.3.27"
+futures = "0.3.28"
 itertools = "0.10.5"
 jdict-shared = { version = "0.1.0", path = "../jdict-shared" }
-opener = "0.5.2"
-rocket = { version = "0.5.0-rc.2", features = ["http2", "json"] }
+opener = "0.6.0"
+rocket = { version = "0.5.0-rc.3", features = ["http2", "json"] }
 rocket_async_compression = "0.2.0"
-serde = "1.0.158"
-tokio = "1.26.0"
+serde = "1.0.159"
+tokio = "1.27.0"
