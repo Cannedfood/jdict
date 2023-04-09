@@ -1,15 +1,34 @@
 use std::collections::BTreeMap;
 
-#[derive(Debug)]
-pub enum Query {
-	StartsWith(String),
-	Contains(String),
-	EndsWith(String),
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum QueryType {
+    StartsWith,
+    Contains,
+    EndsWith,
+    Exactly,
+}
+
+#[derive(Debug, Clone)]
+pub struct Query {
+    pub query_type: QueryType,
+    pub query: String,
+    pub base_weight: i32,
 }
 impl Query {
-	pub fn starts_with(s: &str) -> Self { Self::StartsWith(normalize_string(s)) }
-	pub fn contains(s: &str)    -> Self { Self::Contains(normalize_string(s)) }
-	pub fn ends_with(s: &str)   -> Self { Self::EndsWith(normalize_string(s)) }
+    pub fn new(query_type: QueryType, query: &str) -> Self {
+        Self { query_type, query: normalize_string(query), base_weight: 0, }
+    }
+	pub fn starts_with(s: &str) -> Self { Self::new(QueryType::StartsWith, s) }
+	pub fn contains(s: &str)    -> Self { Self::new(QueryType::Contains,   s) }
+	pub fn ends_with(s: &str)   -> Self { Self::new(QueryType::EndsWith,   s) }
+    pub fn exactly(s: &str)     -> Self { Self::new(QueryType::Exactly,    s) }
+
+    pub fn with_weight(self, weight: i32) -> Self {
+        Self {
+            base_weight: weight,
+            ..self
+        }
+    }
 }
 
 #[derive(Default, Clone)]
@@ -37,43 +56,53 @@ impl FullTextIndex {
 		const EXACT_MATCH_BONUS: i32 = i32::MAX / 2;
 		const LENGTH_PENALTY: i32 = 2000;
 
-		match query {
-			Query::StartsWith(s) => {
+        let q = &query.query;
+        let base = query.base_weight;
+
+		match query.query_type {
+            QueryType::Exactly => {
+                result.extend(
+                    self.entries.get(&query.query).into_iter()
+                    .flatten()
+                    .map(|(id, weight)| (*id, *weight + EXACT_MATCH_BONUS + base))
+                );
+            },
+			QueryType::StartsWith => {
 				result.extend(
-					self.entries.range(s.clone()..)
-					.take_while(|(key, _)| key.starts_with(s))
+					self.entries.range(q.clone()..)
+					.take_while(|(key, _)| key.starts_with(q))
 					.flat_map(|(key, value)| {
 						let match_quality =
-							EXACT_MATCH_BONUS * (key == s) as i32
-							-LENGTH_PENALTY   * (key.len() as i32 - s.len() as i32);
+							EXACT_MATCH_BONUS * (key == q) as i32
+							-LENGTH_PENALTY   * (key.len() as i32 - q.len() as i32);
 
-						value.iter().map(move|(id, weight)| (*id, *weight + match_quality))
+						value.iter().map(move|(id, weight)| (*id, *weight + match_quality + base))
 					})
 				);
 			},
-			Query::EndsWith(s) => {
+			QueryType::EndsWith => {
 				result.extend(
 					self.entries.iter()
-					.filter(|(key, _)| key.ends_with(s))
+					.filter(|(key, _)| key.ends_with(q))
 					.flat_map(|(key, value)| {
 						let match_quality =
-							EXACT_MATCH_BONUS * (key == s) as i32
-							-LENGTH_PENALTY   * (key.len() as i32 - s.len() as i32);
+							EXACT_MATCH_BONUS * (key == q) as i32
+							-LENGTH_PENALTY   * (key.len() as i32 - q.len() as i32);
 
-						value.iter().map(move|(id, weight)| (*id, *weight + match_quality))
+						value.iter().map(move|(id, weight)| (*id, *weight + match_quality + base))
 					})
 				);
 			},
-			Query::Contains(s) => {
+			QueryType::Contains => {
 				result.extend(
 					self.entries.iter()
-					.filter(|(key, _)| key.contains(s))
+					.filter(|(key, _)| key.contains(q))
 					.flat_map(|(key, value)| {
 						let match_quality =
-							EXACT_MATCH_BONUS * (key == s) as i32
-							-LENGTH_PENALTY   * (key.len() as i32 - s.len() as i32);
+							EXACT_MATCH_BONUS * (key == q) as i32
+							-LENGTH_PENALTY   * (key.len() as i32 - q.len() as i32);
 
-						value.iter().map(move|(id, weight)| (*id, *weight + match_quality))
+						value.iter().map(move|(id, weight)| (*id, *weight + match_quality + base))
 					})
 				);
 			}
