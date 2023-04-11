@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, str::FromStr};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum QueryType {
@@ -30,6 +30,18 @@ impl Query {
         }
     }
 }
+impl FromStr for Query {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            word if word.starts_with('*') && word.ends_with('*') => Ok(Query::contains(&word[1..word.len() - 1])),
+            word if word.starts_with('*') => Ok(Query::ends_with(&word[1..])),
+            word if word.ends_with('*') => Ok(Query::starts_with(&word[..word.len() - 1])),
+            word => Ok(Query::starts_with(word)),
+        }
+    }
+}
 
 #[derive(Default, Clone)]
 pub struct FullTextIndex {
@@ -48,7 +60,7 @@ impl FullTextIndex {
 	}
 
 	pub fn optimize(&mut self) {
-		self.entries.values_mut().for_each(dedup_weighted);
+		self.entries.values_mut().for_each(FullTextIndex::dedup_weighted);
 		// self.write_stats("./fulltext-stats.txt");
 	}
 
@@ -109,26 +121,16 @@ impl FullTextIndex {
 		}
 	}
 
-	pub fn search(&self, text: &str) -> Vec<(u32, i32)> {
-        let mut ids = Vec::new();
+	// pub fn search(&self, apply_queries: impl FnOnce(&Self, &mut Vec<(u32, i32)>)) -> Vec<(u32, i32)> {
+    //     let mut results = Vec::new();
 
-		for word in split_words(text) {
-			self.query(
-				&mut ids,
-				&match word {
-					word if word.starts_with('*') && word.ends_with('*') => Query::contains(&word[1..word.len() - 1]),
-					word if word.starts_with('*') => Query::ends_with(&word[1..]),
-					word if word.ends_with('*') => Query::starts_with(&word[..word.len() - 1]),
-					word => Query::starts_with(word),
-				}
-			);
-		}
+    //     apply_queries(self, &mut results);
 
-		dedup_weighted(&mut ids);
-		ids.sort_unstable_by_key(|(_, weight)| std::cmp::Reverse(*weight));
+	// 	FullTextIndex::dedup_weighted(&mut results);
+	// 	FullTextIndex::sort_results(&mut results);
 
-		ids
-    }
+	// 	results
+    // }
 
 	// pub fn write_stats(&self, path: &str) {
 	// 	let mut line_writer = std::io::LineWriter::new(std::fs::File::create(path).unwrap());
@@ -144,6 +146,15 @@ impl FullTextIndex {
 	// 		writeln!(line_writer, "{k} {v}").unwrap();
 	// 	}
 	// }
+
+    pub fn sort_results(results: &mut [(u32, i32)]) {
+        results.sort_unstable_by_key(|(_, weight)| std::cmp::Reverse(*weight));
+    }
+
+    pub fn dedup_weighted(ids: &mut Vec<(u32, i32)>) {
+        ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
+        ids.dedup_by_key(|id| id.0);
+    }
 }
 
 fn normalize_string(s: &str) -> String {
@@ -154,11 +165,6 @@ fn normalize_string(s: &str) -> String {
 		'A'..='Z' => char::from_u32(c as u32 - 'A' as u32 + 'a' as u32).unwrap(),
 		c => c,
 	}).collect()
-}
-
-fn dedup_weighted(ids: &mut Vec<(u32, i32)>) {
-	ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
-	ids.dedup_by_key(|id| id.0);
 }
 
 fn split_words(text: &str) -> impl Iterator<Item = &str> + '_ {

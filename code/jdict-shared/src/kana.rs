@@ -1,19 +1,3 @@
-fn snip_prefix(prefix: &str, text: &mut &str) -> bool {
-    if let Some(s) = text.strip_prefix(prefix) {
-        *text = s;
-        true
-    } else {
-        false
-    }
-}
-
-fn remove_first_char(text: &mut &str) -> Option<char> {
-    let mut chars = text.chars();
-    let c = chars.next()?;
-    *text = chars.as_str();
-    Some(c)
-}
-
 pub fn to_romaji(text: &str) -> String {
     let mut result = String::new();
     let mut text_copy = text;
@@ -48,6 +32,22 @@ pub fn to_romaji(text: &str) -> String {
         was_tsu = false;
     }
     result
+}
+
+fn snip_prefix(prefix: &str, text: &mut &str) -> bool {
+    if let Some(s) = text.strip_prefix(prefix) {
+        *text = s;
+        true
+    } else {
+        false
+    }
+}
+
+fn remove_first_char(text: &mut &str) -> Option<char> {
+    let mut chars = text.chars();
+    let c = chars.next()?;
+    *text = chars.as_str();
+    Some(c)
 }
 
 fn snip_full_width_char(text: &mut &str) -> Option<char> {

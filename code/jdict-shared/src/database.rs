@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::Path};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-use crate::{jmdict::{JMdict, Entry, Priorities, Priority}, kanjidic::{Kanjidic, Character}, kanjivg::{KanjiVG, Kanji}, FullTextIndex, util::{print_time, decompress}};
+use crate::{jmdict::{JMdict, Entry, Priorities, Priority}, kanjidic::{Kanjidic, Character}, kanjivg::{KanjiVG, Kanji}, FullTextIndex, util::{print_time, decompress}, phonetic, fulltext_index::Query};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -92,7 +92,18 @@ impl Database {
     }
 
     pub fn search(&self, query: &str) -> Vec<Entry> {
-        self.dict_index.search(query).iter()
+        let mut results = Vec::new();
+
+        for (similar, distance) in phonetic::similar_sounding_words(query, 10000000) {
+            println!(" Search alt: {} ({})", similar, distance);
+            self.dict_index.query(&mut results, &Query::exactly(&similar).with_weight(-distance));
+        }
+        self.dict_index.query(&mut results, &query.parse().unwrap());
+
+        FullTextIndex::dedup_weighted(&mut results);
+        FullTextIndex::sort_results(&mut results);
+
+        results.iter()
         .map(|entry_idx| &self.dict.entries[entry_idx.0 as usize])
 		.cloned()
         .collect()
