@@ -61,5 +61,7 @@ fn similar_sounding_words_recursive(
         }
     }
 
-    similar_sounding_words_recursive(s, position + 1, previous_cost, max_cost, into);
+    if let Some((idx, _)) = subs.char_indices().nth(1) {
+        similar_sounding_words_recursive(s, position + idx, previous_cost, max_cost, into);
+    }
 }
