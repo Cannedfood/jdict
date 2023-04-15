@@ -68,7 +68,7 @@ pub fn search_internal(db: &Database, search_term: &str, take: Option<u32>, skip
     let paged_results =
         all_results.iter()
         .skip(skip.unwrap_or(0) as usize)
-        .take(take.unwrap_or(128) as usize)
+        .take(take.unwrap_or(1024) as usize)
         .cloned() // TODO: PERFORMANCE: Use references instead of cloning
         .collect::<Vec<Entry>>();
 
