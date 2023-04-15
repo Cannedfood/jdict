@@ -104,8 +104,7 @@ impl Database {
         FullTextIndex::sort_results(&mut results);
 
         results.iter()
-        .map(|entry_idx| &self.dict.entries[entry_idx.0 as usize])
-		.cloned()
+        .map(|entry_idx| self.dict.entries[entry_idx.0 as usize].clone())
         .collect()
     }
 
