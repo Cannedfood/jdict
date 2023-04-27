@@ -152,7 +152,10 @@ impl FullTextIndex {
     }
 
     pub fn dedup_weighted(ids: &mut Vec<(u32, i32)>) {
-        ids.sort_unstable_by_key(|(id, weight)| (*id, std::cmp::Reverse(*weight)));
+        ids.sort_unstable_by_key(|(id, weight)| (
+            *id,
+            std::cmp::Reverse(*weight) // Reverse, so the value with the highest weight is first and kept in dedup_by_key
+        ));
         ids.dedup_by_key(|id| id.0);
     }
 }
