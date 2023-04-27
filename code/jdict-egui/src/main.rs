@@ -14,10 +14,10 @@ struct JDictApp {
 	search_field: String,
 
 	search_history: History<String>,
-	results: Option<SearchResult>,
+	results: Option<SearchResult<'static>>,
 
-	inbox: mpsc::Receiver<SearchResult>,
-	send_results: mpsc::Sender<SearchResult>,
+	inbox: mpsc::Receiver<SearchResult<'static>>,
+	send_results: mpsc::Sender<SearchResult<'static>>,
 }
 impl JDictApp {
 	fn new() -> Self {

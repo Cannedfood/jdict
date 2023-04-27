@@ -91,7 +91,7 @@ impl Database {
 		})
     }
 
-    pub fn search(&self, query: &str) -> Vec<Entry> {
+    pub fn search<'a>(&'a self, query: &str) -> Vec<&'a Entry> {
         let mut results = Vec::new();
 
         for (similar, distance) in phonetic::similar_sounding_words(query, 10000000) {
@@ -104,11 +104,11 @@ impl Database {
         FullTextIndex::sort_results(&mut results);
 
         results.iter()
-        .map(|entry_idx| self.dict.entries[entry_idx.0 as usize].clone())
+        .map(|entry_idx| &self.dict.entries[entry_idx.0 as usize])
         .collect()
     }
 
-    pub fn contained_kanji_chars(&self, text: &str) -> (Vec<Character>, Vec<Kanji>) {
+    pub fn contained_kanji_chars<'a>(&'a self, text: &str) -> (Vec<&'a Character>, Vec<&'a Kanji>) {
         let uniq_chars =
             text.chars()
             .unique();
@@ -116,13 +116,13 @@ impl Database {
         let chars =
             uniq_chars.clone()
             .filter_map(|c| self.kanjidic_index.get(&c))
-            .map(|idx| self.kanjidic.characters[*idx as usize].clone())
+            .map(|idx| &self.kanjidic.characters[*idx as usize])
             .collect();
 
         let kanjivg =
             uniq_chars
             .filter_map(|c| self.kanjivg_index.get(&c))
-            .map(|idx| self.kanjivg.kanji[*idx as usize].clone())
+            .map(|idx| &self.kanjivg.kanji[*idx as usize])
             .collect();
 
         (chars, kanjivg)

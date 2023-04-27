@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'jdict-server'",
+            "name": "Debug executable 'jdict-egui'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=jdict-server",
-                    "--package=jdict-server"
+                    "--bin=jdict-egui",
+                    "--package=jdict-egui"
                 ],
                 "filter": {
-                    "name": "jdict-server",
+                    "name": "jdict-egui",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'jdict-server'",
+            "name": "Debug unit tests in executable 'jdict-egui'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=jdict-server",
-                    "--package=jdict-server"
+                    "--bin=jdict-egui",
+                    "--package=jdict-egui"
                 ],
                 "filter": {
-                    "name": "jdict-server",
+                    "name": "jdict-egui",
                     "kind": "bin"
                 }
             },
