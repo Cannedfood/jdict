@@ -6,7 +6,10 @@ const SIMILAR_SOUNDS: &[(i32, &[&str])] = &[
     (1, &["i", "ii"]),
     (1, &["o", "oo", "ou"]),
     (1, &["u", "uu"]),
-    (1, &["s", "z"])
+    (1, &["s", "z"]),
+    (2, &["zu", "dzu", "tsu"]),
+    (2, &["j", "ch"]),
+    (3, &["chu", "chou"]),
 ];
 
 pub fn similar_sounding_words(s: &str, max_cost: i32) -> Vec<(String, i32)> {
