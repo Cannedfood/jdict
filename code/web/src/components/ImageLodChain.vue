@@ -12,11 +12,7 @@ const loadedLevels = reactive([] as number[]);
 		v-for="(url, i) in urls" :key="url" :src="url"
 		@load="loadedLevels.push(i)"
 		:alt="alt"
-		:class=`{
-			first: i == 0,
-			loaded: loadedLevels.includes(i),
-			superseeded: loadedLevels.some(j => j > i)
-		}`
+		:class="{ first: i == 0, loaded: loadedLevels.includes(i), superseeded: loadedLevels.some(j => j > i) }"
 	)
 </template>
 

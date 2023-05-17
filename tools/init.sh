@@ -2,9 +2,15 @@
 
 (
     echo
-    echo "=============== Installing dependencies in tools/... =============="
+    echo "=============== Installing dependencies in tools/... (for generating image sizes) =============="
     cd tools
     npm install
+)
+
+(
+    echo
+    echo "=============== Generating various image sizes in code/web/public... =============="
+    ./tools/generate-sizes.mjs
 )
 
 (
@@ -16,8 +22,9 @@
 
 (
     echo
-    echo "=============== Generating various image sizes in code/web/public... =============="
-    ./tools/generate-sizes.mjs
+    echo "=============== Prebuilding code/web/... =============="
+    cd code/web
+    npm run build
 )
 
 (
