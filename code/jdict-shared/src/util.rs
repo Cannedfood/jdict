@@ -1,4 +1,4 @@
-use std::{path::Path, fs::File, io::{Read, BufReader, self}, time::Duration, cell::UnsafeCell, sync::atomic::AtomicBool};
+use std::{path::Path, fs::File, io::{Read, BufReader, self}, time::Duration};
 
 pub fn load_gzip_file(file: File) -> io::Result<String> {
     let mut file_content = String::new();
@@ -48,40 +48,4 @@ pub fn print_time<T>(
 
 pub fn is_default<T: Default + PartialEq>(t: &T) -> bool {
     *t == Default::default()
-}
-
-pub struct Eventually<T> {
-    has_value: AtomicBool,
-    value: UnsafeCell<Option<T>>,
-}
-unsafe impl<T> Sync for Eventually<T> {}
-impl<T> Eventually<T> {
-    pub const fn new() -> Self {
-        Self {
-            has_value: AtomicBool::new(false),
-            value: UnsafeCell::new(None),
-        }
-    }
-
-    pub fn has_value(&self) -> bool {
-        self.has_value.load(std::sync::atomic::Ordering::Acquire)
-    }
-
-    pub fn write(&self, value: T) {
-        if self.has_value() {
-            panic!("Value already set");
-        }
-
-        unsafe { *self.value.get() = Some(value) };
-        self.has_value.store(true, std::sync::atomic::Ordering::Release);
-    }
-
-    pub fn get(&self) -> Option<&T> {
-        if self.has_value() {
-            unsafe { &*self.value.get() }.as_ref()
-        }
-        else {
-            None
-        }
-    }
 }
