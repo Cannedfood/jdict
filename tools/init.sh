@@ -16,7 +16,13 @@
 
 (
     echo
-    echo "=============== Pre-Building code/server/ and code/tauri/... ==================="
+    echo "=============== Generating various image sizes in code/web/public... =============="
+    ./tools/generate-sizes.mjs
+)
+
+(
+    echo
+    echo "=============== Pre-Building rust code... ==================="
     cargo build
     cargo build --release
 )
