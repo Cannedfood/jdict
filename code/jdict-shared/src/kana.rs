@@ -5,27 +5,27 @@ pub fn to_romaji(text: &str) -> String {
     let mut was_tsu = false;
 
     while !text_copy.is_empty() {
-		// Small tsu
+        // Small tsu
         if snip_prefix("っ", &mut text_copy) || snip_prefix("ッ", &mut text_copy) {
             was_tsu = true;
             continue;
         }
-		// Prolonged sound mark
-		else if result.ends_with(is_vowel) && snip_prefix("ー", &mut text_copy) {
-			result.push(result.chars().last().unwrap());
-		}
-		// Kana
+        // Prolonged sound mark
+        else if result.ends_with(is_vowel) && snip_prefix("ー", &mut text_copy) {
+            result.push(result.chars().last().unwrap());
+        }
+        // Kana
         else if let Some(translation) = snip_and_translate_prefix_to_romaji(&mut text_copy) {
             if was_tsu {
                 result.push_str(&translation[0..1]);
             }
             result.push_str(translation);
         }
-		// Undo full-width chars
-		else if let Some(c) = snip_full_width_char(&mut text_copy) {
-			result.push(c);
-		}
-		// Fall back to just copying the first char
+        // Undo full-width chars
+        else if let Some(c) = snip_full_width_char(&mut text_copy) {
+            result.push(c);
+        }
+        // Fall back to just copying the first char
         else {
             result.push(remove_first_char(&mut text_copy).unwrap());
         }
@@ -51,74 +51,74 @@ fn remove_first_char(text: &mut &str) -> Option<char> {
 }
 
 fn snip_full_width_char(text: &mut &str) -> Option<char> {
-	let c = text.chars().next()?;
+    let c = text.chars().next()?;
 
-	let result = match c {
-		'０'..='９' => char::from_u32(c as u32 - '０' as u32 + '0' as u32),
-		'Ａ'..='Ｚ' => char::from_u32(c as u32 - 'Ａ' as u32 + 'A' as u32),
-		'ａ'..='ｚ' => char::from_u32(c as u32 - 'ａ' as u32 + 'a' as u32),
-		_ => None,
-	};
+    let result = match c {
+        '０'..='９' => char::from_u32(c as u32 - '０' as u32 + '0' as u32),
+        'Ａ'..='Ｚ' => char::from_u32(c as u32 - 'Ａ' as u32 + 'A' as u32),
+        'ａ'..='ｚ' => char::from_u32(c as u32 - 'ａ' as u32 + 'a' as u32),
+        _ => None,
+    };
 
-	if result.is_some() {
-		*text = &text[1..];
-	}
+    if result.is_some() {
+        *text = &text[1..];
+    }
 
-	result
+    result
 }
 
 fn is_vowel(c: char) -> bool {
-	matches!(c,
-		'a' | 'e' | 'i' | 'o' | 'u' |
-		'A' | 'E' | 'I' | 'O' | 'U'
-	)
+    matches!(c,
+        'a' | 'e' | 'i' | 'o' | 'u' |
+        'A' | 'E' | 'I' | 'O' | 'U'
+    )
 }
 
 #[cfg(test)]
 mod test {
-	#[test]
-	fn test_kana() {
-		// Hiragana
-		assert_eq!(super::to_romaji("れいぞうこ"), "reizouko"); // Basic
-		assert_eq!(super::to_romaji("かって"), "katte"); // tsu
-		assert_eq!(super::to_romaji("ぴょこん"), "pyokon");
+    #[test]
+    fn test_kana() {
+        // Hiragana
+        assert_eq!(super::to_romaji("れいぞうこ"), "reizouko"); // Basic
+        assert_eq!(super::to_romaji("かって"), "katte"); // tsu
+        assert_eq!(super::to_romaji("ぴょこん"), "pyokon");
 
-		// Katakana
-		assert_eq!(super::to_romaji("ハンカチ"), "hankachi"); // Basic
-		assert_eq!(super::to_romaji("ポット"), "potto"); // tsu
-		assert_eq!(super::to_romaji("ハンガリー"), "hangarii"); // prolonged sound mark
+        // Katakana
+        assert_eq!(super::to_romaji("ハンカチ"), "hankachi"); // Basic
+        assert_eq!(super::to_romaji("ポット"), "potto"); // tsu
+        assert_eq!(super::to_romaji("ハンガリー"), "hangarii"); // prolonged sound mark
 
-	}
+    }
 }
 
 fn snip_and_translate_prefix_to_romaji(text: &mut &str) -> Option<&'static str> {
-	for kana in KANA_TABLE.iter() {
-		if text.starts_with(kana.kana) {
-			*text = &text[kana.kana.len()..];
-			return Some(kana.romaji);
-		}
-	}
-	None
+    for kana in KANA_TABLE.iter() {
+        if text.starts_with(kana.kana) {
+            *text = &text[kana.kana.len()..];
+            return Some(kana.romaji);
+        }
+    }
+    None
 }
 
 pub struct Kana {
-	kana: &'static str,
-	romaji: &'static str,
+    kana: &'static str,
+    romaji: &'static str,
 }
 impl Kana {
-	const fn hiragana(kana: &'static str, romaji: &'static str) -> Self {
-		Self { kana, romaji }
-	}
-	const fn katakana(kana: &'static str, romaji: &'static str) -> Self {
-		Self { kana, romaji }
-	}
-	const fn symbol(kana: &'static str, romaji: &'static str) -> Self {
-		Self { kana, romaji }
-	}
+    const fn hiragana(kana: &'static str, romaji: &'static str) -> Self {
+        Self { kana, romaji }
+    }
+    const fn katakana(kana: &'static str, romaji: &'static str) -> Self {
+        Self { kana, romaji }
+    }
+    const fn symbol(kana: &'static str, romaji: &'static str) -> Self {
+        Self { kana, romaji }
+    }
 }
 
 pub const KANA_TABLE: [Kana; 399] = sort_by_kana_length([
-	Kana::hiragana("きゃ", "kya"),
+    Kana::hiragana("きゃ", "kya"),
     Kana::hiragana("きゅ", "kyu"),
     Kana::hiragana("きょ", "kyo"),
     Kana::hiragana("しゃ", "sha"),

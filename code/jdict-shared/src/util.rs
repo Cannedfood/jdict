@@ -14,8 +14,8 @@ pub fn load_file(mut file: File) -> io::Result<String> {
 }
 
 pub fn decompress(data: &[u8]) -> io::Result<String> {
-	let decoder = flate2::read::GzDecoder::new(data);
-	let mut file_content = String::new();
+    let decoder = flate2::read::GzDecoder::new(data);
+    let mut file_content = String::new();
     BufReader::new(decoder).read_to_string(&mut file_content)?;
     Ok(file_content)
 }
