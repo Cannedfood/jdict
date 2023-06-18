@@ -104,18 +104,20 @@ fn parse_gloss(gloss: &Node) -> jmdict::Gloss {
     jmdict::Gloss {
         value: gloss.text().unwrap().to_string(),
         lang: gloss.attribute("xml:lang").unwrap_or("eng").to_string(),
-        gender: gloss.attribute("g_gend").map(|g_gend| match g_gend {
-            "male"    => Gender::Male,
-            "female"  => Gender::Female,
-            "neutral" => Gender::Neutral,
-            _         => panic!("Failed parsing gender: {}", g_gend),
-        }),
-        typ: gloss.attribute("g_type").and_then(|s| match s {
-            "literal"    => Some(jmdict::GlossType::Literal),
-            "figurative" => Some(jmdict::GlossType::Figurative),
+        gender: match gloss.attribute("g_gend") {
+            Some("male")    => Some(Gender::Male),
+            Some("female")  => Some(Gender::Female),
+            Some("neutral") => Some(Gender::Neutral),
+            Some(g_gend)    => panic!("Failed parsing gender: {}", g_gend),
+            None            => None,
+        },
+        typ: match gloss.attribute("g_type") {
             // "figurative" => Some(jmdict::GlossType::Explanatory),
-            _            => None,
-        }),
+            Some("literal")    => Some(jmdict::GlossType::Literal),
+            Some("figurative") => Some(jmdict::GlossType::Figurative),
+            Some(g_type)       => panic!("Failed parsing gloss type: {}", g_type),
+            None               => None,
+        },
         highlight: gloss.children().any(|c| c.tag_name().name() == "pri"),
     }
 }
