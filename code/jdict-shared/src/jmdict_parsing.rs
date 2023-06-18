@@ -104,10 +104,10 @@ fn parse_gloss(gloss: &Node) -> jmdict::Gloss {
     jmdict::Gloss {
         value: gloss.text().unwrap().to_string(),
         lang: gloss.attribute("xml:lang").unwrap_or("eng").to_string(),
-        gender: gloss.attribute("g_gend").and_then(|g_gend| match g_gend {
-            "male"    => Some(Gender::Male),
-            "female"  => Some(Gender::Female),
-            "neutral" => Some(Gender::Neutral),
+        gender: gloss.attribute("g_gend").map(|g_gend| match g_gend {
+            "male"    => Gender::Male,
+            "female"  => Gender::Female,
+            "neutral" => Gender::Neutral,
             _         => panic!("Failed parsing gender: {}", g_gend),
         }),
         typ: gloss.attribute("g_type").and_then(|s| match s {

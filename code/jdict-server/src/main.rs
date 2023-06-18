@@ -51,6 +51,12 @@ fn rocket() -> _ {
     if cfg!(debug_assertions) {
         server
     } else {
-        server.attach(CachedCompression::fairing(vec![".js", ".css", ".html", ".wasm", ".json"]))
+        server.attach(
+            CachedCompression::path_suffix_fairing(
+                [".js", ".css", ".html", ".wasm", ".json"]
+                .map(|s| s.to_string())
+                .into()
+            )
+        )
     }
 }
