@@ -120,6 +120,7 @@ pub enum GlossType {
     Literal,
     Figurative,
     Explanatory,
+    Trademark,
 }
 
 // <gloss>

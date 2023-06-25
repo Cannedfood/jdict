@@ -112,11 +112,12 @@ fn parse_gloss(gloss: &Node) -> jmdict::Gloss {
             None            => None,
         },
         typ: match gloss.attribute("g_type") {
-            // "figurative" => Some(jmdict::GlossType::Explanatory),
-            Some("literal")    => Some(jmdict::GlossType::Literal),
-            Some("figurative") => Some(jmdict::GlossType::Figurative),
-            Some(g_type)       => panic!("Failed parsing gloss type: {}", g_type),
-            None               => None,
+            Some("fig")  => Some(jmdict::GlossType::Figurative),
+            Some("expl") => Some(jmdict::GlossType::Explanatory),
+            Some("lit")  => Some(jmdict::GlossType::Literal),
+            Some("tm")   => Some(jmdict::GlossType::Trademark),
+            Some(g_type) => panic!("Failed parsing gloss type: {}", g_type),
+            None         => None,
         },
         highlight: gloss.children().any(|c| c.tag_name().name() == "pri"),
     }
