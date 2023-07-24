@@ -1,4 +1,7 @@
-use figment::{Figment, providers::{Toml, Format, Serialized}};
+use figment::{
+    providers::{Format, Serialized, Toml},
+    Figment,
+};
 use rocket::serde::json::Json;
 use rocket_async_compression::CachedCompression;
 use serde::{Deserialize, Serialize};
@@ -9,9 +12,8 @@ use serde::{Deserialize, Serialize};
 pub async fn search<'a>(
     searchTerm: &str,
     take: Option<u32>,
-    skip: Option<u32>
-) -> Json<jdict_shared::shared_api::SearchResult>
-{
+    skip: Option<u32>,
+) -> Json<jdict_shared::shared_api::SearchResult> {
     Json(jdict_shared::shared_api::search(searchTerm, take, skip))
 }
 
@@ -31,8 +33,7 @@ struct ConfigSections {
 
 #[rocket::launch]
 fn rocket() -> _ {
-    let cfg: ConfigSections =
-        Figment::from(Serialized::defaults(ConfigSections::default()))
+    let cfg: ConfigSections = Figment::from(Serialized::defaults(ConfigSections::default()))
         .merge(Toml::file("Config.toml"))
         .extract()
         .unwrap();
@@ -42,7 +43,10 @@ fn rocket() -> _ {
     let server = rocket::build()
         .configure(&cfg.rocket)
         .mount("/", rocket::routes![search])
-        .mount("/", rocket::fs::FileServer::new(cfg.jdict_server.public_path, rocket::fs::Options::Index));
+        .mount(
+            "/",
+            rocket::fs::FileServer::new(cfg.jdict_server.public_path, rocket::fs::Options::Index),
+        );
 
     if let Err(e) = opener::open_browser(format!("http://localhost:{}", cfg.rocket.port)) {
         println!("Failed to open browser: {}", e);
@@ -51,12 +55,10 @@ fn rocket() -> _ {
     if cfg!(debug_assertions) {
         server
     } else {
-        server.attach(
-            CachedCompression::path_suffix_fairing(
-                [".js", ".css", ".html", ".wasm", ".json"]
+        server.attach(CachedCompression::path_suffix_fairing(
+            [".js", ".css", ".html", ".wasm", ".json"]
                 .map(|s| s.to_string())
-                .into()
-            )
-        )
+                .into(),
+        ))
     }
 }

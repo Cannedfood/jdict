@@ -3,10 +3,8 @@ name = "jdict-egui"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "1.0.72"
 eframe = "0.22.0"
 egui = "0.22.0"
 itertools = "0.11.0"

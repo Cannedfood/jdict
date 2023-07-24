@@ -28,8 +28,8 @@ fn similar_sounding_words_recursive(
     position: usize,
     previous_cost: i32,
     max_cost: i32,
-    into: &mut Vec<(String, i32)>)
-{
+    into: &mut Vec<(String, i32)>,
+) {
     let subs = &s[position..];
     if subs.is_empty() {
         return;
@@ -55,7 +55,7 @@ fn similar_sounding_words_recursive(
                             position + similar_sound.len(),
                             new_cost,
                             max_cost,
-                            into
+                            into,
                         );
 
                         into.push((new_string, new_cost));

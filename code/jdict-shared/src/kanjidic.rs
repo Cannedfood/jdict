@@ -4,15 +4,15 @@ use std::str::FromStr;
 
 #[derive(Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum VariantType {
-    jis208, // In JIS X 0208 - kuten coding
-    jis212, // In JIS X 0212 - kuten coding
+    jis208,   // In JIS X 0208 - kuten coding
+    jis212,   // In JIS X 0212 - kuten coding
     jis213, // In JIS X 0213 - kuten coding (most of the above relate to "shinjitai/kyuujitai" alternative character glyphs)
-    deroo, // De Roo number - numeric
-    njecd, // Halpern NJECD index number - numeric
-    s_h, // The Kanji Dictionary (Spahn & Hadamitzky) - descriptor
+    deroo,  // De Roo number - numeric
+    njecd,  // Halpern NJECD index number - numeric
+    s_h,    // The Kanji Dictionary (Spahn & Hadamitzky) - descriptor
     nelson_c, // "Classic" Nelson - numeric
     oneill, // Japanese Names (O'Neill) - numeric
-    ucs, // Unicode codepoint- hex
+    ucs,    // Unicode codepoint- hex
 }
 
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
@@ -56,11 +56,11 @@ pub enum DicRefType {
     halpern_kkd, // "Kodansha Kanji Dictionary", (2nd Ed. of the NJECD) edited by Jack Halpern.
     halpern_kkld, // "Kanji Learners Dictionary" (Kodansha) edited by Jack Halpern.
     halpern_kkld_2ed, // "Kanji Learners Dictionary" (Kodansha), 2nd edition (2013) edited by Jack Halpern.
-    heisig, // "Remembering The  Kanji"  by  James Heisig.
-    heisig6, // "Remembering The  Kanji, Sixth Ed."  by  James Heisig.
-    gakken, // "A  New Dictionary of Kanji Usage" (Gakken)
-    oneill_names, // "Japanese Names", by P.G. O'Neill.
-    oneill_kk, // "Essential Kanji" by P.G. O'Neill.
+    heisig,           // "Remembering The  Kanji"  by  James Heisig.
+    heisig6,          // "Remembering The  Kanji, Sixth Ed."  by  James Heisig.
+    gakken,           // "A  New Dictionary of Kanji Usage" (Gakken)
+    oneill_names,     // "Japanese Names", by P.G. O'Neill.
+    oneill_kk,        // "Essential Kanji" by P.G. O'Neill.
     moro, // "Daikanwajiten" compiled by Morohashi. For some kanji two additional attributes are used: m_vol:  the volume of the dictionary in which the kanji is found, and m_page: the page number in the volume.
     henshall, // "A Guide To Remembering Japanese Characters" by Kenneth G.  Henshall.
     sh_kk, // "Kanji and Kana" by Spahn and Hadamitzky.
@@ -69,7 +69,7 @@ pub enum DicRefType {
     jf_cards, // Japanese Kanji Flashcards, by Max Hodges and Tomoko Okazaki. (Series 1)
     henshall3, // "A Guide To Reading and Writing Japanese" 3rd edition, edited by Henshall, Seeley and De Groot.
     tutt_cards, // Tuttle Kanji Cards, compiled by Alexander Kask.
-    crowley, // "The Kanji Way to Japanese Language Power" by Dale Crowley.
+    crowley,   // "The Kanji Way to Japanese Language Power" by Dale Crowley.
     kanji_in_context, // "Kanji in Context" by Nishiguchi and Kono.
     busy_people, // "Japanese For Busy People" vols I-III, published by the AJLT. The codes are the volume.chapter.
     kodansha_compact, // The "Kodansha Compact Kanji Guide".
@@ -80,30 +80,30 @@ impl FromStr for DicRefType {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "nelson_c"         => Ok(Self::nelson_c),
-            "nelson_n"         => Ok(Self::nelson_n),
-            "halpern_njecd"    => Ok(Self::halpern_njecd),
-            "halpern_kkd"      => Ok(Self::halpern_kkd),
-            "halpern_kkld"     => Ok(Self::halpern_kkld),
+            "nelson_c" => Ok(Self::nelson_c),
+            "nelson_n" => Ok(Self::nelson_n),
+            "halpern_njecd" => Ok(Self::halpern_njecd),
+            "halpern_kkd" => Ok(Self::halpern_kkd),
+            "halpern_kkld" => Ok(Self::halpern_kkld),
             "halpern_kkld_2ed" => Ok(Self::halpern_kkld_2ed),
-            "heisig"           => Ok(Self::heisig),
-            "heisig6"          => Ok(Self::heisig6),
-            "gakken"           => Ok(Self::gakken),
-            "oneill_names"     => Ok(Self::oneill_names),
-            "oneill_kk"        => Ok(Self::oneill_kk),
-            "moro"             => Ok(Self::moro),
-            "henshall"         => Ok(Self::henshall),
-            "sh_kk"            => Ok(Self::sh_kk),
-            "sh_kk2"           => Ok(Self::sh_kk2),
-            "sakade"           => Ok(Self::sakade),
-            "jf_cards"         => Ok(Self::jf_cards),
-            "henshall3"        => Ok(Self::henshall3),
-            "tutt_cards"       => Ok(Self::tutt_cards),
-            "crowley"          => Ok(Self::crowley),
+            "heisig" => Ok(Self::heisig),
+            "heisig6" => Ok(Self::heisig6),
+            "gakken" => Ok(Self::gakken),
+            "oneill_names" => Ok(Self::oneill_names),
+            "oneill_kk" => Ok(Self::oneill_kk),
+            "moro" => Ok(Self::moro),
+            "henshall" => Ok(Self::henshall),
+            "sh_kk" => Ok(Self::sh_kk),
+            "sh_kk2" => Ok(Self::sh_kk2),
+            "sakade" => Ok(Self::sakade),
+            "jf_cards" => Ok(Self::jf_cards),
+            "henshall3" => Ok(Self::henshall3),
+            "tutt_cards" => Ok(Self::tutt_cards),
+            "crowley" => Ok(Self::crowley),
             "kanji_in_context" => Ok(Self::kanji_in_context),
-            "busy_people"      => Ok(Self::busy_people),
+            "busy_people" => Ok(Self::busy_people),
             "kodansha_compact" => Ok(Self::kodansha_compact),
-            "maniette"         => Ok(Self::maniette),
+            "maniette" => Ok(Self::maniette),
             _ => Err(()),
         }
     }
@@ -128,11 +128,12 @@ pub enum QueryCodeType {
 
 #[derive(Default, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum SkipMisclass {
-    #[default] none,
+    #[default]
+    none,
     posn,
     stroke_count,
     stroke_and_posn,
-    stroke_diff
+    stroke_diff,
 }
 /// <!ELEMENT query_code (q_code+)> These codes contain information relating to the glyph, and can be used for finding a required kanji. The type of code is defined by the qc_type attribute.
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
@@ -147,7 +148,7 @@ pub enum ReadingType {
     pinyin, // The modern PinYin romanization of the Chinese reading of the kanji. The tones are represented by a concluding  digit. [Y]
     korean_r, // The romanized form of the Korean reading(s) of the  kanji.  The readings are in the (Republic of Korea) Ministry  of Education style of romanization. [W]
     korean_h, // The Korean reading(s) of the kanji in hangul.
-    vietnam, // The Vietnamese readings supplied by Minh Chau Pham.
+    vietnam,  // The Vietnamese readings supplied by Minh Chau Pham.
     ja_on, // The "on" Japanese reading of the kanji, in katakana.  Another attribute r_status, if present, will indicate with a value of "jy" whether the reading is approved for a "Jouyou kanji". (The r_status attribute is not currently used.) A further attribute on_type, if present,  will indicate with  a value of kan, go, tou or kan'you the type of on-reading. (The on_type attribute is not currently used.)
     ja_kun, // The "kun" Japanese reading of the kanji, usually in  hiragana.  Where relevant the okurigana is also included separated by a  ".". Readings associated with prefixes and suffixes are  marked with a "-". A second attribute r_status, if present,  will indicate with a value of "jy" whether the reading is  approved for a "Jouyou kanji". (The r_status attribute is  not currently used.)
 }
@@ -155,11 +156,11 @@ impl FromStr for ReadingType {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "pinyin"   => Ok(ReadingType::pinyin),
+            "pinyin" => Ok(ReadingType::pinyin),
             "korean_r" => Ok(ReadingType::korean_r),
             "korean_h" => Ok(ReadingType::korean_h),
-            "ja_on"    => Ok(ReadingType::ja_on),
-            "ja_kun"   => Ok(ReadingType::ja_kun),
+            "ja_on" => Ok(ReadingType::ja_on),
+            "ja_kun" => Ok(ReadingType::ja_kun),
             _ => Err(()),
         }
     }
@@ -167,7 +168,8 @@ impl FromStr for ReadingType {
 
 #[derive(Default, Copy, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq, Hash)]
 pub enum OnType {
-    #[default] none,
+    #[default]
+    none,
     kan,
     go,
     tou,
@@ -178,9 +180,9 @@ impl FromStr for OnType {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "kan"     => Ok(OnType::kan),
-            "go"      => Ok(OnType::go),
-            "tou"     => Ok(OnType::tou),
+            "kan" => Ok(OnType::kan),
+            "go" => Ok(OnType::go),
+            "tou" => Ok(OnType::tou),
             "kan'you" => Ok(OnType::kanyou),
             _ => Err(()),
         }

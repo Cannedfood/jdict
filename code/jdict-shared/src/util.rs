@@ -1,4 +1,9 @@
-use std::{path::Path, fs::File, io::{Read, BufReader, self}, time::Duration};
+use std::{
+    fs::File,
+    io::{self, BufReader, Read},
+    path::Path,
+    time::Duration,
+};
 
 pub fn load_gzip_file(file: File) -> io::Result<String> {
     let mut file_content = String::new();
@@ -25,8 +30,8 @@ pub fn read_file(path: &Path) -> io::Result<String> {
 
     if path.ends_with(".xml") {
         load_file(file)
-    }
-    else { // .xml.gz file
+    } else {
+        // .xml.gz file
         load_gzip_file(file)
     }
 }
@@ -37,10 +42,7 @@ pub fn measure_time<T>(f: impl FnOnce() -> T) -> (T, Duration) {
     (result, start.elapsed())
 }
 
-pub fn print_time<T>(
-    f: impl FnOnce() -> T,
-    print: impl FnOnce(Duration),
-) -> T {
+pub fn print_time<T>(f: impl FnOnce() -> T, print: impl FnOnce(Duration)) -> T {
     let (result, time) = measure_time(f);
     print(time);
     result

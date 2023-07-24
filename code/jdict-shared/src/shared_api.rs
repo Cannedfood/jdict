@@ -1,14 +1,14 @@
-use std::sync::OnceLock;
 use std::sync::atomic::AtomicBool;
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use serde::Serialize;
 
 use crate::database::{Database, DictData};
 
+use crate::jmdict::Entry;
 use crate::kanjidic::Character;
 use crate::kanjivg::Kanji;
-use crate::jmdict::Entry;
 
 #[derive(Default, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,12 +25,14 @@ pub static DB: OnceLock<Database> = OnceLock::new();
 
 pub fn load_db(config: &crate::database::Config) {
     DB_LOADING.store(true, std::sync::atomic::Ordering::SeqCst);
-    DB.set(Database::load(config)).unwrap_or_else(|_| panic!("Failed setting db singleton"));
+    DB.set(Database::load(config))
+        .unwrap_or_else(|_| panic!("Failed setting db singleton"));
     DB_LOADING.store(false, std::sync::atomic::Ordering::SeqCst);
 }
 pub fn parse_db(data: DictData) {
     DB_LOADING.store(true, std::sync::atomic::Ordering::SeqCst);
-    DB.set(Database::from_bytes(data)).unwrap_or_else(|_| panic!("Failed setting db singleton"));
+    DB.set(Database::from_bytes(data))
+        .unwrap_or_else(|_| panic!("Failed setting db singleton"));
     DB_LOADING.store(false, std::sync::atomic::Ordering::SeqCst);
 }
 pub fn load_db_async(config: crate::database::Config) {
@@ -57,17 +59,27 @@ pub fn get_db_sync(total_timeout: Duration, subdivisions: u32) -> &'static Datab
 }
 
 pub fn search(search_term: &str, take: Option<u32>, skip: Option<u32>) -> SearchResult<'static> {
-    search_internal(get_db_sync(Duration::from_secs(5), 20), search_term, take, skip)
+    search_internal(
+        get_db_sync(Duration::from_secs(5), 20),
+        search_term,
+        take,
+        skip,
+    )
 }
 
-pub fn search_internal<'a>(db: &'a Database, search_term: &str, take: Option<u32>, skip: Option<u32>) -> SearchResult<'a> {
+pub fn search_internal<'a>(
+    db: &'a Database,
+    search_term: &str,
+    take: Option<u32>,
+    skip: Option<u32>,
+) -> SearchResult<'a> {
     let start_time = std::time::Instant::now();
 
     let all_results = db.search(search_term);
 
     let results_total = all_results.len();
-    let paged_results =
-        all_results.into_iter()
+    let paged_results = all_results
+        .into_iter()
         .skip(skip.unwrap_or(0) as usize)
         .take(take.unwrap_or(1024) as usize)
         .collect();

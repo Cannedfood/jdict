@@ -7,8 +7,12 @@ use std::sync::mpsc;
 
 use egui::ScrollArea;
 use history::History;
-use jdict_shared::{shared_api::{SearchResult, self, DB_LOADING}, kanjidic::ReadingType, database::DictData};
 use itertools::Itertools;
+use jdict_shared::{
+    database::DictData,
+    kanjidic::ReadingType,
+    shared_api::{self, SearchResult, DB_LOADING},
+};
 
 struct JDictApp {
     search_field: String,
@@ -38,7 +42,9 @@ impl JDictApp {
         if !search.is_empty() {
             let sender = self.send_results.clone();
             std::thread::spawn(move || {
-                sender.send(shared_api::search(&search, None, None)).unwrap();
+                sender
+                    .send(shared_api::search(&search, None, None))
+                    .unwrap();
                 ctx.request_repaint();
             });
         }
@@ -48,10 +54,7 @@ impl JDictApp {
 impl JDictApp {
     fn draw_searchbar(&mut self, ui: &mut egui::Ui) {
         ui.horizontal_top(|ui| {
-            let re = ui.add(
-                egui::TextEdit::singleline(&mut self.search_field)
-                .hint_text("Search")
-            );
+            let re = ui.add(egui::TextEdit::singleline(&mut self.search_field).hint_text("Search"));
 
             // On enter
             if re.lost_focus() && re.ctx.input(|input| input.key_pressed(egui::Key::Enter)) {
@@ -64,7 +67,10 @@ impl JDictApp {
             }
 
             if let Some(results) = &self.results {
-                ui.label(format!("{} results in {}", results.results_total, results.time));
+                ui.label(format!(
+                    "{} results in {}",
+                    results.results_total, results.time
+                ));
             }
 
             if DB_LOADING.load(std::sync::atomic::Ordering::Relaxed) {
@@ -77,56 +83,73 @@ impl JDictApp {
     fn draw_results(&mut self, ui: &mut egui::Ui) {
         if let Some(results) = &self.results {
             ScrollArea::vertical()
-            .min_scrolled_width(ui.available_width())
-            .show(ui, |ui| {
-                for entry in &results.results {
-                    ui.small(entry.readings.iter().map(|r| &r.value).join(", "));
-                    ui.horizontal(|ui| {
-                        for kanji in &entry.kanji {
-                            if ui.small_button(&kanji.value).clicked() {
-                                self.search_history.push(kanji.value.clone());
+                .min_scrolled_width(ui.available_width())
+                .show(ui, |ui| {
+                    for entry in &results.results {
+                        ui.small(entry.readings.iter().map(|r| &r.value).join(", "));
+                        ui.horizontal(|ui| {
+                            for kanji in &entry.kanji {
+                                if ui.small_button(&kanji.value).clicked() {
+                                    self.search_history.push(kanji.value.clone());
+                                }
                             }
+                        });
+                        for sense in &entry.senses {
+                            ui.label(format!(
+                                " - {}",
+                                sense.glosses.iter().map(|g| &g.value).join(", ")
+                            ));
                         }
-                    });
-                    for sense in &entry.senses {
-                        ui.label(format!(" - {}", sense.glosses.iter().map(|g| &g.value).join(", ")));
+                        ui.separator();
                     }
-                    ui.separator();
-                }
-            });
+                });
         }
     }
 
     fn draw_kanji_infos(&mut self, ui: &mut egui::Ui) {
         if let Some(result) = &self.results {
             ScrollArea::vertical()
-            .min_scrolled_width(ui.available_width())
-            .show(ui, |ui| {
-                ui.heading("Kanji");
-                for kanji in &result.kanji {
-                    ui.separator();
-                    // let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
+                .min_scrolled_width(ui.available_width())
+                .show(ui, |ui| {
+                    ui.heading("Kanji");
+                    for kanji in &result.kanji {
+                        ui.separator();
+                        // let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
 
-                    if ui.button(&kanji.literal).clicked() {
-                        self.search_history.push(kanji.literal.clone());
-                    }
-                    for rm in &kanji.reading_meaning_groups {
-                        let kun = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_kun).map(|r| &r.value).join(", ");
-                        let on  = rm.readings.iter().filter(|r| r.typ == ReadingType::ja_on).map(|r| &r.value).join(", ");
-
-                        ui.label(
-                            rm.meanings.iter().filter(|m| m.lang == "en").map(|m| &m.value).join(", ")
-                        );
-
-                        if !kun.is_empty() {
-                            ui.small(format!("kun: {}", kun));
+                        if ui.button(&kanji.literal).clicked() {
+                            self.search_history.push(kanji.literal.clone());
                         }
-                        if !on.is_empty() {
-                            ui.small(format!("on: {}", on));
+                        for rm in &kanji.reading_meaning_groups {
+                            let kun = rm
+                                .readings
+                                .iter()
+                                .filter(|r| r.typ == ReadingType::ja_kun)
+                                .map(|r| &r.value)
+                                .join(", ");
+                            let on = rm
+                                .readings
+                                .iter()
+                                .filter(|r| r.typ == ReadingType::ja_on)
+                                .map(|r| &r.value)
+                                .join(", ");
+
+                            ui.label(
+                                rm.meanings
+                                    .iter()
+                                    .filter(|m| m.lang == "en")
+                                    .map(|m| &m.value)
+                                    .join(", "),
+                            );
+
+                            if !kun.is_empty() {
+                                ui.small(format!("kun: {}", kun));
+                            }
+                            if !on.is_empty() {
+                                ui.small(format!("on: {}", on));
+                            }
                         }
                     }
-                }
-            });
+                });
         }
     }
 }
@@ -140,10 +163,12 @@ impl eframe::App for JDictApp {
         }
 
         ctx.input_mut(|input| {
-            if
-                input.pointer.button_clicked(egui::PointerButton::Extra1) ||
-                input.pointer.button_pressed(egui::PointerButton::Middle) ||
-                input.consume_shortcut(&egui::KeyboardShortcut::new(egui::Modifiers::CTRL, egui::Key::Z))
+            if input.pointer.button_clicked(egui::PointerButton::Extra1)
+                || input.pointer.button_pressed(egui::PointerButton::Middle)
+                || input.consume_shortcut(&egui::KeyboardShortcut::new(
+                    egui::Modifiers::CTRL,
+                    egui::Key::Z,
+                ))
             {
                 self.search_history.back();
             }
@@ -182,9 +207,9 @@ impl eframe::App for JDictApp {
 
 fn main() {
     shared_api::parse_db_async(DictData::<'static> {
-        dict:     include_bytes!("../../../res/JMdict_e.gz"),
+        dict: include_bytes!("../../../res/JMdict_e.gz"),
         kanjidic: include_bytes!("../../../res/kanjidic2.xml.gz"),
-        kanjivg:  include_bytes!("../../../res/kanjivg.xml.gz"),
+        kanjivg: include_bytes!("../../../res/kanjivg.xml.gz"),
     });
 
     eframe::run_native(
@@ -197,17 +222,26 @@ fn main() {
             let mut fonts = egui::FontDefinitions::default();
             fonts.font_data.insert(
                 "JP".into(),
-                egui::FontData::from_static(
-                    include_bytes!("../../../res/NotoSansCJKjp-Regular.otf")
-                )
+                egui::FontData::from_static(include_bytes!(
+                    "../../../res/NotoSansCJKjp-Regular.otf"
+                )),
             );
 
-            fonts.families.entry(egui::FontFamily::Proportional).or_default().push("JP".into());
-            fonts.families.entry(egui::FontFamily::Monospace).or_default().push("JP".into());
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .push("JP".into());
+            fonts
+                .families
+                .entry(egui::FontFamily::Monospace)
+                .or_default()
+                .push("JP".into());
 
             ctx.egui_ctx.set_fonts(fonts);
 
             Box::new(JDictApp::new())
-        })
-    ).unwrap();
+        }),
+    )
+    .unwrap();
 }

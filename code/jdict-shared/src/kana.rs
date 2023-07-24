@@ -68,10 +68,7 @@ fn snip_full_width_char(text: &mut &str) -> Option<char> {
 }
 
 fn is_vowel(c: char) -> bool {
-    matches!(c,
-        'a' | 'e' | 'i' | 'o' | 'u' |
-        'A' | 'E' | 'I' | 'O' | 'U'
-    )
+    matches!(c, 'a' | 'e' | 'i' | 'o' | 'u' | 'A' | 'E' | 'I' | 'O' | 'U')
 }
 
 #[cfg(test)]
@@ -87,7 +84,6 @@ mod test {
         assert_eq!(super::to_romaji("ハンカチ"), "hankachi"); // Basic
         assert_eq!(super::to_romaji("ポット"), "potto"); // tsu
         assert_eq!(super::to_romaji("ハンガリー"), "hangarii"); // prolonged sound mark
-
     }
 }
 
