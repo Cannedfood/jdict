@@ -1,6 +1,12 @@
 [workspace]
-members = ["./code/jdict-shared/", "./code/jdict-server/", "./code/jdict-egui/"]
 resolver = "2"
+members = [
+    "./code/jdict-shared/",
+    "./code/jdict-server/",
+    "./code/jdict-tiny/",
+    "./code/jdict-egui/",
+    "./code/kana-transliteration/",
+]
 
 [profile.dev.package."*"]
 opt-level = 3
