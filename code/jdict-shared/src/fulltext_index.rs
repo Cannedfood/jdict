@@ -73,7 +73,7 @@ impl FullTextIndex {
         for word in split_words(text) {
             self.entries
                 .entry(normalize_string(word))
-                .or_insert(vec![])
+                .or_default()
                 .push((id, weight));
         }
     }
