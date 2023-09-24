@@ -1569,11 +1569,11 @@ checksum = "af150ab688ff2122fcef229be89cb50dd66af9e01a4ff320cc137eecc9bacc38"
 name = "jdict-egui"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "eframe",
  "egui",
  "itertools",
  "jdict-shared",
+ "svgtypes",
 ]
 
 [[package]]
@@ -1581,14 +1581,11 @@ name = "jdict-server"
 version = "0.1.0"
 dependencies = [
  "figment",
- "futures",
- "itertools",
  "jdict-shared",
  "opener",
  "rocket",
  "rocket_async_compression",
  "serde",
- "tokio",
 ]
 
 [[package]]
@@ -1600,7 +1597,6 @@ dependencies = [
  "itertools",
  "roxmltree",
  "serde",
- "unicode-blocks",
 ]
 
 [[package]]
@@ -1648,6 +1644,15 @@ name = "khronos_api"
 version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
+
+[[package]]
+name = "kurbo"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd85a5776cd9500c2e2059c8c76c3b01528566b7fcbaf8098b55a33fc298849b"
+dependencies = [
+ "arrayvec",
+]
 
 [[package]]
 name = "lazy_static"
@@ -2674,6 +2679,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
+name = "siphasher"
+version = "0.3.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
+
+[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2787,6 +2798,16 @@ name = "strict-num"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6637bab7722d379c8b41ba849228d680cc12d0a45ba1fa2b48f2a30577a06731"
+
+[[package]]
+name = "svgtypes"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed4b0611e7f3277f68c0fa18e385d9e2d26923691379690039548f867cef02a7"
+dependencies = [
+ "kurbo",
+ "siphasher",
+]
 
 [[package]]
 name = "syn"
@@ -3129,12 +3150,6 @@ name = "unicode-bidi"
 version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92888ba5573ff080736b3648696b70cafad7d250551175acbaa4e0385b3e1460"
-
-[[package]]
-name = "unicode-blocks"
-version = "0.1.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c84398c527c802fbf222e5145f220382d60f1878e0e6cb4d22a3080949a8ddcd"
 
 [[package]]
 name = "unicode-ident"

@@ -9,8 +9,17 @@ pub struct KanjiVG {
     pub kanji: Vec<Kanji>,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CubicBezier {
+    pub start: (f32, f32),
+    pub control1: (f32, f32),
+    pub control2: (f32, f32),
+    pub end: (f32, f32),
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Stroke {
+    /// The stroke path in SVG format. Usually only contains move-to and cubic beziers.
     pub path: String,
     pub typ: String,
 }

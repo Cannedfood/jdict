@@ -1,11 +1,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(dead_code)]
 
+mod egui_svg_path;
 mod history;
 
 use std::sync::mpsc;
 
-use egui::ScrollArea;
+use egui::{vec2, ScrollArea};
 use history::History;
 use itertools::Itertools;
 use jdict_shared::{
@@ -113,44 +114,130 @@ impl JDictApp {
                 .show(ui, |ui| {
                     ui.heading("Kanji");
                     for kanji in &result.kanji {
+                        let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
+
                         ui.separator();
-                        // let kanjivg = result.kanjivg.iter().find(|vg| vg.kanji == kanji.literal);
-
-                        if ui.button(&kanji.literal).clicked() {
-                            self.search_history.push(kanji.literal.clone());
-                        }
-                        for rm in &kanji.reading_meaning_groups {
-                            let kun = rm
-                                .readings
-                                .iter()
-                                .filter(|r| r.typ == ReadingType::ja_kun)
-                                .map(|r| &r.value)
-                                .join(", ");
-                            let on = rm
-                                .readings
-                                .iter()
-                                .filter(|r| r.typ == ReadingType::ja_on)
-                                .map(|r| &r.value)
-                                .join(", ");
-
-                            ui.label(
-                                rm.meanings
-                                    .iter()
-                                    .filter(|m| m.lang == "en")
-                                    .map(|m| &m.value)
-                                    .join(", "),
-                            );
-
-                            if !kun.is_empty() {
-                                ui.small(format!("kun: {}", kun));
+                        ui.horizontal(|ui| {
+                            let kanjivg_res = match kanjivg {
+                                Some(kanjivg) => draw_kanjivg(ui, kanjivg, egui::Sense::click()),
+                                None => ui.button(&kanji.literal),
+                            };
+                            if kanjivg_res.clicked() {
+                                self.search_history.push(kanji.literal.clone());
                             }
-                            if !on.is_empty() {
-                                ui.small(format!("on: {}", on));
-                            }
-                        }
+
+                            ui.vertical(|ui| {
+                                for rm in &kanji.reading_meaning_groups {
+                                    let kun = rm
+                                        .readings
+                                        .iter()
+                                        .filter(|r| r.typ == ReadingType::ja_kun)
+                                        .map(|r| &r.value)
+                                        .join(", ");
+                                    let on = rm
+                                        .readings
+                                        .iter()
+                                        .filter(|r| r.typ == ReadingType::ja_on)
+                                        .map(|r| &r.value)
+                                        .join(", ");
+
+                                    ui.label(
+                                        rm.meanings
+                                            .iter()
+                                            .filter(|m| m.lang == "en")
+                                            .map(|m| &m.value)
+                                            .join(", "),
+                                    );
+
+                                    if !kun.is_empty() {
+                                        ui.small(format!("kun: {}", kun));
+                                    }
+                                    if !on.is_empty() {
+                                        ui.small(format!("on: {}", on));
+                                    }
+                                }
+                            });
+                        });
+
+                        // if let Some(kanjivg) = kanjivg {
+                        //     draw_kanji_hierarchy(ui, kanjivg, None);
+                        // }
                     }
                 });
         }
+    }
+}
+
+fn draw_kanjivg(
+    ui: &mut egui::Ui,
+    kanji: &jdict_shared::kanjivg::Kanji,
+    sense: egui::Sense,
+) -> egui::Response {
+    let (rect, res) = ui.allocate_exact_size(vec2(50.0, 50.0), sense);
+
+    let painter = ui.painter_at(rect);
+    let style = ui.style().interact(&res);
+    painter.rect_filled(rect, 0.0, style.weak_bg_fill);
+
+    draw_strokes_recursive(kanji, rect, &painter, style.fg_stroke);
+
+    fn draw_strokes_recursive(
+        kanjivg: &jdict_shared::kanjivg::Kanji,
+        rect: egui::Rect,
+        painter: &egui::Painter,
+        stroke_style: egui::Stroke,
+    ) {
+        for stroke in kanjivg.strokes.iter() {
+            for segment in egui_svg_path::egui_svg_path(
+                &stroke.path,
+                egui::Rect::from_min_size(egui::Pos2::ZERO, egui::Vec2::splat(109.0)),
+                rect,
+                stroke_style,
+            ) {
+                painter.add(segment);
+            }
+        }
+
+        for child in kanjivg.parts.iter() {
+            draw_strokes_recursive(child, rect, painter, stroke_style);
+        }
+    }
+
+    res
+}
+
+fn draw_kanji_hierarchy(
+    ui: &mut egui::Ui,
+    kanji: &jdict_shared::kanjivg::Kanji,
+    origin: Option<egui::Pos2>,
+) {
+    if kanji.parts.is_empty() {
+        draw_label(ui, kanji, origin);
+    } else {
+        ui.horizontal(|ui| {
+            let new_origin = draw_label(ui, kanji, origin);
+            ui.spacing();
+            ui.vertical(|ui| {
+                for part in kanji.parts.iter() {
+                    draw_kanji_hierarchy(ui, part, Some(new_origin));
+                }
+            });
+        });
+    }
+
+    fn draw_label(
+        ui: &mut egui::Ui,
+        kanji: &jdict_shared::kanjivg::Kanji,
+        origin: Option<egui::Pos2>,
+    ) -> egui::Pos2 {
+        let res = ui.button(&kanji.kanji);
+        if let Some(origin) = origin {
+            ui.painter().line_segment(
+                [origin, res.rect.left_center()],
+                ui.style().interact(&res).fg_stroke,
+            );
+        }
+        res.rect.right_center()
     }
 }
 

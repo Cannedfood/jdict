@@ -67,10 +67,6 @@ impl Database {
 
     pub fn from_bytes(data: DictData) -> Self {
         Self::build(Dicts {
-            dict: print_time(
-                || JMdict::parse(&decompress(data.dict).unwrap()).unwrap(),
-                |time| println!("Parsed JMdict in {:?}", time),
-            ),
             kanjidic: print_time(
                 || Kanjidic::parse(&decompress(data.kanjidic).unwrap()).unwrap(),
                 |time| println!("Parsed kanjidic in {:?}", time),
@@ -78,6 +74,10 @@ impl Database {
             kanjivg: print_time(
                 || KanjiVG::parse(&decompress(data.kanjivg).unwrap()).unwrap(),
                 |time| println!("Parsed KanjiVG in {:?}", time),
+            ),
+            dict: print_time(
+                || JMdict::parse(&decompress(data.dict).unwrap()).unwrap(),
+                |time| println!("Parsed JMdict in {:?}", time),
             ),
         })
     }
