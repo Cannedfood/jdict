@@ -1,3 +1,15 @@
+/// Convert hiragana/katakana to romaji. Non-kana characters are copied as-is.
+/// ```
+/// // Hiragana
+/// assert_eq!(jdict_shared::kana::to_romaji("れいぞうこ"), "reizouko"); // Basic
+/// assert_eq!(jdict_shared::kana::to_romaji("かって"), "katte"); // tsu
+/// assert_eq!(jdict_shared::kana::to_romaji("ぴょこん"), "pyokon");
+///
+/// // Katakana
+/// assert_eq!(jdict_shared::kana::to_romaji("ハンカチ"), "hankachi"); // Basic
+/// assert_eq!(jdict_shared::kana::to_romaji("ポット"), "potto"); // tsu
+/// assert_eq!(jdict_shared::kana::to_romaji("ハンガリー"), "hangarii"); // prolonged sound mark
+/// ```
 pub fn to_romaji(text: &str) -> String {
     let mut result = String::new();
     let mut text_copy = text;
@@ -97,19 +109,37 @@ fn snip_and_translate_prefix_to_romaji(text: &mut &str) -> Option<&'static str> 
     None
 }
 
+pub enum KanaType {
+    Hiragana,
+    Katakana,
+    Symbol,
+}
 pub struct Kana {
-    kana: &'static str,
-    romaji: &'static str,
+    pub ty: KanaType,
+    pub kana: &'static str,
+    pub romaji: &'static str,
 }
 impl Kana {
     const fn hiragana(kana: &'static str, romaji: &'static str) -> Self {
-        Self { kana, romaji }
+        Self {
+            ty: KanaType::Hiragana,
+            kana,
+            romaji,
+        }
     }
     const fn katakana(kana: &'static str, romaji: &'static str) -> Self {
-        Self { kana, romaji }
+        Self {
+            ty: KanaType::Katakana,
+            kana,
+            romaji,
+        }
     }
     const fn symbol(kana: &'static str, romaji: &'static str) -> Self {
-        Self { kana, romaji }
+        Self {
+            ty: KanaType::Symbol,
+            kana,
+            romaji,
+        }
     }
 }
 
