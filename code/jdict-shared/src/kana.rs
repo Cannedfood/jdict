@@ -83,22 +83,6 @@ fn is_vowel(c: char) -> bool {
     matches!(c, 'a' | 'e' | 'i' | 'o' | 'u' | 'A' | 'E' | 'I' | 'O' | 'U')
 }
 
-#[cfg(test)]
-mod test {
-    #[test]
-    fn test_kana() {
-        // Hiragana
-        assert_eq!(super::to_romaji("れいぞうこ"), "reizouko"); // Basic
-        assert_eq!(super::to_romaji("かって"), "katte"); // tsu
-        assert_eq!(super::to_romaji("ぴょこん"), "pyokon");
-
-        // Katakana
-        assert_eq!(super::to_romaji("ハンカチ"), "hankachi"); // Basic
-        assert_eq!(super::to_romaji("ポット"), "potto"); // tsu
-        assert_eq!(super::to_romaji("ハンガリー"), "hangarii"); // prolonged sound mark
-    }
-}
-
 fn snip_and_translate_prefix_to_romaji(text: &mut &str) -> Option<&'static str> {
     for kana in KANA_TABLE.iter() {
         if text.starts_with(kana.kana) {
@@ -560,4 +544,20 @@ const fn sort_by_kana_length<const N: usize>(kana: [Kana; N]) -> [Kana; N] {
     }
 
     kana
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_kana() {
+        // Hiragana
+        assert_eq!(super::to_romaji("れいぞうこ"), "reizouko"); // Basic
+        assert_eq!(super::to_romaji("かって"), "katte"); // tsu
+        assert_eq!(super::to_romaji("ぴょこん"), "pyokon");
+
+        // Katakana
+        assert_eq!(super::to_romaji("ハンカチ"), "hankachi"); // Basic
+        assert_eq!(super::to_romaji("ポット"), "potto"); // tsu
+        assert_eq!(super::to_romaji("ハンガリー"), "hangarii"); // prolonged sound mark
+    }
 }

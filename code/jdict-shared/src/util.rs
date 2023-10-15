@@ -28,7 +28,7 @@ pub fn decompress(data: &[u8]) -> io::Result<String> {
 pub fn read_file(path: &Path) -> io::Result<String> {
     let file = File::open(path)?;
 
-    if path.ends_with(".xml") {
+    if path.extension().is_some_and(|ext| ext == "xml") {
         load_file(file)
     } else {
         // .xml.gz file
