@@ -301,10 +301,7 @@ fn main() {
 
     eframe::run_native(
         "jdict-egui",
-        eframe::NativeOptions {
-            initial_window_size: Some(egui::vec2(1280.0, 720.0)),
-            ..Default::default()
-        },
+        eframe::NativeOptions::default(),
         Box::new(|ctx| {
             let mut fonts = egui::FontDefinitions::default();
             fonts.font_data.insert(
