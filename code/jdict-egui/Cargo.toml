@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-eframe = "0.26.0"
-egui = "0.26.0"
+eframe = "0.26.2"
+egui = "0.26.2"
 itertools = "0.12.1"
 jdict-shared = { version = "0.1.0", path = "../jdict-shared" }
 svgtypes = "0.14.0"

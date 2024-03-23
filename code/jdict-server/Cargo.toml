@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-figment = { version = "0.10.14", features = ["toml"] }
+figment = { version = "0.10.15", features = ["toml"] }
 jdict-shared = { version = "0.1.0", path = "../jdict-shared" }
 opener = "0.6.1"
 rocket = { version = "0.5.0", features = ["http2", "json"] }
 rocket_async_compression = "0.5.1"
-serde = "1.0.196"
+serde = "1.0.197"
