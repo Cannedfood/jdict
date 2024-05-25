@@ -65,6 +65,9 @@ impl Database {
     fn load_cache() -> Self {
         let file = std::fs::File::open("./res/database.cache").unwrap();
         let mem = unsafe { memmap2::Mmap::map(&file) }.unwrap();
+        mem.advise(memmap2::Advice::Sequential).unwrap();
+        mem.advise(memmap2::Advice::WillNeed).unwrap();
+        mem.advise(memmap2::Advice::DontFork).unwrap();
 
         postcard::from_bytes(&mem).unwrap()
     }
