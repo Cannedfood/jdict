@@ -6,6 +6,7 @@ use std::sync::{Arc, OnceLock};
 
 use egui::ahash::HashMap;
 use jdict2::jmdict::{self, Entry};
+use jdict2::kana::{romaji_to, KanaType};
 use jdict2::kanjivg::StrokeGroup;
 use jdict2::{kanjidic2, kanjivg};
 
@@ -95,21 +96,271 @@ impl Database {
 
 static DICTIONARY: OnceLock<Database> = OnceLock::new();
 
+struct Search {
+    dirty: bool,
+
+    text: String,
+
+    weight_kanji: u32,
+    weight_kanji_position_panelty_pct: u32,
+    weight_reading: u32,
+    weight_reading_position_panelty_pct: u32,
+    weight_sense: u32,
+    weight_sense_position_panelty_pct: u32,
+    weight_gloss_position_panelty_pct: u32,
+
+    weight_exact: u32,
+    weight_word_exact: u32,
+    weight_startswith: u32,
+    weight_word_startswith: u32,
+    weight_contains: u32,
+    weight_position_panelty_pct: u32,
+}
+impl Default for Search {
+    fn default() -> Self {
+        Self {
+            dirty: true,
+            text:  "".to_string(),
+
+            weight_kanji: 3,
+            weight_kanji_position_panelty_pct: 100,
+            weight_reading: 2,
+            weight_reading_position_panelty_pct: 100,
+            weight_sense: 1,
+            weight_sense_position_panelty_pct: 100,
+            weight_gloss_position_panelty_pct: 100,
+
+            weight_exact: 5,
+            weight_word_exact: 4,
+            weight_startswith: 3,
+            weight_word_startswith: 2,
+            weight_contains: 1,
+            weight_position_panelty_pct: 100,
+        }
+    }
+}
+impl Search {
+    fn show_searchbox(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.label("Search:");
+            self.dirty |= ui.text_edit_singleline(&mut self.text).changed();
+        });
+    }
+
+    fn show_weight_editor(&mut self, ui: &mut egui::Ui) {
+        ui.label("Weights:");
+
+        egui::Grid::new("weights").show(ui, |ui| {
+            ui.label("Kanji");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_kanji))
+                .changed();
+            ui.end_row();
+
+            ui.label("Kanji Position Penalty");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_kanji_position_panelty_pct).suffix("%"))
+                .changed();
+            ui.end_row();
+
+            ui.label("Reading");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_reading))
+                .changed();
+            ui.end_row();
+
+            ui.label("Reading Position Penalty");
+            self.dirty |= ui
+                .add(
+                    egui::DragValue::new(&mut self.weight_reading_position_panelty_pct).suffix("%"),
+                )
+                .changed();
+            ui.end_row();
+
+            ui.label("Sense");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_sense))
+                .changed();
+            ui.end_row();
+
+            ui.label("Sense Position Penalty");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_sense_position_panelty_pct).suffix("%"))
+                .changed();
+            ui.end_row();
+
+            ui.label("Gloss Position Penalty");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_gloss_position_panelty_pct).suffix("%"))
+                .changed();
+            ui.end_row();
+
+            ui.separator();
+            ui.end_row();
+
+            ui.label("Exact");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_exact))
+                .changed();
+            ui.end_row();
+
+            ui.label("Word Exact");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_word_exact))
+                .changed();
+            ui.end_row();
+
+            ui.label("Starts With");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_startswith))
+                .changed();
+            ui.end_row();
+
+            ui.label("Word Starts With");
+            self.dirty |= ui
+                .add(egui::DragValue::new(&mut self.weight_word_startswith))
+                .changed();
+            ui.end_row();
+        });
+    }
+
+    fn apply(&self, database: &Database, result: &mut Vec<(u32, u32)>) {
+        result.clear();
+
+        if self.text.trim().len() < 3 {
+            return;
+        }
+
+        let mut pieces = Vec::<String>::new();
+        for piece in self.text.split_whitespace() {
+            pieces.push(piece.to_string());
+
+            let (failures, hiragana) = romaji_to(KanaType::Hiragana, piece);
+            if failures == 0 {
+                pieces.push(hiragana);
+            }
+
+            let (failures, katakana) = romaji_to(KanaType::Katakana, piece);
+            if failures == 0 {
+                pieces.push(katakana);
+            }
+        }
+        if pieces.is_empty() {
+            return;
+        }
+
+        println!("Searching for {:?}", pieces);
+
+        for (i, entry) in database.dictionary.iter().enumerate() {
+            let mut score = 0;
+            for piece in &pieces {
+                for (kanji_idx, kanji) in entry.kanji.iter().enumerate() {
+                    if let Some(match_score) = self.text_match(piece, &kanji.text) {
+                        score = score.max(Self::apply_position_penalty(
+                            self.weight_kanji_position_panelty_pct,
+                            match_score * self.weight_kanji,
+                            kanji_idx as u32,
+                        ))
+                    }
+                }
+
+                for (reading_idx, reading) in entry.reading.iter().enumerate() {
+                    if let Some(match_score) = self.text_match(piece, &reading.text) {
+                        score = score.max(Self::apply_position_penalty(
+                            self.weight_reading_position_panelty_pct,
+                            match_score * self.weight_reading,
+                            reading_idx as u32,
+                        ))
+                    }
+                }
+
+                for (sense_idx, sense) in entry.sense.iter().enumerate() {
+                    for (gloss_idx, gloss) in sense.glosses.iter().enumerate() {
+                        if let Some(match_score) = self.text_match(piece, &gloss.text) {
+                            let gloss_score = match_score * self.weight_sense;
+                            let gloss_score = Self::apply_position_penalty(
+                                self.weight_sense_position_panelty_pct,
+                                score,
+                                sense_idx as u32,
+                            );
+                            let gloss_score = Self::apply_position_penalty(
+                                self.weight_gloss_position_panelty_pct,
+                                score,
+                                gloss_idx as u32,
+                            );
+
+                            score = score.max(gloss_score)
+                        }
+                    }
+                }
+            }
+
+            if score > 0 {
+                result.push((i as u32, score));
+            }
+        }
+
+        result.sort_unstable_by_key(|(_, score)| std::cmp::Reverse(*score));
+    }
+
+    fn apply_position_penalty(panelty_pct: u32, score: u32, position: u32) -> u32 {
+        if score == 0 {
+            return 0;
+        }
+
+        score
+            .saturating_sub(1 + position * panelty_pct / 100)
+            .saturating_add(1)
+    }
+
+    fn text_match(&self, term: &str, text: &str) -> Option<u32> {
+        fn next_char(text: &str, pos: usize) -> Option<char> { text[pos..].chars().next() }
+        fn prev_char(text: &str, pos: usize) -> Option<char> { text[..pos].chars().next_back() }
+
+        let pos = text.find(term)?;
+
+        let exact_match = text == term;
+        let starts_with = pos == 0;
+        let word_starts_with = pos == 0
+            || prev_char(text, pos)
+                .map(|c| !c.is_alphabetic())
+                .unwrap_or(false);
+        let word_exact_match = word_starts_with
+            && (pos + term.len() == text.len()
+                || next_char(text, pos + term.len())
+                    .map(|c| !c.is_alphabetic())
+                    .unwrap_or(false));
+
+        Some(if exact_match {
+            self.weight_exact
+        }
+        else if word_exact_match {
+            self.weight_word_exact
+        }
+        else if starts_with {
+            self.weight_startswith
+        }
+        else if word_starts_with {
+            self.weight_word_startswith
+        }
+        else {
+            self.weight_contains
+        })
+    }
+}
+
 #[derive(Default)]
 struct App {
-    search: String,
-    search_result: Vec<&'static Entry>,
-    search_dirty: bool,
+    search:  Search,
+    results: Vec<(u32, u32)>,
 }
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        egui::SidePanel::left("weights").show(ctx, |ui| {
+            self.search.show_weight_editor(ui);
+        });
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.horizontal(|ui| {
-                ui.label("Search:");
-                if ui.text_edit_singleline(&mut self.search).changed() {
-                    self.search_dirty = true;
-                }
-            });
+            self.search.show_searchbox(ui);
 
             let Some(database) = DICTIONARY.get()
             else {
@@ -120,50 +371,27 @@ impl eframe::App for App {
                 return;
             };
 
-            if std::mem::replace(&mut self.search_dirty, false) {
-                self.search_dirty = false;
-
+            if std::mem::replace(&mut self.search.dirty, false) {
                 let timer = std::time::Instant::now();
 
-                let pieces = self.search.split_whitespace().collect::<Vec<_>>();
-                print!("Searching for:");
-                for (i, piece) in pieces.iter().enumerate() {
-                    if i != 0 {
-                        print!(" AND ");
-                    }
-                    print!("'{}'", piece);
-                }
-                println!();
-
-                // Search sense
-                let entries: Vec<u32> = database
-                    .dictionary
-                    .iter()
-                    .enumerate()
-                    .filter(|(i, entry)| {
-                        pieces.iter().all(|piece| {
-                            entry.sense.iter().any(|sense| {
-                                sense.glosses.iter().any(|gloss| gloss.text.contains(piece))
-                            })
-                        })
-                    })
-                    .map(|(i, entry)| i as u32)
-                    .take(512)
-                    .collect();
+                self.search.apply(database, &mut self.results);
 
                 println!(
                     "Found {} entries in {:?}",
-                    self.search_result.len(),
+                    self.results.len(),
                     timer.elapsed()
                 );
             }
 
             egui::ScrollArea::vertical().show(ui, |ui| {
-                for entry in &self.search_result {
+                for (entry_idx, score) in self.results.iter().take(512) {
+                    let entry = &database.dictionary[*entry_idx as usize];
+
                     ui.horizontal(|ui| {
                         for (i, kanji) in entry.kanji.iter().enumerate() {
                             ui.label(kanji.text.as_str());
                         }
+                        ui.label(format!(" ({score})"));
                     });
 
                     ui.horizontal(|ui| {
