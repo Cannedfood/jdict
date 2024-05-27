@@ -24,6 +24,7 @@ pub struct Character {
     // radical
     pub radicals: SmallVec<[u8; 8]>,
     // radical rad_type=nelson_c
+    #[serde(skip)]
     pub radicals_nelson_c: Option<SmallVec<[u8; 8]>>,
     // misc
     pub misc: CharacterMetadata,

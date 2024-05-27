@@ -8,8 +8,10 @@ pub struct Reading {
     // re_restr
     pub restrict_to_kanji: Vec<String>,
     // re_inf
+    #[serde(skip)]
     pub info: Vec<ReadingInfo>,
     // re_pri
+    #[serde(skip)]
     pub prio: Vec<ReadingPrio>,
 }
 

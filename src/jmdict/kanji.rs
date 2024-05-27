@@ -6,6 +6,7 @@ pub struct Kanji {
     // ke_inf
     pub info: Vec<KanjiInfo>,
     // ke_pri
+    #[serde(skip)]
     pub prio: Vec<KanjiPrio>,
 }
 

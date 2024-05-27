@@ -3,12 +3,15 @@ pub struct Gloss {
     pub text: compact_str::CompactString,
 
     // attribute xml:lang
+    #[serde(skip)]
     pub lang: isolang::Language,
     // pri
     pub highlight: bool,
     // attribute g_type
+    #[serde(skip)]
     pub typ: GlossType,
     // attribute g_gend
+    #[serde(skip)]
     pub gender: Option<compact_str::CompactString>, // Unused
 }
 

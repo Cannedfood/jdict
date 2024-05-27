@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::io::{BufReader, Read};
 use std::path::Path;
 use std::time::Instant;
 
@@ -17,22 +17,27 @@ impl Database {
     pub fn load_from_source() -> Database {
         pub fn load_gzip_xml(
             path: impl AsRef<Path>,
-            buffer: &mut String,
+            buffer: &mut Vec<u8>,
         ) -> roxmltree::Document<'_> {
             buffer.clear();
 
-            flate2::read::GzDecoder::new(std::fs::File::open(path).unwrap())
-                .read_to_string(buffer)
-                .unwrap();
+            flate2::read::GzDecoder::new(BufReader::new(
+                std::fs::File::open(path.as_ref()).unwrap(),
+            ))
+            .read_to_end(buffer)
+            .unwrap();
 
-            roxmltree::Document::parse_with_options(buffer, roxmltree::ParsingOptions {
-                allow_dtd: true,
-                ..Default::default()
-            })
+            roxmltree::Document::parse_with_options(
+                unsafe { std::str::from_utf8_unchecked(buffer) },
+                roxmltree::ParsingOptions {
+                    allow_dtd: true,
+                    ..Default::default()
+                },
+            )
             .unwrap()
         }
 
-        let mut buffer = String::new();
+        let mut buffer = Vec::new();
         let dictionary = jmdict::parsing::parse_jmdict(
             load_gzip_xml("./res/JMdict_e.gz", &mut buffer).root_element(),
         );

@@ -6,6 +6,7 @@ pub struct Sense {
     // gloss
     pub glosses: Vec<Gloss>,
     // stagk, stagr, xref, ant, pos, field, misc, dial, pri, s_inf
+    #[serde(skip)]
     pub tags:    Vec<SenseTag>,
     // example
     // pub example: Vec<String>,

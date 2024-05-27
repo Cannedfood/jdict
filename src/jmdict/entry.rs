@@ -4,6 +4,7 @@ use super::{Kanji, Reading, Sense};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Entry {
+    #[serde(skip)]
     pub ent_seq: EntrySeq,
     pub kanji:   Vec<Kanji>,
     pub reading: Vec<Reading>,
