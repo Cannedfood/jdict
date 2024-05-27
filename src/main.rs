@@ -22,13 +22,13 @@ use jdict2::kanjivg::StrokeGroup;
 static DICTIONARY: OnceLock<database::Database> = OnceLock::new();
 
 #[derive(Default)]
-struct Search {
+struct SearchBox {
     changed: bool,
     request_focus: bool,
     text: String,
     search_weights: SearchWeights,
 }
-impl Search {
+impl SearchBox {
     fn show_searchbox(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.label("Search:");
@@ -135,7 +135,7 @@ impl Search {
 struct App {
     show_settings: bool,
 
-    search: Search,
+    search: SearchBox,
     pagination: pagination::Pagination,
     search_debounce: debounce::Debounce,
 
