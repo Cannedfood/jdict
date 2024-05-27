@@ -263,7 +263,6 @@ fn main() {
 }
 
 fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
-    let mut fonts = egui::FontDefinitions::default();
     fonts.font_data.insert(
         "JP".into(),
         egui::FontData::from_static(include_bytes!("../res/NotoSansCJKjp-Regular.otf")),
