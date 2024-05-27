@@ -140,7 +140,6 @@ struct App {
     search_debounce: debounce::Debounce,
 
     results: Vec<(u32, u32)>,
-    kanji_results: Vec<char>,
 }
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
@@ -173,17 +172,7 @@ impl eframe::App for App {
                 self.pagination.show_controls(ui, self.results.len());
             });
         });
-        egui::SidePanel::right("kanji").show_animated(ctx, !self.kanji_results.is_empty(), |ui| {
-            ui.label("Kanji");
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                for k in &self.kanji_results {
-                    ui.label(k.to_string());
-                }
-            });
-        });
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.set_clip_rect(ui.available_rect_before_wrap());
-
             let Some(database) = DICTIONARY.get()
             else {
                 ui.horizontal(|ui| {
@@ -211,67 +200,43 @@ impl eframe::App for App {
                 );
             }
 
-            let mut symbols = HashSet::new();
-            let mut ordered_symbols = Vec::new();
             self.pagination
                 .show_entries(ui, &self.results, |ui, _, (entry_idx, score)| {
-                    let entry = &database.dictionary[*entry_idx as usize];
-
-                    let visible = {
-                        let (rect, _) = ui.allocate_exact_size(
-                            egui::Vec2::new(ui.available_width(), 1.0),
-                            egui::Sense::hover(),
-                        );
-                        ui.is_rect_visible(rect)
-                    };
-
-                    ui.horizontal(|ui| {
-                        for (i, kanji) in entry.kanji.iter().enumerate() {
-                            ui.label(kanji.text.as_str());
-                            if visible {
-                                for k in kanji.text.chars() {
-                                    if !symbols.contains(&k) {
-                                        symbols.insert(k);
-                                        ordered_symbols.push(k);
-                                    }
-                                }
-                            }
-                        }
-                        ui.label(format!(" ({score})"));
-                    });
-
-                    ui.horizontal(|ui| {
-                        for reading in &entry.reading {
-                            ui.label(format!(
-                                "{}{}{}",
-                                if reading.no_kanji { "【" } else { "" },
-                                reading.text.as_str(),
-                                if reading.no_kanji { "】" } else { "" }
-                            ));
-                        }
-                    });
-
-                    for sense in &entry.sense {
-                        ui.horizontal(|ui| {
-                            let mut text = " • ".to_string();
-                            for (i, gloss) in sense.glosses.iter().enumerate() {
-                                if i != 0 {
-                                    text.push_str(", ");
-                                }
-                                text.push_str(&gloss.text);
-                            }
-                            ui.label(text);
-                        });
-                    }
+                    render_entry(ui, &database.dictionary[*entry_idx as usize]);
                     ui.separator();
                 });
+        });
+    }
+}
 
-            self.kanji_results.clear();
-            for k in ordered_symbols {
-                if let Some(kanji) = database.kanji_dictionary.get(&k) {
-                    self.kanji_results.push(k);
+fn render_entry(ui: &mut egui::Ui, entry: &jmdict::Entry) {
+    ui.horizontal(|ui| {
+        for (i, kanji) in entry.kanji.iter().enumerate() {
+            ui.label(kanji.text.as_str());
+        }
+    });
+
+    ui.horizontal(|ui| {
+        for reading in &entry.reading {
+            ui.label(format!(
+                "{}{}{}",
+                if reading.no_kanji { "【" } else { "" },
+                reading.text.as_str(),
+                if reading.no_kanji { "】" } else { "" }
+            ));
+        }
+    });
+
+    for sense in &entry.sense {
+        ui.horizontal(|ui| {
+            let mut text = " • ".to_string();
+            for (i, gloss) in sense.glosses.iter().enumerate() {
+                if i != 0 {
+                    text.push_str(", ");
                 }
+                text.push_str(&gloss.text);
             }
+            ui.label(text);
         });
     }
 }
