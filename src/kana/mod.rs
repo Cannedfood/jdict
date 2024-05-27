@@ -53,14 +53,14 @@ pub fn to_romaji(text: &str) -> String {
 /// use jdict2::kana::{KanaType, romaji_to};
 ///
 /// // Hiragana
-/// assert_eq!(romaji_to(KanaType::Hiragana, "reizouko"), "れいぞうこ"); // Basic
-/// assert_eq!(romaji_to(KanaType::Hiragana, "katte"), "かって"); // tsu
-/// assert_eq!(romaji_to(KanaType::Hiragana, "pyokon"), "ぴょこん");
+/// assert_eq!(romaji_to(KanaType::Hiragana, "reizouko").1, "れいぞうこ"); // Basic
+/// assert_eq!(romaji_to(KanaType::Hiragana, "katte").1, "かって"); // tsu
+/// assert_eq!(romaji_to(KanaType::Hiragana, "pyokon").1, "ぴょこん");
 ///
 /// // Katakana
-/// assert_eq!(romaji_to(KanaType::Katakana, "hankachi"), "ハンカチ"); // Basic
-/// assert_eq!(romaji_to(KanaType::Katakana, "potto"), "ポット"); // tsu
-/// // assert_eq!(romaji_to(KanaType::Katakana, "hangarii"), "ハンガリー"); // prolonged sound mark - not handled
+/// assert_eq!(romaji_to(KanaType::Katakana, "hankachi").1, "ハンカチ"); // Basic
+/// assert_eq!(romaji_to(KanaType::Katakana, "potto").1, "ポット"); // tsu
+/// // assert_eq!(romaji_to(KanaType::Katakana, "hangarii").1, "ハンガリー"); // prolonged sound mark - not handled
 /// ```
 pub fn romaji_to(ty: KanaType, text: &str) -> (u32, String) {
     // Greedy algorithm - not sure if this will work for everything
