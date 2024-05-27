@@ -1,8 +1,12 @@
 #![allow(unused)]
 
+use std::collections::HashSet;
 use std::io::{BufReader, BufWriter, Read};
+use std::mem::take;
+use std::num::NonZeroUsize;
 use std::path::Path;
 use std::sync::{Arc, OnceLock};
+use std::time::{Duration, Instant};
 
 use egui::ahash::HashMap;
 use jdict2::jmdict::{self, Entry};
@@ -97,7 +101,9 @@ impl Database {
 static DICTIONARY: OnceLock<Database> = OnceLock::new();
 
 struct Search {
+    request_focus: bool,
     dirty: bool,
+    last_search: Instant,
 
     text: String,
 
@@ -119,8 +125,11 @@ struct Search {
 impl Default for Search {
     fn default() -> Self {
         Self {
+            request_focus: true,
             dirty: true,
-            text:  "".to_string(),
+            last_search: Instant::now(),
+
+            text: "".to_string(),
 
             weight_kanji: 3,
             weight_kanji_position_panelty_pct: 100,
@@ -143,13 +152,16 @@ impl Search {
     fn show_searchbox(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.label("Search:");
-            self.dirty |= ui.text_edit_singleline(&mut self.text).changed();
+            let search_box = ui.text_edit_singleline(&mut self.text);
+            if take(&mut self.request_focus) {
+                search_box.request_focus();
+            }
+
+            self.dirty |= search_box.changed();
         });
     }
 
     fn show_weight_editor(&mut self, ui: &mut egui::Ui) {
-        ui.label("Weights:");
-
         egui::Grid::new("weights").show(ui, |ui| {
             ui.label("Kanji");
             self.dirty |= ui
@@ -349,19 +361,120 @@ impl Search {
     }
 }
 
+struct Pagination {
+    page: usize,
+    page_size: usize,
+    page_changed: bool,
+}
+impl Default for Pagination {
+    fn default() -> Self {
+        Self {
+            page: 0,
+            page_size: 100,
+            page_changed: false,
+        }
+    }
+}
+impl Pagination {
+    pub fn show_controls(&mut self, ui: &mut egui::Ui, entries: usize) {
+        let pages = entries / self.page_size;
+        if pages == 0 {
+            return;
+        }
+
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            let has_next_page = self.page < pages;
+            let has_prev_page = self.page > 0;
+
+            let next_page = ui
+                .add_enabled(has_next_page, egui::Button::new("→"))
+                .clicked();
+            ui.label(format!("Page {}/{}", self.page + 1, pages + 1));
+            let prev_page = ui
+                .add_enabled(has_prev_page, egui::Button::new("←"))
+                .clicked();
+
+            if next_page {
+                self.page_changed = true;
+                self.page += 1;
+            }
+            if prev_page {
+                self.page_changed = true;
+                self.page -= 1;
+            }
+        });
+    }
+
+    pub fn show_entries<T>(
+        &mut self,
+        ui: &mut egui::Ui,
+        entries: &[T],
+        mut renderer: impl FnMut(&mut egui::Ui, usize, &T),
+    ) {
+        let mut scroll_area = egui::ScrollArea::vertical();
+        if take(&mut self.page_changed) {
+            // Scroll to top when page changes
+            scroll_area = scroll_area.vertical_scroll_offset(0.0);
+        }
+
+        scroll_area.show(ui, |ui| {
+            for (i, entry) in entries
+                .iter()
+                .enumerate()
+                .skip(self.page * self.page_size)
+                .take(self.page_size)
+            {
+                renderer(ui, i, entry);
+            }
+        });
+    }
+}
+
 #[derive(Default)]
 struct App {
-    search:  Search,
+    show_settings: bool,
+
+    search: Search,
+    pagination: Pagination,
     results: Vec<(u32, u32)>,
+    kanji_results: Vec<char>,
 }
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        egui::SidePanel::left("weights").show(ctx, |ui| {
-            self.search.show_weight_editor(ui);
+        egui::SidePanel::left("weights").show_animated(ctx, self.show_settings, |ui| {
+            egui::CollapsingHeader::new("Pagination")
+                .default_open(true)
+                .show_unindented(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label("Page Size:");
+                        ui.add(
+                            egui::DragValue::new(&mut self.pagination.page_size)
+                                .clamp_range(1..=10000),
+                        );
+                    });
+                });
+            egui::CollapsingHeader::new("Weights")
+                .default_open(true)
+                .show_unindented(ui, |ui| {
+                    self.search.show_weight_editor(ui);
+                })
+        });
+        egui::TopBottomPanel::top("Search").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.toggle_value(&mut self.show_settings, "\u{2699}\u{FE0F}");
+                self.search.show_searchbox(ui);
+                self.pagination.show_controls(ui, self.results.len());
+            });
+        });
+        egui::SidePanel::right("kanji").show_animated(ctx, !self.kanji_results.is_empty(), |ui| {
+            ui.label("Kanji");
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for k in &self.kanji_results {
+                    ui.label(k.to_string());
+                }
+            });
         });
         egui::CentralPanel::default().show(ctx, |ui| {
-            self.search.show_searchbox(ui);
-
             let Some(database) = DICTIONARY.get()
             else {
                 ui.horizontal(|ui| {
@@ -371,25 +484,46 @@ impl eframe::App for App {
                 return;
             };
 
-            if std::mem::replace(&mut self.search.dirty, false) {
-                let timer = std::time::Instant::now();
+            let now = Instant::now();
+            if self.search.last_search + Duration::from_millis(100) < now
+                && take(&mut self.search.dirty)
+            {
+                self.search.last_search = now;
 
                 self.search.apply(database, &mut self.results);
 
                 println!(
                     "Found {} entries in {:?}",
                     self.results.len(),
-                    timer.elapsed()
+                    now.elapsed()
                 );
             }
 
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                for (entry_idx, score) in self.results.iter().take(512) {
+            let mut symbols = HashSet::new();
+            let mut ordered_symbols = Vec::new();
+            self.pagination
+                .show_entries(ui, &self.results, |ui, _, (entry_idx, score)| {
                     let entry = &database.dictionary[*entry_idx as usize];
+
+                    let visible = {
+                        let (rect, _) = ui.allocate_exact_size(
+                            egui::Vec2::new(ui.available_width(), 1.0),
+                            egui::Sense::hover(),
+                        );
+                        ui.is_rect_visible(rect)
+                    };
 
                     ui.horizontal(|ui| {
                         for (i, kanji) in entry.kanji.iter().enumerate() {
                             ui.label(kanji.text.as_str());
+                            if visible {
+                                for k in kanji.text.chars() {
+                                    if !symbols.contains(&k) {
+                                        symbols.insert(k);
+                                        ordered_symbols.push(k);
+                                    }
+                                }
+                            }
                         }
                         ui.label(format!(" ({score})"));
                     });
@@ -417,8 +551,14 @@ impl eframe::App for App {
                         });
                     }
                     ui.separator();
+                });
+
+            self.kanji_results.clear();
+            for k in ordered_symbols {
+                if let Some(kanji) = database.kanji_dictionary.get(&k) {
+                    self.kanji_results.push(k);
                 }
-            });
+            }
         });
     }
 }
