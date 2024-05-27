@@ -243,9 +243,10 @@ impl eframe::App for App {
                     ui.horizontal(|ui| {
                         for reading in &entry.reading {
                             ui.label(format!(
-                                "{}{}",
+                                "{}{}{}",
                                 if reading.no_kanji { "【" } else { "" },
-                                reading.text.as_str()
+                                reading.text.as_str(),
+                                if reading.no_kanji { "】" } else { "" }
                             ));
                         }
                     });
@@ -284,27 +285,32 @@ fn main() {
         "jdict2",
         eframe::NativeOptions::default(),
         Box::new(|cx| {
-            let mut fonts = egui::FontDefinitions::default();
-            fonts.font_data.insert(
-                "JP".into(),
-                egui::FontData::from_static(include_bytes!("../res/NotoSansCJKjp-Regular.otf")),
-            );
-
-            fonts
-                .families
-                .entry(egui::FontFamily::Proportional)
-                .or_default()
-                .push("JP".into());
-            fonts
-                .families
-                .entry(egui::FontFamily::Monospace)
-                .or_default()
-                .push("JP".into());
-
-            cx.egui_ctx.set_fonts(fonts);
+            cx.egui_ctx.set_fonts({
+                let mut fonts = egui::FontDefinitions::default();
+                default_fonts_plus_japanese_font(&mut fonts);
+                fonts
+            });
 
             Box::new(App::default())
         }),
     )
     .unwrap();
+}
+
+fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
+    let mut fonts = egui::FontDefinitions::default();
+    fonts.font_data.insert(
+        "JP".into(),
+        egui::FontData::from_static(include_bytes!("../res/NotoSansCJKjp-Regular.otf")),
+    );
+    fonts
+        .families
+        .entry(egui::FontFamily::Proportional)
+        .or_default()
+        .push("JP".into());
+    fonts
+        .families
+        .entry(egui::FontFamily::Monospace)
+        .or_default()
+        .push("JP".into());
 }
