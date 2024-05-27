@@ -1,9 +1,9 @@
 use std::mem::take;
 use std::time::{Duration, Instant};
 
-pub(crate) struct Debounce {
-    pub(crate) last:  Instant,
-    pub(crate) dirty: bool,
+pub struct Debounce {
+    pub last:  Instant,
+    pub dirty: bool,
 
     pub delay: Duration,
 }
@@ -19,12 +19,12 @@ impl Default for Debounce {
 }
 
 impl Debounce {
-    pub(crate) fn trigger(&mut self) {
+    pub fn trigger(&mut self) {
         self.last = Instant::now();
         self.dirty = true;
     }
 
-    pub(crate) fn poll(&mut self) -> bool {
+    pub fn poll(&mut self) -> bool {
         if self.last.elapsed() <= self.delay {
             return false;
         }
@@ -32,7 +32,7 @@ impl Debounce {
         take(&mut self.dirty)
     }
 
-    pub(crate) fn trigger_and_poll_if(&mut self, condition: bool) -> bool {
+    pub fn trigger_and_poll_if(&mut self, condition: bool) -> bool {
         if condition {
             self.trigger();
         }
@@ -40,7 +40,7 @@ impl Debounce {
         self.poll()
     }
 
-    pub(crate) fn will_resolve_in(&self) -> Option<Duration> {
+    pub fn will_resolve_in(&self) -> Option<Duration> {
         self.delay.checked_sub(self.last.elapsed())
     }
 }

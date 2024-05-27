@@ -1,9 +1,9 @@
 use std::mem::take;
 
-pub(crate) struct Pagination {
-    pub(crate) page: usize,
-    pub(crate) page_size: usize,
-    pub(crate) page_changed: bool,
+pub struct Pagination {
+    pub page: usize,
+    pub page_size: usize,
+    pub page_changed: bool,
 }
 
 impl Default for Pagination {

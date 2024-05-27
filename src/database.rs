@@ -7,15 +7,15 @@ use jdict2::jmdict::{self, Entry};
 use jdict2::{kanjidic2, kanjivg};
 
 #[derive(serde::Serialize, serde::Deserialize)]
-pub(crate) struct Database {
-    pub(crate) dictionary: Vec<jmdict::Entry>,
-    pub(crate) kanji_dictionary: HashMap<char, kanjidic2::Character>,
-    pub(crate) kanji_strokes: HashMap<char, kanjivg::StrokeGroup>,
+pub struct Database {
+    pub dictionary: Vec<jmdict::Entry>,
+    pub kanji_dictionary: HashMap<char, kanjidic2::Character>,
+    pub kanji_strokes: HashMap<char, kanjivg::StrokeGroup>,
 }
 
 impl Database {
-    pub(crate) fn load_from_source() -> Database {
-        pub(crate) fn load_gzip_xml(
+    pub fn load_from_source() -> Database {
+        pub fn load_gzip_xml(
             path: impl AsRef<Path>,
             buffer: &mut String,
         ) -> roxmltree::Document<'_> {
@@ -59,11 +59,11 @@ impl Database {
         }
     }
 
-    pub(crate) fn save_cache(&self) {
+    pub fn save_cache(&self) {
         std::fs::write("./res/database.cache", postcard::to_allocvec(self).unwrap());
     }
 
-    pub(crate) fn load_cache() -> Self {
+    pub fn load_cache() -> Self {
         let file = std::fs::File::open("./res/database.cache").unwrap();
         let mem = unsafe { memmap2::Mmap::map(&file) }.unwrap();
         mem.advise(memmap2::Advice::Sequential).unwrap();
@@ -73,7 +73,7 @@ impl Database {
         postcard::from_bytes(&mem).unwrap()
     }
 
-    pub(crate) fn load() -> Self {
+    pub fn load() -> Self {
         if Path::new("./res/database.cache").exists() {
             println!("Loading from cache...");
             let timer = std::time::Instant::now();
