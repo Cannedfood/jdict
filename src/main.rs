@@ -15,9 +15,10 @@ use std::time::Instant;
 
 use dictionary_search::SearchWeights;
 use egui::ahash::HashMap;
+use egui::{Pos2, Vec2};
 use jdict2::jmdict::{self};
 use jdict2::kana::{romaji_to, KanaType};
-use jdict2::kanjivg::StrokeGroup;
+use jdict2::kanjivg::{self, Coord, StrokeGroup};
 
 static DICTIONARY: OnceLock<database::Database> = OnceLock::new();
 
@@ -182,6 +183,8 @@ impl eframe::App for App {
                 return;
             };
 
+            draw_kanji(ui, 100.0, database.kanji_strokes.get(&'何').unwrap());
+
             let now = Instant::now();
             if self
                 .search_debounce
@@ -277,4 +280,64 @@ fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
         .entry(egui::FontFamily::Monospace)
         .or_default()
         .push("JP".into());
+}
+
+fn draw_kanji(ui: &mut egui::Ui, size: f32, kanji: &StrokeGroup) {
+    let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
+
+    let brush = egui::Stroke::new(3.0, egui::Color32::BLACK);
+
+    ui.painter().rect_filled(rect, 3.0, egui::Color32::GRAY);
+
+    draw_recursive(&ui.painter_at(rect.shrink(3.0)), kanji, brush);
+
+    fn draw_recursive(painter: &egui::Painter, path: &kanjivg::StrokeGroup, brush: egui::Stroke) {
+        for child in &path.subgroups {
+            match child {
+                kanjivg::Child::Stroke(stroke) => {
+                    draw_path(painter, &stroke.path, brush);
+                }
+                kanjivg::Child::Group(group) => {
+                    draw_recursive(painter, group, brush);
+                }
+            }
+        }
+    }
+    fn draw_path(painter: &egui::Painter, path: &kanjivg::Path, brush: egui::Stroke) {
+        let scale = painter
+            .clip_rect()
+            .width()
+            .min(painter.clip_rect().height());
+
+        let offset = painter.clip_rect().min;
+
+        let mut brush_position = Vec2::new(0.0, 0.0);
+        for cmd in &path.0 {
+            match cmd {
+                kanjivg::Command::MoveTo(Coord { x, y }) => {
+                    brush_position = Vec2::new(*x, *y);
+                }
+                kanjivg::Command::LineTo(Coord { x, y }) => {
+                    painter.line_segment(
+                        [
+                            offset + brush_position * scale,
+                            offset + Vec2::new(*x, *y) * scale,
+                        ],
+                        brush,
+                    );
+                    brush_position = Vec2::new(*x, *y);
+                }
+                kanjivg::Command::CubicBezier(c1, c2, to) => {
+                    let c1 = Vec2::new(c1.x, c1.y);
+                    let c2 = Vec2::new(c2.x, c2.y);
+                    let to = Vec2::new(to.x, to.y);
+                    for (a, b) in [(brush_position, c1), (c1, c2), (c2, to)] {
+                        painter.line_segment([offset + a * scale, offset + b * scale], brush);
+                    }
+                    brush_position = to;
+                }
+                _ => {}
+            }
+        }
+    }
 }

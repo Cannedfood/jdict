@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
-pub enum Action {
+pub enum Command {
     MoveTo(Coord),
     LineTo(Coord),
     CubicBezier(Coord, Coord, Coord),
@@ -17,7 +17,7 @@ pub struct Coord {
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
-pub struct Path(pub Vec<Action>);
+pub struct Path(pub Vec<Command>);
 impl Path {
     /// Parse an SVG path data string into a Path.
     /// Example:
@@ -34,7 +34,7 @@ impl Path {
         let mut path_builder = PathBuilder {
             path: Path::default(),
             _last_control: (0.0, 0.0),
-            cursor: (0.0, 0.0),
+            pos: (0.0, 0.0),
             viewbox: view_box,
         };
 
@@ -50,75 +50,75 @@ impl Path {
 struct PathBuilder {
     path: Path,
     _last_control: (f32, f32),
-    cursor: (f32, f32),
+    pos: (f32, f32),
     viewbox: (f32, f32, f32, f32),
 }
 impl PathBuilder {
     fn move_to_internal(&mut self, relative: bool, coord: (f32, f32)) -> Coord {
-        self.cursor = if !relative {
+        self.pos = if !relative {
             coord
         }
         else {
-            (self.cursor.0 + coord.0, self.cursor.1 + coord.1)
+            (self.pos.0 + coord.0, self.pos.1 + coord.1)
         };
 
         let (minx, miny, width, height) = self.viewbox;
         Coord {
-            x: ((self.cursor.0 - minx) / width),
-            y: ((self.cursor.1 - miny) / height),
+            x: ((self.pos.0 - minx) / width),
+            y: ((self.pos.1 - miny) / height),
         }
     }
-    // fn get_coord_internal(&self, relative: bool, coord: (f32, f32)) -> Coord {
-    //     let position = if !relative {
-    //         coord
-    //     }
-    //     else {
-    //         (self.cursor.0 + coord.0, self.cursor.1 + coord.1)
-    //     };
+    fn get_coord_internal(&self, relative: bool, coord: (f32, f32)) -> Coord {
+        let position = if !relative {
+            coord
+        }
+        else {
+            (self.pos.0 + coord.0, self.pos.1 + coord.1)
+        };
 
-    //     let (minx, miny, width, height) = self.viewbox;
-    //     Coord {
-    //         x: ((position.0 - minx) / width).into(),
-    //         y: ((position.1 - miny) / height).into(),
-    //     }
-    // }
+        let (minx, miny, width, height) = self.viewbox;
+        Coord {
+            x: ((position.0 - minx) / width),
+            y: ((position.1 - miny) / height),
+        }
+    }
 
     fn move_to(&mut self, relative: bool, to: (f32, f32)) {
-        let action = Action::MoveTo(self.move_to_internal(relative, to));
+        let action = Command::MoveTo(self.move_to_internal(relative, to));
         self.path.0.push(action);
     }
 
     fn line_to(&mut self, relative: bool, to: (f32, f32)) {
-        let action = Action::LineTo(self.move_to_internal(relative, to));
+        let action = Command::LineTo(self.move_to_internal(relative, to));
         self.path.0.push(action);
     }
 
     // C
     fn cubic_bezier(&mut self, relative: bool, c1: (f32, f32), c2: (f32, f32), to: (f32, f32)) {
-        let c1 = self.move_to_internal(relative, c1);
-        let c2 = self.move_to_internal(relative, c2);
+        let c1 = self.get_coord_internal(relative, c1);
+        let c2 = self.get_coord_internal(relative, c2);
         let to = self.move_to_internal(relative, to);
-        self.path.0.push(Action::CubicBezier(c1, c2, to));
+        self.path.0.push(Command::CubicBezier(c1, c2, to));
     }
 
     // S
     fn cubic_spline(&mut self, relative: bool, c2: (f32, f32), to: (f32, f32)) {
-        let c2 = self.move_to_internal(relative, c2);
+        let c2 = self.get_coord_internal(relative, c2);
         let to = self.move_to_internal(relative, to);
-        self.path.0.push(Action::CubicSpline(c2, to));
+        self.path.0.push(Command::CubicSpline(c2, to));
     }
 
     // Q
-    fn quad_bezier(&mut self, relative: bool, c1: (f32, f32), c2: (f32, f32)) {
-        let c1 = self.move_to_internal(relative, c1);
-        let c2 = self.move_to_internal(relative, c2);
-        self.path.0.push(Action::QuadBezier(c1, c2));
+    fn quad_bezier(&mut self, relative: bool, c1: (f32, f32), to: (f32, f32)) {
+        let c1 = self.get_coord_internal(relative, c1);
+        let to = self.move_to_internal(relative, to);
+        self.path.0.push(Command::QuadBezier(c1, to));
     }
 
     // T
-    fn quad_spline(&mut self, relative: bool, c2: (f32, f32)) {
-        let c2 = self.move_to_internal(relative, c2);
-        self.path.0.push(Action::QuadSpline(c2));
+    fn quad_spline(&mut self, relative: bool, to: (f32, f32)) {
+        let to = self.move_to_internal(relative, to);
+        self.path.0.push(Command::QuadSpline(to));
     }
 
     fn parse_action<'a>(&mut self, mut s: &'a str) -> &'a str {

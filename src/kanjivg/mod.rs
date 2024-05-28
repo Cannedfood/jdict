@@ -1,8 +1,7 @@
 pub mod path;
-
 use roxmltree::NodeType;
 
-use self::path::Path;
+pub use self::path::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, strum::EnumString, serde::Serialize, serde::Deserialize)]
 #[rustfmt::skip]
