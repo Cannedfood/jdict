@@ -1,7 +1,5 @@
 use std::str::FromStr;
 
-use super::fixed_u8::FixedU8;
-
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 pub enum Action {
     MoveTo(Coord),
@@ -14,8 +12,8 @@ pub enum Action {
 
 #[derive(Debug, Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 pub struct Coord {
-    pub x: FixedU8,
-    pub y: FixedU8,
+    pub x: f32,
+    pub y: f32,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -66,8 +64,8 @@ impl PathBuilder {
 
         let (minx, miny, width, height) = self.viewbox;
         Coord {
-            x: ((self.cursor.0 - minx) / width).into(),
-            y: ((self.cursor.1 - miny) / height).into(),
+            x: ((self.cursor.0 - minx) / width),
+            y: ((self.cursor.1 - miny) / height),
         }
     }
     // fn get_coord_internal(&self, relative: bool, coord: (f32, f32)) -> Coord {

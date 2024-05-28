@@ -1,4 +1,3 @@
-pub mod fixed_u8;
 pub mod path;
 
 use roxmltree::NodeType;
