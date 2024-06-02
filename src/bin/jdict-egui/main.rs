@@ -13,7 +13,7 @@ use std::sync::{Arc, OnceLock};
 use std::time::Instant;
 
 use egui::ahash::HashMap;
-use egui::{Pos2, Vec2};
+use egui::{global_dark_light_mode_buttons, Pos2, Vec2};
 use jdict2::jmdict::{self};
 use jdict2::kana::{romaji_to, KanaType};
 use jdict2::kanjivg::{self, Coord, StrokeGroup};
@@ -36,7 +36,11 @@ impl eframe::App for App {
             ctx.request_repaint_after(duration);
         }
 
-        egui::SidePanel::left("weights").show_animated(ctx, self.show_settings, |ui| {
+        egui::SidePanel::left("settings").show_animated(ctx, self.show_settings, |ui| {
+            ui.heading("Settings");
+
+            global_dark_light_mode_buttons(ui);
+
             egui::CollapsingHeader::new("Pagination")
                 .default_open(true)
                 .show_unindented(ui, |ui| {
