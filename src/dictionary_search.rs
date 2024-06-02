@@ -1,5 +1,5 @@
-use jdict2::jmdict;
-use jdict2::kana::{romaji_to, KanaType};
+use crate::jmdict;
+use crate::kana::{romaji_to, KanaType};
 
 pub struct SearchWeights {
     pub kanji: u32,
