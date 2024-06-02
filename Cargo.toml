@@ -6,6 +6,9 @@ license = "GPL-3.0-only"
 description = "A Japanese dictionary"
 repository = "https://github.com/Cannedfood/jdict"
 
+[profile.dev.package."*"]
+opt-level = 3
+
 [profile.release]
 lto = 'thin'
 panic = 'abort'
