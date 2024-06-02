@@ -75,13 +75,13 @@ impl eframe::App for App {
                 return;
             };
 
-            // draw_kanji(ui, 100.0, database.kanji_strokes.get(&'何').unwrap());
+            // draw_kanji_strokes(ui, 100.0, database.kanji_strokes.get(&'何').unwrap());
 
-            let now = Instant::now();
             if self
                 .search_debounce
                 .trigger_and_poll_if(take(&mut self.search.changed))
             {
+                let timer = Instant::now();
                 jdict2::dictionary_search::search(
                     &self.search.text,
                     &self.search.search_weights,
@@ -91,7 +91,7 @@ impl eframe::App for App {
                 println!(
                     "Found {} entries in {:?}",
                     self.results.len(),
-                    now.elapsed()
+                    timer.elapsed()
                 );
             }
 
@@ -176,7 +176,7 @@ fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
         .push("JP".into());
 }
 
-fn draw_kanji(ui: &mut egui::Ui, size: f32, kanji: &StrokeGroup) {
+fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, kanji: &StrokeGroup) {
     let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
 
     let brush = egui::Stroke::new(3.0, egui::Color32::BLACK);
