@@ -10,17 +10,18 @@ pub(crate) struct SearchBox {
 
 impl SearchBox {
     pub(crate) fn show_searchbox(&mut self, ui: &mut egui::Ui) {
-        ui.horizontal(|ui| {
-            ui.label("Search:");
-            let search_box = ui.text_edit_singleline(&mut self.text);
+        let search_box = ui.add(
+            egui::TextEdit::singleline(&mut self.text)
+                .hint_text("Search")
+                .id("search_field".into()),
+        );
 
-            let sent = search_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-            if take(&mut self.request_focus) || sent {
-                search_box.request_focus();
-            }
+        let sent = search_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        if take(&mut self.request_focus) || sent {
+            search_box.request_focus();
+        }
 
-            self.changed = search_box.changed();
-        });
+        self.changed = search_box.changed();
     }
 
     pub(crate) fn show_weight_editor(&mut self, ui: &mut egui::Ui) {

@@ -29,6 +29,7 @@ struct App {
     search_debounce: debounce::Debounce,
 
     results: Vec<(u32, u32)>,
+    kanji_results: Vec<char>,
 }
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
@@ -59,11 +60,18 @@ impl eframe::App for App {
                 })
         });
         egui::TopBottomPanel::top("Search").show(ctx, |ui| {
-            ui.horizontal(|ui| {
-                ui.toggle_value(&mut self.show_settings, "\u{2699}\u{FE0F}");
-                self.search.show_searchbox(ui);
-                self.pagination.show_controls(ui, self.results.len());
-            });
+            triptichon_layout(
+                ui,
+                |ui| {
+                    ui.toggle_value(&mut self.show_settings, "\u{2699}\u{FE0F}");
+                },
+                |ui| {
+                    self.pagination.show_controls(ui, self.results.len());
+                },
+                |ui| {
+                    self.search.show_searchbox(ui);
+                },
+            );
         });
         egui::CentralPanel::default().show(ctx, |ui| {
             let Some(database) = DICTIONARY.get()
@@ -95,19 +103,88 @@ impl eframe::App for App {
                 );
             }
 
+            ui.horizontal(|ui| {
+                for character in &self.kanji_results {
+                    // let info = &database.kanji_dictionary[&character];
+                    let strokes = &database.kanji_strokes[character];
+                    draw_kanji_strokes(ui, 30.0, (1.0, egui::Color32::BLACK).into(), strokes);
+                }
+            });
+
+            self.kanji_results.clear();
             self.pagination
                 .show_entries(ui, &self.results, |ui, _, (entry_idx, score)| {
-                    render_entry(ui, &database.dictionary[*entry_idx as usize]);
+                    let entry = &database.dictionary[*entry_idx as usize];
+                    let entry_visible = render_entry(ui, entry);
                     ui.separator();
+
+                    if entry_visible {
+                        for c in entry.kanji.iter().flat_map(|k| k.text.chars()) {
+                            if database.kanji_dictionary.contains_key(&c)
+                                && !self.kanji_results.contains(&c)
+                            {
+                                self.kanji_results.push(c);
+                            }
+                        }
+                    }
                 });
         });
     }
 }
 
-fn render_entry(ui: &mut egui::Ui, entry: &jmdict::Entry) {
+fn triptichon_layout(
+    ui: &mut egui::Ui,
+    left: impl FnOnce(&mut egui::Ui),
+    right: impl FnOnce(&mut egui::Ui),
+    center: impl FnOnce(&mut egui::Ui),
+) {
+    let available = ui.available_rect_before_wrap();
+    let left_divider = (available.left() + available.width() / 6.0);
+    let right_divider = (available.right() - available.width() / 6.0);
+
+    // Center 2/3rds
+    let mut center_ui = ui.child_ui(
+        egui::Rect::from_x_y_ranges(left_divider..=right_divider, available.y_range()),
+        egui::Layout::top_down(egui::Align::Center),
+    );
+    center(&mut center_ui);
+
+    let left_divider = left_divider.min(center_ui.min_rect().left());
+    let right_divider = right_divider.max(center_ui.min_rect().right());
+
+    // Left 1/6th
+    let mut left_ui = ui.child_ui(
+        egui::Rect::from_x_y_ranges(available.left()..=left_divider, available.y_range()),
+        egui::Layout::left_to_right(egui::Align::Center),
+    );
+    left(&mut left_ui);
+
+    // Right 1/6th
+    let mut right_ui = ui.child_ui(
+        egui::Rect::from_x_y_ranges(right_divider..=available.right(), available.y_range()),
+        egui::Layout::right_to_left(egui::Align::Center),
+    );
+    right(&mut right_ui);
+
+    ui.advance_cursor_after_rect(egui::Rect::from_points(&[
+        left_ui.min_rect().min,
+        left_ui.min_rect().max,
+        center_ui.min_rect().min,
+        center_ui.min_rect().max,
+        right_ui.min_rect().min,
+        right_ui.min_rect().max,
+    ]));
+}
+
+fn render_entry(ui: &mut egui::Ui, entry: &jmdict::Entry) -> bool {
+    let mut visible = false;
+
     ui.horizontal(|ui| {
         for (i, kanji) in entry.kanji.iter().enumerate() {
-            ui.label(kanji.text.as_str());
+            let res = ui.label(kanji.text.as_str());
+            if ui.is_rect_visible(res.rect) {
+                visible = true;
+            }
         }
     });
 
@@ -134,6 +211,8 @@ fn render_entry(ui: &mut egui::Ui, entry: &jmdict::Entry) {
             ui.label(text);
         });
     }
+
+    visible
 }
 
 fn main() {
@@ -176,10 +255,8 @@ fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
         .push("JP".into());
 }
 
-fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, kanji: &StrokeGroup) {
+fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: &StrokeGroup) {
     let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
-
-    let brush = egui::Stroke::new(3.0, egui::Color32::BLACK);
 
     ui.painter().rect_filled(rect, 3.0, egui::Color32::GRAY);
 
