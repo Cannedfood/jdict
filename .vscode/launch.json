@@ -21,20 +21,20 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'jdict2'",
+            "name": "Debug executable 'jdict-build-db'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=jdict2",
+                    "--bin=jdict-build-db",
                     "--package=jdict2"
                 ],
                 "filter": {
-                    "name": "jdict2",
+                    "name": "jdict-build-db",
                     "kind": "bin"
                 }
             },
@@ -44,16 +44,53 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'jdict2'",
+            "name": "Debug unit tests in executable 'jdict-build-db'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=jdict2",
+                    "--bin=jdict-build-db",
                     "--package=jdict2"
                 ],
                 "filter": {
-                    "name": "jdict2",
+                    "name": "jdict-build-db",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'jdict-egui'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=jdict-egui",
+                    "--package=jdict2"
+                ],
+                "filter": {
+                    "name": "jdict-egui",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'jdict-egui'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=jdict-egui",
+                    "--package=jdict2"
+                ],
+                "filter": {
+                    "name": "jdict-egui",
                     "kind": "bin"
                 }
             },
