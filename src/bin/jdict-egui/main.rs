@@ -75,7 +75,7 @@ impl eframe::App for App {
                 return;
             };
 
-            draw_kanji(ui, 100.0, database.kanji_strokes.get(&'何').unwrap());
+            // draw_kanji(ui, 100.0, database.kanji_strokes.get(&'何').unwrap());
 
             let now = Instant::now();
             if self
