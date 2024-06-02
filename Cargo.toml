@@ -20,7 +20,6 @@ eframe = "0.27.2"
 egui = "0.27.2"
 flate2 = "1.0.30"
 isolang = { version = "2.4.0", features = ["serde"], default-features = false }
-memmap2 = "0.9.4"
 postcard = { version = "1.0.8", features = ["use-std"] }
 roxmltree = { version = "0.20.0", features = ["std"], default-features = false }
 serde = { version = "1.0.203", features = ["derive"] }

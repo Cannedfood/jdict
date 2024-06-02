@@ -1639,7 +1639,6 @@ dependencies = [
  "egui",
  "flate2",
  "isolang",
- "memmap2",
  "postcard",
  "roxmltree",
  "serde",
