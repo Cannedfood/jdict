@@ -270,10 +270,6 @@ fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: 
     draw_recursive(&ui.painter_at(rect.shrink(3.0)), kanji, brush, &mut f);
 
     fn measure(kanji: &StrokeGroup) -> f32 {
-        if kanji.variant {
-            return 0.0;
-        }
-
         kanji
             .subgroups
             .iter()
@@ -290,10 +286,6 @@ fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: 
         brush: egui::Stroke,
         length_budget: &mut f32,
     ) {
-        if path.variant {
-            return;
-        }
-
         for child in &path.subgroups {
             match child {
                 kanjivg::Child::Stroke(stroke) => {
