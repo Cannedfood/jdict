@@ -15,6 +15,13 @@ pub struct Coord {
     pub x: f32,
     pub y: f32,
 }
+impl Coord {
+    fn distance(&self, other: &Coord) -> f32 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        (dx * dx + dy * dy).sqrt()
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct Path(pub Vec<Command>);
@@ -44,6 +51,42 @@ impl Path {
         }
 
         path_builder.path
+    }
+
+    pub fn length(&self) -> f32 {
+        let mut length = 0.0;
+        let mut last = Coord::default();
+
+        for cmd in self.0.iter() {
+            match cmd {
+                Command::MoveTo(to) | Command::LineTo(to) => {
+                    length += last.distance(to);
+                    last = *to;
+                }
+                Command::CubicBezier(c1, c2, to) => {
+                    length += last.distance(c1);
+                    length += c1.distance(c2);
+                    length += c2.distance(to);
+                    last = *to;
+                }
+                Command::CubicSpline(c2, to) => {
+                    length += last.distance(c2);
+                    length += c2.distance(to);
+                    last = *to;
+                }
+                Command::QuadBezier(c1, to) => {
+                    length += last.distance(c1);
+                    length += c1.distance(to);
+                    last = *to;
+                }
+                Command::QuadSpline(to) => {
+                    length += last.distance(to);
+                    last = *to;
+                }
+            }
+        }
+
+        length
     }
 }
 

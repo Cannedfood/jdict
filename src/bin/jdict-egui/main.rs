@@ -9,7 +9,8 @@ use std::io::{BufReader, BufWriter, Read};
 use std::mem::take;
 use std::num::NonZeroUsize;
 use std::path::Path;
-use std::sync::{Arc, OnceLock};
+use std::sync::atomic::AtomicU64;
+use std::sync::{Arc, LazyLock, OnceLock};
 use std::time::Instant;
 
 use egui::ahash::HashMap;
@@ -255,26 +256,61 @@ fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
         .push("JP".into());
 }
 
+static START_TIME: LazyLock<Instant> = LazyLock::new(Instant::now);
+
 fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: &StrokeGroup) {
     let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
 
+    let time = (START_TIME.elapsed().as_secs_f32() % 5.0) / 5.0;
+
+    let mut f = time * measure(kanji);
+
     ui.painter().rect_filled(rect, 3.0, egui::Color32::GRAY);
 
-    draw_recursive(&ui.painter_at(rect.shrink(3.0)), kanji, brush);
+    draw_recursive(&ui.painter_at(rect.shrink(3.0)), kanji, brush, &mut f);
 
-    fn draw_recursive(painter: &egui::Painter, path: &kanjivg::StrokeGroup, brush: egui::Stroke) {
+    fn measure(kanji: &StrokeGroup) -> f32 {
+        if kanji.variant {
+            return 0.0;
+        }
+
+        kanji
+            .subgroups
+            .iter()
+            .map(|child| match child {
+                kanjivg::Child::Group(group) => measure(group),
+                kanjivg::Child::Stroke(stroke) => stroke.path.length(),
+            })
+            .sum()
+    }
+
+    fn draw_recursive(
+        painter: &egui::Painter,
+        path: &kanjivg::StrokeGroup,
+        brush: egui::Stroke,
+        length_budget: &mut f32,
+    ) {
+        if path.variant {
+            return;
+        }
+
         for child in &path.subgroups {
             match child {
                 kanjivg::Child::Stroke(stroke) => {
-                    draw_path(painter, &stroke.path, brush);
+                    draw_path(painter, &stroke.path, brush, length_budget);
                 }
                 kanjivg::Child::Group(group) => {
-                    draw_recursive(painter, group, brush);
+                    draw_recursive(painter, group, brush, length_budget);
                 }
             }
         }
     }
-    fn draw_path(painter: &egui::Painter, path: &kanjivg::Path, brush: egui::Stroke) {
+    fn draw_path(
+        painter: &egui::Painter,
+        path: &kanjivg::Path,
+        brush: egui::Stroke,
+        length_budget: &mut f32,
+    ) {
         let scale = painter
             .clip_rect()
             .width()
@@ -303,12 +339,42 @@ fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: 
                     let c2 = Vec2::new(c2.x, c2.y);
                     let to = Vec2::new(to.x, to.y);
                     for (a, b) in [(brush_position, c1), (c1, c2), (c2, to)] {
-                        painter.line_segment([offset + a * scale, offset + b * scale], brush);
+                        painter.add(take_line_segment(
+                            &painter.clip_rect(),
+                            a,
+                            b,
+                            brush,
+                            length_budget,
+                        ));
                     }
                     brush_position = to;
                 }
                 _ => {}
             }
+        }
+
+        fn take_line_segment(
+            rect: &egui::Rect,
+            from: Vec2,
+            to: Vec2,
+            stroke: egui::Stroke,
+            length_budget: &mut f32,
+        ) -> egui::Shape {
+            let length = (to - from).length();
+            if length > *length_budget {
+                *length_budget = 0.0;
+                return egui::Shape::Noop;
+            }
+
+            let length = length.min(*length_budget);
+            *length_budget -= length;
+
+            let to = from + (to - from).normalized() * length;
+
+            let from = rect.min + from * rect.width();
+            let to = rect.min + to * rect.width();
+
+            egui::Shape::line_segment([from, to], stroke)
         }
     }
 }
