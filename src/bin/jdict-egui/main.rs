@@ -363,8 +363,8 @@ fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: 
 
             let to = from + (to - from).normalized() * length;
 
-            let from = rect.min + from * rect.width();
-            let to = rect.min + to * rect.width();
+            let from = rect.min + from * rect.size();
+            let to = rect.min + to * rect.size();
 
             egui::Shape::line_segment([from, to], stroke)
         }
