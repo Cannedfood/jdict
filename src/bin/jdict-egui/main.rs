@@ -1,29 +1,23 @@
-#![allow(unused)]
-
 mod debounce;
 mod pagination;
 mod search_box;
+mod stroke_animation;
 
-use std::collections::HashSet;
-use std::io::{BufReader, BufWriter, Read};
 use std::mem::take;
-use std::num::NonZeroUsize;
-use std::path::Path;
-use std::sync::atomic::AtomicU64;
-use std::sync::{Arc, LazyLock, OnceLock};
+use std::sync::OnceLock;
 use std::time::Instant;
 
-use egui::ahash::HashMap;
-use egui::{global_dark_light_mode_buttons, Pos2, Vec2};
-use jdict2::jmdict::{self};
-use jdict2::kana::{romaji_to, KanaType};
-use jdict2::kanjivg::{self, Coord, StrokeGroup};
+use egui::global_dark_light_mode_buttons;
+use itertools::Itertools;
+use jdict2::jmdict;
+use jdict2::kanjidic2::ReadingType;
 
 static DICTIONARY: OnceLock<jdict2::database::Database> = OnceLock::new();
 
 #[derive(Default)]
 struct App {
     show_settings: bool,
+    show_kanji:    bool,
 
     search: search_box::SearchBox,
     pagination: pagination::Pagination,
@@ -33,7 +27,7 @@ struct App {
     kanji_results: Vec<char>,
 }
 impl eframe::App for App {
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if let Some(duration) = self.search_debounce.will_resolve_in() {
             ctx.request_repaint_after(duration);
         }
@@ -60,11 +54,63 @@ impl eframe::App for App {
                     self.search.show_weight_editor(ui);
                 })
         });
+        egui::SidePanel::left("kanji").show_animated(ctx, self.show_kanji, |ui| {
+            let Some(database) = DICTIONARY.get()
+            else {
+                ui.horizontal(|ui| {
+                    ui.label("Loading...");
+                    ui.spinner();
+                });
+                return;
+            };
+
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for character in &self.kanji_results {
+                    let info = &database.kanji_dictionary[character];
+                    let strokes = &database.kanji_strokes[character];
+                    ui.horizontal(|ui| {
+                        stroke_animation::kanji_stroke_animation(
+                            ui,
+                            30.0,
+                            (1.0, egui::Color32::BLACK).into(),
+                            strokes,
+                        );
+                        ui.vertical(|ui| {
+                            for rm in info.reading_meaning.iter() {
+                                for rm in rm.reading_meaning_groups.iter() {
+                                    let readings = rm
+                                        .readings
+                                        .iter()
+                                        .filter(|r| {
+                                            matches!(
+                                                r.typ,
+                                                ReadingType::Kunyomi | ReadingType::Onyomi(_)
+                                            )
+                                        })
+                                        .map(|r| &r.value)
+                                        .join(", ");
+                                    ui.label(readings);
+
+                                    let meanings = rm
+                                        .meanings
+                                        .iter()
+                                        .filter(|m| m.lang == isolang::Language::Eng)
+                                        .map(|m| &m.text)
+                                        .join(", ");
+                                    ui.label(meanings);
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        });
         egui::TopBottomPanel::top("Search").show(ctx, |ui| {
             triptichon_layout(
                 ui,
                 |ui| {
                     ui.toggle_value(&mut self.show_settings, "\u{2699}\u{FE0F}");
+                    ui.toggle_value(&mut self.show_kanji, "事");
                 },
                 |ui| {
                     self.pagination.show_controls(ui, self.results.len());
@@ -104,17 +150,9 @@ impl eframe::App for App {
                 );
             }
 
-            ui.horizontal(|ui| {
-                for character in &self.kanji_results {
-                    // let info = &database.kanji_dictionary[&character];
-                    let strokes = &database.kanji_strokes[character];
-                    draw_kanji_strokes(ui, 30.0, (1.0, egui::Color32::BLACK).into(), strokes);
-                }
-            });
-
             self.kanji_results.clear();
             self.pagination
-                .show_entries(ui, &self.results, |ui, _, (entry_idx, score)| {
+                .show_entries(ui, &self.results, |ui, _, (entry_idx, _score)| {
                     let entry = &database.dictionary[*entry_idx as usize];
                     let entry_visible = render_entry(ui, entry);
                     ui.separator();
@@ -140,8 +178,8 @@ fn triptichon_layout(
     center: impl FnOnce(&mut egui::Ui),
 ) {
     let available = ui.available_rect_before_wrap();
-    let left_divider = (available.left() + available.width() / 6.0);
-    let right_divider = (available.right() - available.width() / 6.0);
+    let left_divider = available.left() + available.width() / 6.0;
+    let right_divider = available.right() - available.width() / 6.0;
 
     // Center 2/3rds
     let mut center_ui = ui.child_ui(
@@ -181,7 +219,7 @@ fn render_entry(ui: &mut egui::Ui, entry: &jmdict::Entry) -> bool {
     let mut visible = false;
 
     ui.horizontal(|ui| {
-        for (i, kanji) in entry.kanji.iter().enumerate() {
+        for kanji in &entry.kanji {
             let res = ui.label(kanji.text.as_str());
             if ui.is_rect_visible(res.rect) {
                 visible = true;
@@ -254,119 +292,4 @@ fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
         .entry(egui::FontFamily::Monospace)
         .or_default()
         .push("JP".into());
-}
-
-static START_TIME: LazyLock<Instant> = LazyLock::new(Instant::now);
-
-fn draw_kanji_strokes(ui: &mut egui::Ui, size: f32, brush: egui::Stroke, kanji: &StrokeGroup) {
-    let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
-
-    let time = (START_TIME.elapsed().as_secs_f32() % 5.0) / 5.0;
-
-    let mut f = time * measure(kanji);
-
-    ui.painter().rect_filled(rect, 3.0, egui::Color32::GRAY);
-
-    draw_recursive(&ui.painter_at(rect.shrink(3.0)), kanji, brush, &mut f);
-
-    fn measure(kanji: &StrokeGroup) -> f32 {
-        kanji
-            .subgroups
-            .iter()
-            .map(|child| match child {
-                kanjivg::Child::Group(group) => measure(group),
-                kanjivg::Child::Stroke(stroke) => stroke.path.length(),
-            })
-            .sum()
-    }
-
-    fn draw_recursive(
-        painter: &egui::Painter,
-        path: &kanjivg::StrokeGroup,
-        brush: egui::Stroke,
-        length_budget: &mut f32,
-    ) {
-        for child in &path.subgroups {
-            match child {
-                kanjivg::Child::Stroke(stroke) => {
-                    draw_path(painter, &stroke.path, brush, length_budget);
-                }
-                kanjivg::Child::Group(group) => {
-                    draw_recursive(painter, group, brush, length_budget);
-                }
-            }
-        }
-    }
-    fn draw_path(
-        painter: &egui::Painter,
-        path: &kanjivg::Path,
-        brush: egui::Stroke,
-        length_budget: &mut f32,
-    ) {
-        let scale = painter
-            .clip_rect()
-            .width()
-            .min(painter.clip_rect().height());
-
-        let offset = painter.clip_rect().min;
-
-        let mut brush_position = Vec2::new(0.0, 0.0);
-        for cmd in &path.0 {
-            match cmd {
-                kanjivg::Command::MoveTo(Coord { x, y }) => {
-                    brush_position = Vec2::new(*x, *y);
-                }
-                kanjivg::Command::LineTo(Coord { x, y }) => {
-                    painter.line_segment(
-                        [
-                            offset + brush_position * scale,
-                            offset + Vec2::new(*x, *y) * scale,
-                        ],
-                        brush,
-                    );
-                    brush_position = Vec2::new(*x, *y);
-                }
-                kanjivg::Command::CubicBezier(c1, c2, to) => {
-                    let c1 = Vec2::new(c1.x, c1.y);
-                    let c2 = Vec2::new(c2.x, c2.y);
-                    let to = Vec2::new(to.x, to.y);
-                    for (a, b) in [(brush_position, c1), (c1, c2), (c2, to)] {
-                        painter.add(take_line_segment(
-                            &painter.clip_rect(),
-                            a,
-                            b,
-                            brush,
-                            length_budget,
-                        ));
-                    }
-                    brush_position = to;
-                }
-                _ => {}
-            }
-        }
-
-        fn take_line_segment(
-            rect: &egui::Rect,
-            from: Vec2,
-            to: Vec2,
-            stroke: egui::Stroke,
-            length_budget: &mut f32,
-        ) -> egui::Shape {
-            let length = (to - from).length();
-            if length > *length_budget {
-                *length_budget = 0.0;
-                return egui::Shape::Noop;
-            }
-
-            let length = length.min(*length_budget);
-            *length_budget -= length;
-
-            let to = from + (to - from).normalized() * length;
-
-            let from = rect.min + from * rect.size();
-            let to = rect.min + to * rect.size();
-
-            egui::Shape::line_segment([from, to], stroke)
-        }
-    }
 }
