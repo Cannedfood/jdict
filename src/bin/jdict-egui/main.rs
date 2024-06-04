@@ -1,3 +1,6 @@
+// Don't show console window on windows
+#![windows_subsystem = "windows"]
+
 mod debounce;
 mod pagination;
 mod search_box;
