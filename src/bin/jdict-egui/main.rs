@@ -75,7 +75,9 @@ impl eframe::App for App {
                         stroke_animation::kanji_stroke_animation(
                             ui,
                             30.0,
-                            (1.0, egui::Color32::BLACK).into(),
+                            egui::Color32::from_black_alpha(0x22),
+                            (1.0, egui::Color32::from_white_alpha(0x10)).into(),
+                            (1.0, egui::Color32::WHITE).into(),
                             strokes,
                         );
                         ui.vertical(|ui| {

@@ -9,18 +9,33 @@ static START_TIME: LazyLock<Instant> = LazyLock::new(Instant::now);
 pub(crate) fn kanji_stroke_animation(
     ui: &mut egui::Ui,
     size: f32,
-    brush: egui::Stroke,
+    background: egui::Color32,
+    finished_brush: egui::Stroke,
+    animated_brush: egui::Stroke,
     kanji: &StrokeGroup,
 ) {
     let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
 
-    let time = (START_TIME.elapsed().as_secs_f32() % 5.0) / 5.0;
+    let time = START_TIME.elapsed().as_secs_f32();
 
-    let mut f = time * measure(kanji);
+    let mut f = time % measure(kanji);
 
-    ui.painter().rect_filled(rect, 3.0, egui::Color32::GRAY);
+    ui.painter().rect_filled(rect, 3.0, background);
 
-    draw_recursive(&ui.painter_at(rect.shrink(3.0)), kanji, brush, &mut f);
+    draw_recursive(
+        &ui.painter_at(rect.shrink(3.0)),
+        kanji,
+        finished_brush,
+        #[allow(const_item_mutation)]
+        &mut f32::INFINITY,
+    );
+
+    draw_recursive(
+        &ui.painter_at(rect.shrink(3.0)),
+        kanji,
+        animated_brush,
+        &mut f,
+    );
 
     fn measure(kanji: &StrokeGroup) -> f32 {
         kanji

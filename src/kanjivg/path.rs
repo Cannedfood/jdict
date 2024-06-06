@@ -55,33 +55,32 @@ impl Path {
 
     pub fn length(&self) -> f32 {
         let mut length = 0.0;
-        let mut last = Coord::default();
+        let mut brush_position = Coord::default();
 
         for cmd in self.0.iter() {
             match cmd {
                 Command::MoveTo(to) | Command::LineTo(to) => {
-                    length += last.distance(to);
-                    last = *to;
+                    brush_position = *to;
                 }
                 Command::CubicBezier(c1, c2, to) => {
-                    length += last.distance(c1);
+                    length += brush_position.distance(c1);
                     length += c1.distance(c2);
                     length += c2.distance(to);
-                    last = *to;
+                    brush_position = *to;
                 }
                 Command::CubicSpline(c2, to) => {
-                    length += last.distance(c2);
+                    length += brush_position.distance(c2);
                     length += c2.distance(to);
-                    last = *to;
+                    brush_position = *to;
                 }
                 Command::QuadBezier(c1, to) => {
-                    length += last.distance(c1);
+                    length += brush_position.distance(c1);
                     length += c1.distance(to);
-                    last = *to;
+                    brush_position = *to;
                 }
                 Command::QuadSpline(to) => {
-                    length += last.distance(to);
-                    last = *to;
+                    length += brush_position.distance(to);
+                    brush_position = *to;
                 }
             }
         }
