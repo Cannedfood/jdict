@@ -1,13 +1,21 @@
 use std::mem::take;
 
-#[derive(Default)]
 pub(crate) struct SearchBox {
     pub(crate) changed: bool,
     pub(crate) request_focus: bool,
     pub(crate) text: String,
     pub(crate) search_weights: jdict2::dictionary_search::SearchWeights,
 }
-
+impl Default for SearchBox {
+    fn default() -> Self {
+        Self {
+            changed: false,
+            request_focus: true,
+            text: String::new(),
+            search_weights: jdict2::dictionary_search::SearchWeights::default(),
+        }
+    }
+}
 impl SearchBox {
     pub(crate) fn show_searchbox(&mut self, ui: &mut egui::Ui) {
         let search_box = ui.add(
