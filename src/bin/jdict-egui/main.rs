@@ -90,14 +90,7 @@ impl eframe::App for App {
                     for rm in info.reading_meaning.iter() {
                         for rmg in rm.reading_meaning_groups.iter() {
                             ui.horizontal(|ui| {
-                                stroke_animation::kanji_stroke_animation(
-                                    ui,
-                                    60.0,
-                                    egui::Color32::from_gray(0x22),
-                                    (1.0, egui::Color32::from_gray(0x10)).into(),
-                                    (1.0, egui::Color32::WHITE).into(),
-                                    strokes,
-                                );
+                                stroke_animation::kanji_stroke_animation(ui, 60.0, strokes);
                                 ui.vertical(|ui| {
                                     egui::Grid::new(("KanjiGrid", ui.next_auto_id()))
                                         .min_col_width(0.0)

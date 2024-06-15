@@ -6,15 +6,11 @@ use jdict2::kanjivg::{self, Coord, StrokeGroup};
 
 static START_TIME: LazyLock<Instant> = LazyLock::new(Instant::now);
 
-pub(crate) fn kanji_stroke_animation(
-    ui: &mut egui::Ui,
-    size: f32,
-    background: egui::Color32,
-    secondary_brush: egui::Stroke,
-    primary_brush: egui::Stroke,
-    kanji: &StrokeGroup,
-) {
+pub(crate) fn kanji_stroke_animation(ui: &mut egui::Ui, size: f32, kanji: &StrokeGroup) {
     let (rect, res) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
+
+    let style = ui.style();
+    let interacted_style = style.interact(&res);
 
     let mut f = if res.hovered() {
         ui.ctx().request_repaint();
@@ -24,16 +20,20 @@ pub(crate) fn kanji_stroke_animation(
         0.0
     };
 
-    ui.painter().rect_filled(rect, 3.0, background);
+    ui.painter().rect_filled(
+        rect,
+        interacted_style.rounding,
+        style.visuals.extreme_bg_color,
+    );
 
     draw_recursive(
         &ui.painter_at(rect.shrink(3.0)),
         kanji,
         if f > 0.0 {
-            secondary_brush
+            interacted_style.bg_stroke
         }
         else {
-            primary_brush
+            interacted_style.fg_stroke
         },
         #[allow(const_item_mutation)]
         &mut f32::INFINITY,
@@ -43,7 +43,7 @@ pub(crate) fn kanji_stroke_animation(
         draw_recursive(
             &ui.painter_at(rect.shrink(3.0)),
             kanji,
-            primary_brush,
+            interacted_style.fg_stroke,
             &mut f,
         );
     }
