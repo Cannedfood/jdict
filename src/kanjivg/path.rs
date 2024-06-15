@@ -54,38 +54,47 @@ impl Path {
     }
 
     pub fn length(&self) -> f32 {
-        let mut length = 0.0;
-        let mut brush_position = Coord::default();
+        struct TapeMeasure {
+            length: f32,
+            brush_position: Coord,
+        }
+        impl TapeMeasure {
+            fn move_to(&mut self, to: &Coord) { self.brush_position = *to; }
+            fn line_to(&mut self, to: &Coord) {
+                self.length += self.brush_position.distance(to);
+                self.brush_position = *to;
+            }
+        }
+
+        let mut tape_measure = TapeMeasure {
+            length: 0.0,
+            brush_position: Coord::default(),
+        };
 
         for cmd in self.0.iter() {
             match cmd {
-                Command::MoveTo(to) | Command::LineTo(to) => {
-                    brush_position = *to;
-                }
+                Command::MoveTo(to) => tape_measure.move_to(to),
+                Command::LineTo(to) => tape_measure.line_to(to),
                 Command::CubicBezier(c1, c2, to) => {
-                    length += brush_position.distance(c1);
-                    length += c1.distance(c2);
-                    length += c2.distance(to);
-                    brush_position = *to;
+                    tape_measure.line_to(c1);
+                    tape_measure.line_to(c2);
+                    tape_measure.line_to(to);
                 }
                 Command::CubicSpline(c2, to) => {
-                    length += brush_position.distance(c2);
-                    length += c2.distance(to);
-                    brush_position = *to;
+                    tape_measure.line_to(c2);
+                    tape_measure.line_to(to);
                 }
                 Command::QuadBezier(c1, to) => {
-                    length += brush_position.distance(c1);
-                    length += c1.distance(to);
-                    brush_position = *to;
+                    tape_measure.line_to(c1);
+                    tape_measure.line_to(to);
                 }
                 Command::QuadSpline(to) => {
-                    length += brush_position.distance(to);
-                    brush_position = *to;
+                    tape_measure.line_to(to);
                 }
             }
         }
 
-        length
+        tape_measure.length
     }
 }
 

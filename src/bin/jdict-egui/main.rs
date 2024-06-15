@@ -93,8 +93,8 @@ impl eframe::App for App {
                                 stroke_animation::kanji_stroke_animation(
                                     ui,
                                     60.0,
-                                    egui::Color32::from_black_alpha(0x22),
-                                    (1.0, egui::Color32::from_white_alpha(0x10)).into(),
+                                    egui::Color32::from_gray(0x22),
+                                    (1.0, egui::Color32::from_gray(0x10)).into(),
                                     (1.0, egui::Color32::WHITE).into(),
                                     strokes,
                                 );
@@ -152,6 +152,16 @@ impl eframe::App for App {
                             }
                         }
                     }
+
+                    ui.horizontal(|ui| {
+                        if ui.button("Words with this kanji").clicked() {
+                            self.search.text = character.to_string();
+                            self.search_debounce.trigger();
+                        }
+                        ui.menu_button("Decomposition", |ui| {
+                            ui.label("Not implemented");
+                        });
+                    });
                     ui.separator();
                 }
             });

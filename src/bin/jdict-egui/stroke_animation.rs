@@ -10,32 +10,43 @@ pub(crate) fn kanji_stroke_animation(
     ui: &mut egui::Ui,
     size: f32,
     background: egui::Color32,
-    finished_brush: egui::Stroke,
-    animated_brush: egui::Stroke,
+    secondary_brush: egui::Stroke,
+    primary_brush: egui::Stroke,
     kanji: &StrokeGroup,
 ) {
-    let (rect, _) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
+    let (rect, res) = ui.allocate_exact_size((size, size).into(), egui::Sense::hover());
 
-    let time = START_TIME.elapsed().as_secs_f32();
-
-    let mut f = time % measure(kanji);
+    let mut f = if res.hovered() {
+        ui.ctx().request_repaint();
+        START_TIME.elapsed().as_secs_f32() % measure(kanji)
+    }
+    else {
+        0.0
+    };
 
     ui.painter().rect_filled(rect, 3.0, background);
 
     draw_recursive(
         &ui.painter_at(rect.shrink(3.0)),
         kanji,
-        finished_brush,
+        if f > 0.0 {
+            secondary_brush
+        }
+        else {
+            primary_brush
+        },
         #[allow(const_item_mutation)]
         &mut f32::INFINITY,
     );
 
-    draw_recursive(
-        &ui.painter_at(rect.shrink(3.0)),
-        kanji,
-        animated_brush,
-        &mut f,
-    );
+    if f > 0.0 {
+        draw_recursive(
+            &ui.painter_at(rect.shrink(3.0)),
+            kanji,
+            primary_brush,
+            &mut f,
+        );
+    }
 
     fn measure(kanji: &StrokeGroup) -> f32 {
         kanji
@@ -71,13 +82,6 @@ pub(crate) fn kanji_stroke_animation(
         brush: egui::Stroke,
         length_budget: &mut f32,
     ) {
-        let scale = painter
-            .clip_rect()
-            .width()
-            .min(painter.clip_rect().height());
-
-        let offset = painter.clip_rect().min;
-
         let mut brush_position = Vec2::new(0.0, 0.0);
         for cmd in &path.0 {
             match cmd {
@@ -85,14 +89,21 @@ pub(crate) fn kanji_stroke_animation(
                     brush_position = Vec2::new(*x, *y);
                 }
                 kanjivg::Command::LineTo(Coord { x, y }) => {
-                    painter.line_segment(
-                        [
-                            offset + brush_position * scale,
-                            offset + Vec2::new(*x, *y) * scale,
-                        ],
+                    // painter.line_segment(
+                    //     [
+                    //         offset + brush_position * scale,
+                    //         offset + Vec2::new(*x, *y) * scale,
+                    //     ],
+                    //     brush,
+                    // );
+                    // brush_position = Vec2::new(*x, *y);
+                    painter.add(take_line_segment(
+                        &painter.clip_rect(),
+                        brush_position,
+                        Vec2::new(*x, *y),
                         brush,
-                    );
-                    brush_position = Vec2::new(*x, *y);
+                        length_budget,
+                    ));
                 }
                 kanjivg::Command::CubicBezier(c1, c2, to) => {
                     let c1 = Vec2::new(c1.x, c1.y);
@@ -109,7 +120,7 @@ pub(crate) fn kanji_stroke_animation(
                     }
                     brush_position = to;
                 }
-                _ => {}
+                _ => eprintln!("Unimplented stroke type: {cmd:?}"),
             }
         }
 
