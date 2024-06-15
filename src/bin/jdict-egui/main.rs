@@ -73,6 +73,8 @@ impl eframe::App for App {
             );
         });
         egui::SidePanel::left("kanji").show_animated(ctx, self.show_kanji, |ui| {
+            ui.set_width(250.0);
+
             let Some(database) = DICTIONARY.get()
             else {
                 ui.horizontal(|ui| {
@@ -85,42 +87,72 @@ impl eframe::App for App {
                 for character in &self.kanji_results {
                     let info = &database.kanji_dictionary[character];
                     let strokes = &database.kanji_strokes[character];
-                    ui.horizontal(|ui| {
-                        stroke_animation::kanji_stroke_animation(
-                            ui,
-                            30.0,
-                            egui::Color32::from_black_alpha(0x22),
-                            (1.0, egui::Color32::from_white_alpha(0x10)).into(),
-                            (1.0, egui::Color32::WHITE).into(),
-                            strokes,
-                        );
-                        ui.vertical(|ui| {
-                            for rm in info.reading_meaning.iter() {
-                                for rm in rm.reading_meaning_groups.iter() {
-                                    let readings = rm
-                                        .readings
-                                        .iter()
-                                        .filter(|r| {
-                                            matches!(
-                                                r.typ,
-                                                ReadingType::Kunyomi | ReadingType::Onyomi(_)
-                                            )
-                                        })
-                                        .map(|r| &r.value)
-                                        .join(", ");
-                                    ui.label(readings);
+                    for rm in info.reading_meaning.iter() {
+                        for rmg in rm.reading_meaning_groups.iter() {
+                            ui.horizontal(|ui| {
+                                stroke_animation::kanji_stroke_animation(
+                                    ui,
+                                    60.0,
+                                    egui::Color32::from_black_alpha(0x22),
+                                    (1.0, egui::Color32::from_white_alpha(0x10)).into(),
+                                    (1.0, egui::Color32::WHITE).into(),
+                                    strokes,
+                                );
+                                ui.vertical(|ui| {
+                                    egui::Grid::new(("KanjiGrid", ui.next_auto_id()))
+                                        .min_col_width(0.0)
+                                        .num_columns(2)
+                                        .show(ui, |ui| {
+                                            let kunyomi = rmg
+                                                .readings
+                                                .iter()
+                                                .filter(|r| r.typ == ReadingType::Kunyomi)
+                                                .map(|r| &r.value)
+                                                .join(", ");
+                                            if !kunyomi.is_empty() {
+                                                ui.label("Kun");
+                                                ui.add(egui::Label::new(kunyomi).wrap(true));
+                                                ui.end_row();
+                                            }
 
-                                    let meanings = rm
-                                        .meanings
-                                        .iter()
-                                        .filter(|m| m.lang == isolang::Language::Eng)
-                                        .map(|m| &m.text)
-                                        .join(", ");
-                                    ui.label(meanings);
-                                }
+                                            let onyomi = rmg
+                                                .readings
+                                                .iter()
+                                                .filter(|r| matches!(r.typ, ReadingType::Onyomi(_)))
+                                                .map(|r| &r.value)
+                                                .join(", ");
+                                            if !onyomi.is_empty() {
+                                                ui.label("On");
+                                                ui.add(egui::Label::new(onyomi).wrap(true));
+                                                ui.end_row();
+                                            }
+
+                                            if !rm.nanori.is_empty() {
+                                                ui.label("Nanori");
+                                                ui.add(
+                                                    egui::Label::new(rm.nanori.join(", "))
+                                                        .wrap(true),
+                                                );
+                                                ui.end_row();
+                                            }
+                                        });
+                                });
+                            });
+                            let meanings = rmg
+                                .meanings
+                                .iter()
+                                .filter(|m| m.lang == isolang::Language::Eng)
+                                .map(|m| &m.text)
+                                .join(", ");
+                            if !meanings.is_empty() {
+                                ui.add(
+                                    egui::Label::new(egui::RichText::new(meanings).size(16.0))
+                                        .wrap(true),
+                                );
                             }
-                        });
-                    });
+                        }
+                    }
+                    ui.separator();
                 }
             });
         });
