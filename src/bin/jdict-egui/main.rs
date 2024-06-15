@@ -57,6 +57,21 @@ impl eframe::App for App {
                     self.search.show_weight_editor(ui);
                 })
         });
+        egui::TopBottomPanel::top("Search").show(ctx, |ui| {
+            triptichon_layout(
+                ui,
+                |ui| {
+                    ui.toggle_value(&mut self.show_settings, "\u{2699}\u{FE0F}");
+                    ui.toggle_value(&mut self.show_kanji, "事");
+                },
+                |ui| {
+                    self.pagination.show_controls(ui, self.results.len());
+                },
+                |ui| {
+                    self.search.show_searchbox(ui);
+                },
+            );
+        });
         egui::SidePanel::left("kanji").show_animated(ctx, self.show_kanji, |ui| {
             let Some(database) = DICTIONARY.get()
             else {
@@ -66,7 +81,6 @@ impl eframe::App for App {
                 });
                 return;
             };
-
             egui::ScrollArea::vertical().show(ui, |ui| {
                 for character in &self.kanji_results {
                     let info = &database.kanji_dictionary[character];
@@ -109,21 +123,6 @@ impl eframe::App for App {
                     });
                 }
             });
-        });
-        egui::TopBottomPanel::top("Search").show(ctx, |ui| {
-            triptichon_layout(
-                ui,
-                |ui| {
-                    ui.toggle_value(&mut self.show_settings, "\u{2699}\u{FE0F}");
-                    ui.toggle_value(&mut self.show_kanji, "事");
-                },
-                |ui| {
-                    self.pagination.show_controls(ui, self.results.len());
-                },
-                |ui| {
-                    self.search.show_searchbox(ui);
-                },
-            );
         });
         egui::CentralPanel::default().show(ctx, |ui| {
             let Some(database) = DICTIONARY.get()
