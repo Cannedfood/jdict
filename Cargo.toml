@@ -17,14 +17,14 @@ panic = 'abort'
 debug = false
 
 [dependencies]
-compact_str = { version = "0.7.1", features = ["serde"] }
-eframe = "0.27.2"
-egui = "0.27.2"
-flate2 = "1.0.30"
+compact_str = { version = "0.8.0", features = ["serde"] }
+eframe = "0.29.1"
+egui = "0.29.1"
+flate2 = "1.0.34"
 isolang = { version = "2.4.0", features = ["serde"], default-features = false }
 itertools = "0.13.0"
-postcard = { version = "1.0.8", features = ["use-std"] }
+postcard = { version = "1.0.10", features = ["use-std"] }
 roxmltree = { version = "0.20.0", features = ["std"], default-features = false }
-serde = { version = "1.0.203", features = ["derive"] }
+serde = { version = "1.0.210", features = ["derive"] }
 smallvec = { version = "1.13.2", features = ["serde"] }
-strum = { version = "0.26.2", features = ["derive", "phf"] }
+strum = { version = "0.26.3", features = ["derive", "phf"] }

@@ -10,7 +10,7 @@ use std::mem::take;
 use std::sync::OnceLock;
 use std::time::Instant;
 
-use egui::global_dark_light_mode_buttons;
+use egui::global_theme_preference_buttons;
 use itertools::Itertools;
 use jdict2::jmdict;
 use jdict2::kanjidic2::ReadingType;
@@ -38,7 +38,7 @@ impl eframe::App for App {
         egui::SidePanel::left("settings").show_animated(ctx, self.show_settings, |ui| {
             ui.heading("Settings");
 
-            global_dark_light_mode_buttons(ui);
+            global_theme_preference_buttons(ui);
 
             egui::CollapsingHeader::new("Pagination")
                 .default_open(true)
@@ -46,8 +46,7 @@ impl eframe::App for App {
                     ui.horizontal(|ui| {
                         ui.label("Page Size:");
                         ui.add(
-                            egui::DragValue::new(&mut self.pagination.page_size)
-                                .clamp_range(1..=10000),
+                            egui::DragValue::new(&mut self.pagination.page_size).range(1..=10000),
                         );
                     });
                 });
@@ -104,7 +103,7 @@ impl eframe::App for App {
                                                 .join(", ");
                                             if !kunyomi.is_empty() {
                                                 ui.label("Kun");
-                                                ui.add(egui::Label::new(kunyomi).wrap(true));
+                                                ui.add(egui::Label::new(kunyomi).wrap());
                                                 ui.end_row();
                                             }
 
@@ -116,15 +115,14 @@ impl eframe::App for App {
                                                 .join(", ");
                                             if !onyomi.is_empty() {
                                                 ui.label("On");
-                                                ui.add(egui::Label::new(onyomi).wrap(true));
+                                                ui.add(egui::Label::new(onyomi).wrap());
                                                 ui.end_row();
                                             }
 
                                             if !rm.nanori.is_empty() {
                                                 ui.label("Nanori");
                                                 ui.add(
-                                                    egui::Label::new(rm.nanori.join(", "))
-                                                        .wrap(true),
+                                                    egui::Label::new(rm.nanori.join(", ")).wrap(),
                                                 );
                                                 ui.end_row();
                                             }
@@ -140,7 +138,7 @@ impl eframe::App for App {
                             if !meanings.is_empty() {
                                 ui.add(
                                     egui::Label::new(egui::RichText::new(meanings).size(16.0))
-                                        .wrap(true),
+                                        .wrap(),
                                 );
                             }
                         }
@@ -221,9 +219,13 @@ fn triptichon_layout(
     let right_divider = available.right() - available.width() / 6.0;
 
     // Center 2/3rds
-    let mut center_ui = ui.child_ui(
-        egui::Rect::from_x_y_ranges(left_divider..=right_divider, available.y_range()),
-        egui::Layout::top_down(egui::Align::Center),
+    let mut center_ui = ui.new_child(
+        egui::UiBuilder::new()
+            .max_rect(egui::Rect::from_x_y_ranges(
+                left_divider..=right_divider,
+                available.y_range(),
+            ))
+            .layout(egui::Layout::top_down(egui::Align::Center)),
     );
     center(&mut center_ui);
 
@@ -231,16 +233,28 @@ fn triptichon_layout(
     let right_divider = right_divider.max(center_ui.min_rect().right());
 
     // Left 1/6th
-    let mut left_ui = ui.child_ui(
-        egui::Rect::from_x_y_ranges(available.left()..=left_divider, available.y_range()),
-        egui::Layout::left_to_right(egui::Align::Center),
+    // let mut left_ui = ui.child_ui(
+    //     egui::Rect::from_x_y_ranges(available.left()..=left_divider, available.y_range()),
+    //     egui::Layout::left_to_right(egui::Align::Center),
+    // );
+    let mut left_ui = ui.new_child(
+        egui::UiBuilder::new()
+            .max_rect(egui::Rect::from_x_y_ranges(
+                available.left()..=left_divider,
+                available.y_range(),
+            ))
+            .layout(egui::Layout::left_to_right(egui::Align::Center)),
     );
     left(&mut left_ui);
 
     // Right 1/6th
-    let mut right_ui = ui.child_ui(
-        egui::Rect::from_x_y_ranges(right_divider..=available.right(), available.y_range()),
-        egui::Layout::right_to_left(egui::Align::Center),
+    let mut right_ui = ui.new_child(
+        egui::UiBuilder::new()
+            .max_rect(egui::Rect::from_x_y_ranges(
+                right_divider..=available.right(),
+                available.y_range(),
+            ))
+            .layout(egui::Layout::right_to_left(egui::Align::Center)),
     );
     right(&mut right_ui);
 
@@ -310,7 +324,7 @@ fn main() {
                 fonts
             });
 
-            Box::new(App::default())
+            Ok(Box::new(App::default()))
         }),
     )
     .unwrap();

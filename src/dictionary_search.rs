@@ -159,7 +159,7 @@ impl Fraction {
             denominator,
         }
     }
-    pub fn ceil(&self) -> u32 { (self.numerator + self.denominator - 1) / self.denominator }
+    pub fn ceil(&self) -> u32 { self.numerator.div_ceil(self.denominator) }
 }
 impl std::ops::Mul<u32> for Fraction {
     type Output = Fraction;
