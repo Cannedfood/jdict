@@ -7,7 +7,7 @@ mod search_box;
 mod stroke_animation;
 
 use std::mem::take;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use std::time::Instant;
 
 use egui::global_theme_preference_buttons;
@@ -333,7 +333,9 @@ fn main() {
 fn default_fonts_plus_japanese_font(fonts: &mut egui::FontDefinitions) {
     fonts.font_data.insert(
         "JP".into(),
-        egui::FontData::from_static(include_bytes!("../../../res/NotoSansCJKjp-Regular.otf")),
+        Arc::new(egui::FontData::from_static(include_bytes!(
+            "../../../res/NotoSansCJKjp-Regular.otf"
+        ))),
     );
     fonts
         .families

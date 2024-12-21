@@ -183,7 +183,7 @@ fn parse_reading_meaning_group(node: roxmltree::Node) -> ReadingMeaningGroup {
 fn parse_reading(node: roxmltree::Node) -> Reading {
     assert_eq!(node.tag_name().name(), "reading");
 
-    let jouyou = node.attribute("r_type").map_or(false, |x| x == "ja_jlpt");
+    let jouyou = node.attribute("r_type") == Some("ja_jlpt");
     let typ = match node.attribute("r_type") {
         Some("pinyin") => ReadingType::Pinyin,
         Some("korean_r") => ReadingType::KoreanRomanized,
