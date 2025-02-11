@@ -22,7 +22,7 @@ pub(crate) fn kanji_stroke_animation(ui: &mut egui::Ui, size: f32, kanji: &Strok
 
     ui.painter().rect_filled(
         rect,
-        interacted_style.rounding,
+        interacted_style.corner_radius,
         style.visuals.extreme_bg_color,
     );
 
