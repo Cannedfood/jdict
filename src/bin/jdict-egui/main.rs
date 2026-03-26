@@ -30,12 +30,12 @@ struct App {
     kanji_results: Vec<char>,
 }
 impl eframe::App for App {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         if let Some(duration) = self.search_debounce.will_resolve_in() {
-            ctx.request_repaint_after(duration);
+            ui.request_repaint_after(duration);
         }
 
-        egui::SidePanel::left("settings").show_animated(ctx, self.show_settings, |ui| {
+        egui::Panel::left("settings").show_animated_inside(ui, self.show_settings, |ui| {
             ui.heading("Settings");
 
             global_theme_preference_buttons(ui);
@@ -56,7 +56,7 @@ impl eframe::App for App {
                     self.search.show_weight_editor(ui);
                 })
         });
-        egui::TopBottomPanel::top("Search").show(ctx, |ui| {
+        egui::Panel::top("Search").show_inside(ui, |ui| {
             triptichon_layout(
                 ui,
                 |ui| {
@@ -71,7 +71,7 @@ impl eframe::App for App {
                 },
             );
         });
-        egui::SidePanel::left("kanji").show_animated(ctx, self.show_kanji, |ui| {
+        egui::Panel::left("kanji").show_animated_inside(ui, self.show_kanji, |ui| {
             ui.set_width(250.0);
 
             let Some(database) = DICTIONARY.get()
@@ -157,7 +157,7 @@ impl eframe::App for App {
                 }
             });
         });
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show_inside(ui, |ui| {
             let Some(database) = DICTIONARY.get()
             else {
                 ui.horizontal(|ui| {
